@@ -53,7 +53,7 @@ export async function updateExpense(id: string, updates: Partial<Expense>): Prom
   return data as Expense
 }
 
-export async function softDeleteExpense(id: string, receiptPath?: string | null): Promise<void> {
+export async function softDeleteExpense(id: string, receiptsPath?: string | null): Promise<void> {
   const supabase = createClient()
   const { error } = await supabase
     .from('expenses')
@@ -61,7 +61,7 @@ export async function softDeleteExpense(id: string, receiptPath?: string | null)
     .eq('id', id)
   if (error) throw error
 
-  if (receiptPath) {
-    await supabase.storage.from('receipts').remove([receiptPath])
+  if (receiptsPath) {
+    await supabase.storage.from('receipts').remove([receiptsPath])
   }
 }

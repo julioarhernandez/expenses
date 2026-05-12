@@ -47,8 +47,8 @@ function emptyForm(workspaceId: string) {
     payment_method: '' as PaymentMethod | '',
     card_last_four: '',
     notes: '',
-    receipt_url: '',
-    receipt_path: '',
+    receipts_url: '',
+    receipts_path: '',
     workspace_id: workspaceId,
   }
 }
@@ -57,8 +57,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   const { addExpense, updateExpense: updateStore } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [saving, setSaving] = useState(false)
-  const [receiptOpen, setReceiptOpen] = useState(false)
-  const [receiptRotation, setReceiptRotation] = useState(0)
+  const [receiptsOpen, setReceiptOpen] = useState(false)
+  const [receiptsRotation, setReceiptRotation] = useState(0)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | null>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [form, setForm] = useState(emptyForm(activeWorkspaceId ?? ''))
@@ -77,8 +77,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         payment_method: expense.payment_method ?? '',
         card_last_four: expense.card_last_four ?? '',
         notes: expense.notes ?? '',
-        receipt_url: expense.receipt_url ?? '',
-        receipt_path: expense.receipt_path ?? '',
+        receipts_url: expense.receipts_url ?? '',
+        receipts_path: expense.receipts_path ?? '',
         workspace_id: expense.workspace_id,
       })
     } else {
@@ -111,8 +111,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
     if (!form.merchant || !form.amount || !form.date) return
     setSaving(true)
     try {
-      let receiptUrl = form.receipt_url || null
-      let receiptPath = form.receipt_path || null
+      let receiptsUrl = form.receipts_url || null
+      let receiptsPath = form.receipts_path || null
 
       if (pendingFile) {
         const supabase = createClient()
@@ -123,8 +123,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         const { error: uploadError } = await supabase.storage.from('receipts').upload(path, pendingFile)
         if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
         const { data: { publicUrl } } = supabase.storage.from('receipts').getPublicUrl(path)
-        receiptUrl = publicUrl
-        receiptPath = path
+        receiptsUrl = publicUrl
+        receiptsPath = path
       }
 
       const payload = {
@@ -137,8 +137,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         payment_method: (form.payment_method as PaymentMethod) || null,
         card_last_four: form.card_last_four || null,
         notes: form.notes || null,
-        receipt_url: receiptUrl,
-        receipt_path: receiptPath,
+        receipts_url: receiptsUrl,
+        receipts_path: receiptsPath,
         workspace_id: form.workspace_id,
       }
 
@@ -176,11 +176,11 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
             setLocalReceiptUrl(null)
           }}
           onExtractionComplete={applyOcrExtraction}
-          existingUrl={form.receipt_url}
+          existingUrl={form.receipts_url}
           categories={categories}
         />
 
-        {(form.receipt_url || localReceiptUrl) && (
+        {(form.receipts_url || localReceiptUrl) && (
           <>
             <div className="flex justify-end mt-1">
               <Button
@@ -191,12 +191,12 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                 className="h-7 px-2 text-xs text-muted-foreground gap-1.5"
               >
                 <ScanSearch className="h-3 w-3" />
-                View receipt
+                View receipts
               </Button>
             </div>
 
             <Dialog
-              open={receiptOpen}
+              open={receiptsOpen}
               onOpenChange={(o) => { setReceiptOpen(o); if (!o) setReceiptRotation(0) }}
             >
               <DialogContent className="sm:max-w-xl p-2 overflow-hidden" showCloseButton>
@@ -212,12 +212,12 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={localReceiptUrl ?? form.receipt_url}
+                      src={localReceiptUrl ?? form.receipts_url}
                       alt="Receipt"
                       className="w-full h-auto object-contain rounded select-none"
                       draggable={false}
                       style={{
-                        transform: `rotate(${receiptRotation}deg)`,
+                        transform: `rotate(${receiptsRotation}deg)`,
                         transition: 'transform 0.2s ease',
                       }}
                     />

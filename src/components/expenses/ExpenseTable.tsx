@@ -1,13 +1,13 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Receipt, Trash2 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Expense } from '@/types'
@@ -97,6 +97,17 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                   <MoreHorizontal className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {expense.receipt_url && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
+                        className="flex items-center"
+                      >
+                        <Receipt className="mr-2 h-4 w-4" />Receipt
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => onEdit(expense)}>
                     <Pencil className="mr-2 h-4 w-4" />Edit
                   </DropdownMenuItem>
