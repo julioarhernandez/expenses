@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
+import { useWorkspaceStore } from '@/store/workspace'
 import type { Category } from '@/types'
 
 const PRESET_COLORS = [
@@ -23,6 +24,7 @@ export function CategoryManager() {
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState(false)
   const supabase = createClient()
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
 
   useEffect(() => {
     supabase
@@ -39,9 +41,14 @@ export function CategoryManager() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
+      if (!activeWorkspaceId) throw new Error('No active workspace')
+      const duplicate = categories.some(
+        (c) => c.name.toLowerCase() === newName.trim().toLowerCase()
+      )
+      if (duplicate) throw new Error(`Category "${newName.trim()}" already exists`)
       const { data, error } = await supabase
         .from('categories')
-        .insert({ user_id: user.id, name: newName.trim(), color: newColor, is_default: false })
+        .insert({ user_id: user.id, workspace_id: activeWorkspaceId, name: newName.trim(), color: newColor, is_default: false })
         .select()
         .single()
       if (error) throw error
