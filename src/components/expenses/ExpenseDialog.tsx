@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2, ScanSearch } from 'lucide-react'
+import { CalendarIcon, Loader2, RotateCw, ScanSearch } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
@@ -56,6 +56,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [saving, setSaving] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
+  const [receiptRotation, setReceiptRotation] = useState(0)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm(activeWorkspaceId ?? ''))
   const [dateOpen, setDateOpen] = useState(false)
@@ -163,7 +164,10 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
               </Button>
             </div>
 
-            <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
+            <Dialog
+              open={receiptOpen}
+              onOpenChange={(o) => { setReceiptOpen(o); if (!o) setReceiptRotation(0) }}
+            >
               <DialogContent className="sm:max-w-xl p-2 overflow-hidden" showCloseButton>
                 <TransformWrapper
                   initialScale={1}
@@ -172,7 +176,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                   doubleClick={{ mode: 'zoomIn' }}
                 >
                   <TransformComponent
-                    wrapperStyle={{ width: '100%', maxHeight: '80vh' }}
+                    wrapperStyle={{ width: '100%', maxHeight: '75vh' }}
                     contentStyle={{ width: '100%' }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -181,9 +185,26 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                       alt="Receipt"
                       className="w-full h-auto object-contain rounded select-none"
                       draggable={false}
+                      style={{
+                        transform: `rotate(${receiptRotation}deg)`,
+                        transition: 'transform 0.2s ease',
+                      }}
                     />
                   </TransformComponent>
                 </TransformWrapper>
+
+                <div className="flex justify-center pt-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-xs text-muted-foreground"
+                    onClick={() => setReceiptRotation((r) => (r + 90) % 360)}
+                  >
+                    <RotateCw className="h-3.5 w-3.5" />
+                    Rotate
+                  </Button>
+                </div>
               </DialogContent>
             </Dialog>
           </>
