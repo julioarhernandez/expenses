@@ -81,7 +81,7 @@ export function Sidebar({ user }: SidebarProps) {
             {workspaces.map((ws) => (
               <DropdownMenuItem
                 key={ws.id}
-                onClick={() => setActiveWorkspaceId(ws.id)}
+                onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
                 className={cn(ws.id === activeWorkspaceId && 'bg-accent')}
               >
                 <span className="mr-2">{WORKSPACE_TYPE_ICONS[ws.type]}</span>
