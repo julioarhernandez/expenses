@@ -56,6 +56,12 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <aside className="hidden md:flex w-56 shrink-0 border-r bg-background flex-col h-screen sticky top-0">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 px-4 h-14 border-b shrink-0">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-500 text-white text-sm font-bold shrink-0">N</div>
+        <span className="font-semibold text-sm tracking-tight">Nova</span>
+      </div>
+
       {/* Workspace switcher */}
       <div className="p-3 border-b">
         <DropdownMenu>
