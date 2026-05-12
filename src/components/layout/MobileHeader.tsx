@@ -31,7 +31,7 @@ export function MobileHeader() {
   const wsName = mounted && active ? active.name : 'Workspace'
 
   return (
-    <header className="flex md:hidden items-center gap-3 px-4 h-14 border-b bg-background shrink-0">
+    <header className="flex md:hidden justify-between gap-3 px-4 h-14 border-b bg-background shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-500 text-white text-sm font-bold">N</div>

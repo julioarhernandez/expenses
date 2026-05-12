@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex flex-col h-screen overflow-hidden">
         <TopNav user={user} />
         <MobileHeader />
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0 bg-gradient-to-b from-muted to-muted/40">{children}</main>
       </div>
       <MobileBottomNav user={user} />
     </WorkspaceProvider>

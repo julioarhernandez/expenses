@@ -56,34 +56,6 @@ export function TopNav({ user }: { user: User }) {
         <span className="font-semibold text-sm tracking-tight">Nova</span>
       </Link>
 
-      {/* Workspace switcher — beside logo */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors outline-none">
-          <span>{wsIcon}</span>
-          <span className="max-w-32 truncate">{wsName}</span>
-          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-52">
-          {workspaces.map((ws) => (
-            <DropdownMenuItem
-              key={ws.id}
-              onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
-              className={cn(ws.id === activeWorkspaceId && 'bg-accent')}
-            >
-              <span className="mr-2">{WORKSPACE_TYPE_ICONS[ws.type]}</span>
-              {ws.name}
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')}>
-            <Plus className="mr-2 h-3.5 w-3.5" />
-            New workspace
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div className="w-px h-5 bg-border shrink-0" />
-
       {/* Nav links */}
       <nav className="flex items-center gap-1">
         {navItems.map(({ href, label, icon: Icon }) => {
@@ -108,6 +80,32 @@ export function TopNav({ user }: { user: User }) {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Workspace switcher */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors outline-none">
+          <span>{wsIcon}</span>
+          <span className="max-w-32 truncate">{wsName}</span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          {workspaces.map((ws) => (
+            <DropdownMenuItem
+              key={ws.id}
+              onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
+              className={cn(ws.id === activeWorkspaceId && 'bg-accent')}
+            >
+              <span className="mr-2">{WORKSPACE_TYPE_ICONS[ws.type]}</span>
+              {ws.name}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')}>
+            <Plus className="mr-2 h-3.5 w-3.5" />
+            New workspace
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* User */}
       <DropdownMenu>
