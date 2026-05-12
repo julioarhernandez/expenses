@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X, Loader2, FileText, Sparkles } from 'lucide-react'
+import { Upload, X, Loader2, FileText, Sparkles, Camera } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,7 @@ export function ReceiptUploader({
   const [step, setStep] = useState<Step>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(existingUrl || null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const STEP_LABELS: Record<Step, string> = {
     idle: '',
@@ -109,43 +110,70 @@ export function ReceiptUploader({
 
   return (
     <div className="space-y-2">
-      <div
-        {...getRootProps()}
-        className={cn(
-          'border-2 border-dashed rounded-lg p-4 cursor-pointer transition-colors text-center',
-          isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50',
-          isProcessing && 'pointer-events-none opacity-60'
-        )}
-      >
+      {/* Hidden camera input */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) processFile(file)
+          e.target.value = ''
+        }}
+      />
+
+      <div className="flex gap-2">
+        <div
+          {...getRootProps()}
+          className={cn(
+            'flex-1 border-2 border-dashed rounded-lg p-4 cursor-pointer transition-colors text-center',
+            isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50',
+            isProcessing && 'pointer-events-none opacity-60'
+          )}
+        >
         <input {...getInputProps()} />
 
-        {previewUrl && previewUrl.match(/\.(jpg|jpeg|png|webp)$/i) ? (
-          <div className="relative w-24 h-24 mx-auto">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewUrl} alt="Receipt" className="w-full h-full object-cover rounded" />
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-1 py-2">
-            {isProcessing ? (
-              <>
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">{STEP_LABELS[step]}</p>
-              </>
-            ) : step === 'done' ? (
-              <>
-                <Sparkles className="h-6 w-6 text-green-500" />
-                <p className="text-xs text-muted-foreground">{fileName}</p>
-              </>
-            ) : (
-              <>
-                <Upload className="h-6 w-6 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">
-                  {isDragActive ? 'Drop receipt here' : 'Upload receipt (JPG, PNG, PDF)'}
-                </p>
-              </>
-            )}
-          </div>
-        )}
+          {previewUrl && previewUrl.match(/\.(jpg|jpeg|png|webp)$/i) ? (
+            <div className="relative w-24 h-24 mx-auto">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewUrl} alt="Receipt" className="w-full h-full object-cover rounded" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-1 py-2">
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">{STEP_LABELS[step]}</p>
+                </>
+              ) : step === 'done' ? (
+                <>
+                  <Sparkles className="h-6 w-6 text-green-500" />
+                  <p className="text-xs text-muted-foreground">{fileName}</p>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    {isDragActive ? 'Drop receipt here' : 'Upload receipt'}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="shrink-0 h-auto flex-col gap-1 px-3 py-2 text-xs"
+          disabled={isProcessing}
+          onClick={() => cameraInputRef.current?.click()}
+        >
+          <Camera className="h-5 w-5" />
+          Photo
+        </Button>
       </div>
 
       {previewUrl && step === 'done' && (

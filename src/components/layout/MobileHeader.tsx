@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, LayoutDashboard, Receipt, Settings, LogOut, Plus, ChevronDown } from 'lucide-react'
@@ -34,11 +34,16 @@ const WORKSPACE_TYPE_ICONS: Record<string, string> = {
 
 export function MobileHeader({ user }: { user: User }) {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
   const active = activeWorkspace()
+
+  const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
+  const wsName = mounted && active ? active.name : 'Expenses'
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   async function signOut() {
@@ -58,7 +63,7 @@ export function MobileHeader({ user }: { user: User }) {
             <Menu className="h-5 w-5" />
           </button>
           <span className="text-sm font-medium truncate">
-            {active ? `${WORKSPACE_TYPE_ICONS[active.type]} ${active.name}` : 'Expenses'}
+            {mounted && active ? `${wsIcon} ${wsName}` : 'Expenses'}
           </span>
         </div>
         <Avatar className="h-7 w-7 shrink-0">
@@ -78,8 +83,8 @@ export function MobileHeader({ user }: { user: User }) {
                 )}
               >
                 <span className="flex items-center gap-2 min-w-0">
-                  <span>{active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'}</span>
-                  <span className="truncate">{active?.name ?? 'Select workspace'}</span>
+                  <span>{wsIcon}</span>
+                  <span className="truncate">{wsName}</span>
                 </span>
                 <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               </DropdownMenuTrigger>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase } from 'lucide-react'
@@ -40,6 +41,11 @@ export function Sidebar({ user }: SidebarProps) {
   const supabase = createClient()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
   const active = activeWorkspace()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
+  const wsName = mounted && active ? active.name : 'Select workspace'
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -60,8 +66,8 @@ export function Sidebar({ user }: SidebarProps) {
             )}
           >
             <span className="flex items-center gap-2 min-w-0">
-              <span>{active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'}</span>
-              <span className="truncate">{active?.name ?? 'Select workspace'}</span>
+              <span>{wsIcon}</span>
+              <span className="truncate">{wsName}</span>
             </span>
             <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
