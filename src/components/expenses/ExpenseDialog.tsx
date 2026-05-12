@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2 } from 'lucide-react'
+import { CalendarIcon, Loader2, ScanSearch } from 'lucide-react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,10 +54,13 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   const { addExpense, updateExpense: updateStore } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [saving, setSaving] = useState(false)
+  const [receiptOpen, setReceiptOpen] = useState(false)
+  const [localReceiptUrl, setLocalReceiptUrl] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm(activeWorkspaceId ?? ''))
   const [dateOpen, setDateOpen] = useState(false)
 
   useEffect(() => {
+    setLocalReceiptUrl(null)
     if (expense) {
       setForm({
         merchant: expense.merchant,
@@ -134,13 +138,42 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         </SheetHeader>
 
         <ReceiptUploader
-          onReceiptUploaded={({ url, path }) => {
+          onReceiptUploaded={({ url, path, localUrl }) => {
             set('receipt_url', url)
             set('receipt_path', path)
+            if (localUrl) setLocalReceiptUrl(localUrl)
           }}
           onExtractionComplete={applyOcrExtraction}
           existingUrl={form.receipt_url}
         />
+
+        {form.receipt_url && (
+          <>
+            <div className="flex justify-end mt-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setReceiptOpen(true)}
+                className="h-7 px-2 text-xs text-muted-foreground gap-1.5"
+              >
+                <ScanSearch className="h-3 w-3" />
+                View receipt
+              </Button>
+            </div>
+
+            <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
+              <DialogContent className="sm:max-w-xl p-2" showCloseButton>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={localReceiptUrl ?? form.receipt_url}
+                  alt="Receipt"
+                  className="w-full h-auto max-h-[80vh] object-contain rounded"
+                />
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div className="grid grid-cols-2 gap-4">

@@ -16,7 +16,7 @@ const extractionSchema = {
       enum: ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'other', null],
     },
   },
-  required: ['merchant', 'amount', 'date', 'currency'],
+  required: ['merchant', 'amount', 'tax_amount', 'date', 'currency', 'payment_method'],
   additionalProperties: false,
 }
 
@@ -30,25 +30,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No text provided' }, { status: 400 })
   }
 
-  const completion = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are a receipt parser. Extract structured expense data from the receipt text. Use ISO 8601 for dates. Return null for fields you cannot determine.',
+  let completion: Awaited<ReturnType<typeof client.chat.completions.create>>
+  try {
+    completion = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a receipt parser. Extract structured expense data from the receipt text. Use ISO 8601 for dates. Return null for fields you cannot determine.',
+        },
+        { role: 'user', content: text },
+      ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'expense_extraction',
+          schema: extractionSchema,
+          strict: true,
+        },
       },
-      { role: 'user', content: text },
-    ],
-    response_format: {
-      type: 'json_schema',
-      json_schema: {
-        name: 'expense_extraction',
-        schema: extractionSchema,
-        strict: true,
-      },
-    },
-  })
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'OpenAI request failed'
+    return NextResponse.json({ error: message }, { status: 502 })
+  }
 
   const raw = completion.choices[0]?.message?.content
   if (!raw) {

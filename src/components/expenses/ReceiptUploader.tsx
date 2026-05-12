@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { OcrExtraction } from '@/types'
 
 interface ReceiptUploaderProps {
-  onReceiptUploaded: (data: { url: string; path: string }) => void
+  onReceiptUploaded: (data: { url: string; path: string; localUrl?: string }) => void
   onExtractionComplete: (data: OcrExtraction) => void
   existingUrl?: string
 }
@@ -42,9 +42,8 @@ export function ReceiptUploader({
       if (!user) return
 
       setFileName(file.name)
-      if (file.type.startsWith('image/')) {
-        setPreviewUrl(URL.createObjectURL(file))
-      }
+      const localUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+      if (localUrl) setPreviewUrl(localUrl)
 
       // 1. Upload to Supabase Storage
       setStep('uploading')
@@ -58,7 +57,7 @@ export function ReceiptUploader({
       }
 
       const { data: { publicUrl } } = supabase.storage.from('receipts').getPublicUrl(path)
-      onReceiptUploaded({ url: publicUrl, path })
+      onReceiptUploaded({ url: publicUrl, path, localUrl })
 
       // 2. OCR (images only — skip PDF for now)
       if (file.type.startsWith('image/')) {
@@ -67,7 +66,8 @@ export function ReceiptUploader({
         fd.append('file', file)
         const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
         if (!ocrRes.ok) {
-          toast.error('OCR failed — you can still fill fields manually')
+          const { error: ocrErr } = await ocrRes.json().catch(() => ({ error: undefined })) as { error?: string }
+          toast.error(ocrErr ?? 'OCR failed', { description: 'You can still fill fields manually' })
           setStep('done')
           return
         }
@@ -80,7 +80,10 @@ export function ReceiptUploader({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text }),
         })
-        if (aiRes.ok) {
+        if (!aiRes.ok) {
+          const { error: aiErr } = await aiRes.json().catch(() => ({ error: undefined })) as { error?: string }
+          toast.error(aiErr ?? 'AI extraction failed', { description: 'You can still fill fields manually' })
+        } else {
           const extracted = await aiRes.json() as OcrExtraction
           onExtractionComplete(extracted)
           toast.success('Fields pre-filled from receipt')

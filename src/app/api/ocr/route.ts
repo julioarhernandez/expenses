@@ -32,8 +32,11 @@ export async function POST(request: NextRequest) {
   )
 
   if (!response.ok) {
-    const err = await response.text()
-    return NextResponse.json({ error: `Vision API error: ${err}` }, { status: 502 })
+    const body = await response.json().catch(() => null)
+    const raw: string = body?.error?.message ?? 'Vision API request failed'
+    // Keep only the first sentence to avoid overwhelming the user
+    const message = raw.split('.')[0]
+    return NextResponse.json({ error: message }, { status: 502 })
   }
 
   const data = await response.json()
