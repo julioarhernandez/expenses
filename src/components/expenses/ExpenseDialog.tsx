@@ -47,8 +47,8 @@ function emptyForm(workspaceId: string) {
     payment_method: '' as PaymentMethod | '',
     card_last_four: '',
     notes: '',
-    receipts_url: '',
-    receipts_path: '',
+    receipt_url: '',
+    receipt_path: '',
     workspace_id: workspaceId,
   }
 }
@@ -79,8 +79,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         payment_method: expense.payment_method ?? '',
         card_last_four: expense.card_last_four ?? '',
         notes: expense.notes ?? '',
-        receipts_url: expense.receipts_url ?? '',
-        receipts_path: expense.receipts_path ?? '',
+        receipt_url: expense.receipt_url ?? '',
+        receipt_path: expense.receipt_path ?? '',
         workspace_id: expense.workspace_id,
       })
     } else {
@@ -111,8 +111,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   async function saveExpense() {
     setSaving(true)
     try {
-      let receiptsUrl = form.receipts_url || null
-      let receiptsPath = form.receipts_path || null
+      let receiptsUrl = form.receipt_url || null
+      let receiptsPath = form.receipt_path || null
 
       if (pendingFile) {
         const supabase = createClient()
@@ -137,8 +137,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         payment_method: (form.payment_method as PaymentMethod) || null,
         card_last_four: form.card_last_four || null,
         notes: form.notes || null,
-        receipts_url: receiptsUrl,
-        receipts_path: receiptsPath,
+        receipt_url: receiptsUrl,
+        receipt_path: receiptsPath,
         workspace_id: form.workspace_id,
       }
 
@@ -201,11 +201,11 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
             setLocalReceiptUrl(null)
           }}
           onExtractionComplete={applyOcrExtraction}
-          existingUrl={form.receipts_url}
+          existingUrl={form.receipt_url}
           categories={categories}
         />
 
-        {(form.receipts_url || localReceiptUrl) && (
+        {(form.receipt_url || localReceiptUrl) && (
           <>
             <div className="flex justify-end mt-1">
               <Button
@@ -237,7 +237,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={localReceiptUrl ?? form.receipts_url}
+                      src={localReceiptUrl ?? form.receipt_url}
                       alt="Receipt"
                       className="w-full h-auto object-contain rounded select-none"
                       draggable={false}
