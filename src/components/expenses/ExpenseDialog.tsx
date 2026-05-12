@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon, Loader2, ScanSearch } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -163,13 +164,26 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
             </div>
 
             <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
-              <DialogContent className="sm:max-w-xl p-2" showCloseButton>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={localReceiptUrl ?? form.receipt_url}
-                  alt="Receipt"
-                  className="w-full h-auto max-h-[80vh] object-contain rounded"
-                />
+              <DialogContent className="sm:max-w-xl p-2 overflow-hidden" showCloseButton>
+                <TransformWrapper
+                  initialScale={1}
+                  minScale={0.5}
+                  maxScale={8}
+                  doubleClick={{ mode: 'zoomIn' }}
+                >
+                  <TransformComponent
+                    wrapperStyle={{ width: '100%', maxHeight: '80vh' }}
+                    contentStyle={{ width: '100%' }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={localReceiptUrl ?? form.receipt_url}
+                      alt="Receipt"
+                      className="w-full h-auto object-contain rounded select-none"
+                      draggable={false}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>
               </DialogContent>
             </Dialog>
           </>
