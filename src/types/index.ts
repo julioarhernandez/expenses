@@ -14,7 +14,7 @@ export interface Workspace {
 export interface Category {
   id: string
   user_id: string
-  workspace_id: string
+  workspace_id?: string | null
   name: string
   color: string
   is_default: boolean

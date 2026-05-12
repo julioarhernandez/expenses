@@ -24,16 +24,14 @@ export default function ExpensesPage() {
   const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
-    if (!activeWorkspaceId) return
     const supabase = createClient()
     supabase
       .from('categories')
       .select('*')
-      .eq('workspace_id', activeWorkspaceId)
       .order('sort_order', { ascending: true, nullsFirst: false })
       .order('name')
       .then(({ data }) => setCategories((data as Category[]) ?? []))
-  }, [activeWorkspaceId])
+  }, [])
 
   useEffect(() => {
     if (!activeWorkspaceId) return

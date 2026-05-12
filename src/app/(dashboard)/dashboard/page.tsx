@@ -81,7 +81,6 @@ export default async function DashboardPage() {
   const { data: categories } = await supabase
     .from('categories')
     .select('id,name,color')
-    .eq('workspace_id', wsId)
     .order('sort_order', { ascending: true, nullsFirst: false })
     .order('name')
 

@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
-import { useWorkspaceStore } from '@/store/workspace'
 import type { Category } from '@/types'
 
 const PRESET_COLORS = [
@@ -18,7 +17,6 @@ const PRESET_COLORS = [
 ]
 
 export function CategoryManager() {
-  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [categories, setCategories] = useState<Category[]>([])
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState(PRESET_COLORS[0])
@@ -27,25 +25,23 @@ export function CategoryManager() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (!activeWorkspaceId) return
     supabase
       .from('categories')
       .select('*')
-      .eq('workspace_id', activeWorkspaceId)
       .order('sort_order', { ascending: true, nullsFirst: false })
       .order('name')
       .then(({ data }) => setCategories((data as Category[]) ?? []))
-  }, [activeWorkspaceId])
+  }, [])
 
   async function addCategory() {
-    if (!newName.trim() || !activeWorkspaceId) return
+    if (!newName.trim()) return
     setAdding(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
       const { data, error } = await supabase
         .from('categories')
-        .insert({ user_id: user.id, name: newName.trim(), color: newColor, workspace_id: activeWorkspaceId, is_default: false })
+        .insert({ user_id: user.id, name: newName.trim(), color: newColor, is_default: false })
         .select()
         .single()
       if (error) throw error
