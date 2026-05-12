@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon, Loader2, RotateCw, ScanSearch } from 'lucide-react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -54,9 +54,11 @@ function emptyForm(workspaceId: string) {
 }
 
 export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDialogProps) {
-  const { addExpense, updateExpense: updateStore } = useExpenseStore()
+  const { addExpense, updateExpense: updateStore, expenses } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [saving, setSaving] = useState(false)
+  const [duplicateWarning, setDuplicateWarning] = useState<{ exact: boolean } | null>(null)
+  const [pendingSubmit, setPendingSubmit] = useState<(() => Promise<void>) | null>(null)
   const [receiptsOpen, setReceiptOpen] = useState(false)
   const [receiptsRotation, setReceiptRotation] = useState(0)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | null>(null)
@@ -106,9 +108,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
     setForm((f) => ({ ...f, [field]: value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!form.merchant || !form.amount || !form.date) return
+  async function saveExpense() {
     setSaving(true)
     try {
       let receiptsUrl = form.receipts_url || null
@@ -159,7 +159,32 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
     }
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!form.merchant || !form.amount || !form.date) return
+
+    if (!expense) {
+      const amount = parseFloat(form.amount)
+      const duplicate = expenses.find(
+        (ex) =>
+          !ex.is_deleted &&
+          parseFloat(String(ex.amount)) === amount &&
+          ex.date === form.date &&
+          (ex.category_id ?? '') === (form.category_id ?? '')
+      )
+      if (duplicate) {
+        const exact = duplicate.merchant.toLowerCase() === form.merchant.toLowerCase()
+        setDuplicateWarning({ exact })
+        setPendingSubmit(() => saveExpense)
+        return
+      }
+    }
+
+    await saveExpense()
+  }
+
   return (
+    <>
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-6">
         <SheetHeader className="mb-6">
@@ -379,5 +404,29 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         </form>
       </SheetContent>
     </Sheet>
+
+    <Dialog open={!!duplicateWarning} onOpenChange={(o) => { if (!o) { setDuplicateWarning(null); setPendingSubmit(null) } }}>
+      <DialogContent showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>
+            {duplicateWarning?.exact ? 'Possible duplicate' : 'Similar expense found'}
+          </DialogTitle>
+          <DialogDescription>
+            {duplicateWarning?.exact
+              ? 'An expense with the same merchant, amount, date, and category already exists. Are you sure you want to add it?'
+              : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?'}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}>
+            Cancel
+          </Button>
+          <Button onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}>
+            Save anyway
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
