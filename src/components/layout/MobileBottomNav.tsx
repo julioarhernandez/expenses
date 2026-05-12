@@ -34,7 +34,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 flex items-center border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+    <nav className="md:hidden fixed bottom-3 inset-x-3 z-40 flex items-center rounded-2xl bg-background/85 backdrop-blur-md border border-border/30 shadow-lg shadow-black/10">
       {navItems.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(href + '/')
         return (
@@ -42,7 +42,7 @@ export function MobileBottomNav({ user }: { user: User }) {
             key={href}
             href={href}
             className={cn(
-              'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors',
+              'flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors rounded-2xl',
               active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -53,14 +53,14 @@ export function MobileBottomNav({ user }: { user: User }) {
       })}
 
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors outline-none">
+        <DropdownMenuTrigger className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors outline-none rounded-2xl">
           <Avatar className="h-5 w-5">
             <AvatarImage src={avatarUrl} alt={user.email ?? ''} />
             <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
           </Avatar>
           Account
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="top" className="w-48 mb-1">
+        <DropdownMenuContent align="end" side="top" className="w-48 mb-2">
           <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">{user.email}</div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push('/settings')}>

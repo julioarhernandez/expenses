@@ -175,6 +175,15 @@ export default function ExpensesPage() {
         />
       </div>
 
+      {/* Floating add button — mobile only */}
+      <button
+        onClick={openCreate}
+        className="md:hidden fixed bottom-20 right-4 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary/90 transition-colors"
+        aria-label="Add expense"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
       <ExpenseDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

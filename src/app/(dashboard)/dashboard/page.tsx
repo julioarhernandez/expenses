@@ -6,13 +6,29 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { SpendingTrendChart } from '@/components/dashboard/SpendingTrendChart'
-import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart'
+import { CategoryBarChart } from '@/components/dashboard/CategoryBarChart'
 
 export const dynamic = 'force-dynamic'
 
 function fmt(amount: number) {
   return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
+function merchantInitial(name: string) {
+  return name.trim().charAt(0).toUpperCase()
+}
+
+const INITIAL_COLORS = [
+  '#6366f1','#f59e0b','#10b981','#f43f5e','#0ea5e9',
+  '#a855f7','#f97316','#64748b','#84cc16','#06b6d4',
+]
+
+function initialColor(name: string) {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
+  return INITIAL_COLORS[h % INITIAL_COLORS.length]
 }
 
 export default async function DashboardPage() {
@@ -23,7 +39,6 @@ export default async function DashboardPage() {
   const cookieStore = await cookies()
   const activeWsId = cookieStore.get('active-workspace-id')?.value
 
-  // Try the cookie-stored workspace first, fall back to the first workspace
   let workspace = null
   if (activeWsId) {
     const { data } = await supabase
@@ -85,10 +100,8 @@ export default async function DashboardPage() {
     .order('name')
 
   const catMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c]))
-
   const expenses = allExpenses ?? []
 
-  // Monthly totals
   const monthlyTotal = expenses
     .filter((e) => e.date >= monthStart)
     .reduce((s, e) => s + Number(e.amount), 0)
@@ -109,7 +122,6 @@ export default async function DashboardPage() {
   }
   const ChangeIcon = changeDir === 'up' ? TrendingUp : changeDir === 'down' ? TrendingDown : Minus
 
-  // Monthly trend (last 12 months)
   const trendMap: Record<string, number> = {}
   expenses.filter((e) => e.date >= trendStart).forEach((e) => {
     const month = e.date.slice(0, 7) + '-01'
@@ -119,7 +131,6 @@ export default async function DashboardPage() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, total]) => ({ month, total }))
 
-  // Category breakdown
   const catTotals: Record<string, number> = {}
   expenses.forEach((e) => {
     if (e.category_id) catTotals[e.category_id] = (catTotals[e.category_id] ?? 0) + Number(e.amount)
@@ -129,7 +140,6 @@ export default async function DashboardPage() {
     .sort(([, a], [, b]) => b - a)
     .map(([id, total]) => ({ name: catMap[id].name, color: catMap[id].color, total }))
 
-  // Top vendors
   const vendorTotals: Record<string, number> = {}
   expenses.forEach((e) => {
     vendorTotals[e.merchant] = (vendorTotals[e.merchant] ?? 0) + Number(e.amount)
@@ -139,119 +149,151 @@ export default async function DashboardPage() {
     .slice(0, 5)
     .map(([merchant, total]) => ({ merchant, total }))
 
+  type RecentExpense = {
+    id: string
+    merchant: string
+    date: string
+    amount: number
+    currency: string
+    category: { name: string; color: string } | null
+  }
+  const recentList = (recent as unknown as RecentExpense[]) ?? []
+
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="p-4 md:p-6 space-y-3 md:space-y-4">
       <div>
-        <h1 className="text-xl font-semibold">{workspace.name}</h1>
-        <p className="text-sm text-muted-foreground">{format(now, 'MMMM yyyy')}</p>
+        <h1 className="text-lg font-semibold">{workspace.name}</h1>
+        <p className="text-xs text-muted-foreground">{format(now, 'MMMM yyyy')}</p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">This month</CardTitle>
+      {/* Stat cards — 2-column grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="border-border/50">
+          <CardHeader className="pb-0 pt-3 px-4">
+            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">This month</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{fmt(monthlyTotal)}</p>
-            <p className={`flex items-center gap-1 text-xs mt-1 ${changeDir === 'up' ? 'text-red-500' : changeDir === 'down' ? 'text-green-500' : 'text-muted-foreground'}`}>
+          <CardContent className="px-4 pb-3">
+            <p className="text-xl font-bold tabular-nums">{fmt(monthlyTotal)}</p>
+            <p className={`flex items-center gap-1 text-[11px] mt-0.5 ${changeDir === 'up' ? 'text-red-500' : changeDir === 'down' ? 'text-green-500' : 'text-muted-foreground'}`}>
               <ChangeIcon className="h-3 w-3" />
               {changePct === 0 ? 'Same as last month' : `${Math.abs(changePct).toFixed(1)}% vs last month`}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Year to date</CardTitle>
+        <Card className="border-border/50">
+          <CardHeader className="pb-0 pt-3 px-4">
+            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Last month</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{fmt(yearlyTotal)}</p>
+          <CardContent className="px-4 pb-3">
+            <p className="text-xl font-bold tabular-nums">{fmt(prevMonthTotal)}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{format(new Date(now.getFullYear(), now.getMonth() - 1, 1), 'MMMM')}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Top vendor</CardTitle>
+        <Card className="border-border/50">
+          <CardHeader className="pb-0 pt-3 px-4">
+            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Total expenses</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 pb-3">
+            <p className="text-xl font-bold tabular-nums">{fmt(yearlyTotal)}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Year to date</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader className="pb-0 pt-3 px-4">
+            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Top vendor</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-3">
             {topVendors.length > 0 ? (
               <>
-                <p className="text-lg font-semibold truncate">{topVendors[0].merchant}</p>
-                <p className="text-xs text-muted-foreground">{fmt(topVendors[0].total)}</p>
+                <p className="text-base font-bold truncate leading-tight">{topVendors[0].merchant}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmt(topVendors[0].total)}</p>
               </>
             ) : (
-              <p className="text-muted-foreground text-sm">No data yet</p>
+              <p className="text-muted-foreground text-sm">—</p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SpendingTrendChart data={trendData} />
-        <CategoryPieChart data={categoryData} />
-      </div>
+      {/* Charts — full width trend + bar chart */}
+      <SpendingTrendChart data={trendData} />
+      <CategoryBarChart data={categoryData} />
 
-      {/* Top vendors list */}
-      {topVendors.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Top vendors</CardTitle>
+      {/* Tabbed: Top Vendors + Recent Expenses */}
+      <Tabs defaultValue="recent">
+        <Card className="border-border/50">
+          <CardHeader className="pb-0 pt-3 px-4">
+            <div className="flex items-center justify-between">
+              <TabsList className="h-7">
+                <TabsTrigger value="recent" className="text-xs px-2.5">Recent</TabsTrigger>
+                <TabsTrigger value="vendors" className="text-xs px-2.5">Top vendors</TabsTrigger>
+              </TabsList>
+              <Link href="/expenses" className="text-xs text-primary hover:underline">View all</Link>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {topVendors.map((v) => (
-              <div key={v.merchant} className="flex items-center justify-between">
-                <span className="text-sm truncate">{v.merchant}</span>
-                <span className="font-mono text-sm font-medium shrink-0 ml-4">{fmt(v.total)}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Recent expenses */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Recent expenses</CardTitle>
-          <Link href="/expenses" className="text-xs text-primary hover:underline">View all</Link>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {(recent ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No expenses yet.</p>
-          ) : (
-            (recent as unknown as {
-              id: string
-              merchant: string
-              date: string
-              amount: number
-              currency: string
-              category: { name: string; color: string } | null
-            }[]).map((e) => (
-              <div key={e.id} className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{e.merchant}</p>
-                    <p className="text-xs text-muted-foreground">{format(new Date(e.date + 'T12:00:00'), 'MMM d')}</p>
-                  </div>
-                  {e.category && (
-                    <Badge
-                      variant="secondary"
-                      className="shrink-0 text-xs"
-                      style={{ backgroundColor: e.category.color + '20', color: e.category.color }}
+          <TabsContent value="recent">
+            <CardContent className="px-4 pb-3 pt-2 space-y-1.5">
+              {recentList.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">No expenses yet.</p>
+              ) : (
+                recentList.map((e) => (
+                  <div key={e.id} className="flex items-center gap-3 py-1">
+                    <div
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                      style={{ backgroundColor: e.category?.color ?? initialColor(e.merchant) }}
                     >
-                      {e.category.name}
-                    </Badge>
-                  )}
-                </div>
-                <span className="font-mono text-sm font-medium shrink-0 ml-4">
-                  {e.currency} {Number(e.amount).toFixed(2)}
-                </span>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+                      {merchantInitial(e.merchant)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate leading-tight">{e.merchant}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[11px] text-muted-foreground">{format(new Date(e.date + 'T12:00:00'), 'MMM d')}</p>
+                        {e.category && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] px-1.5 py-0 h-4"
+                            style={{ backgroundColor: e.category.color + '20', color: e.category.color }}
+                          >
+                            {e.category.name}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <span className="font-mono text-sm font-semibold shrink-0 tabular-nums">
+                      {e.currency} {Number(e.amount).toFixed(2)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </TabsContent>
+
+          <TabsContent value="vendors">
+            <CardContent className="px-4 pb-3 pt-2 space-y-1.5">
+              {topVendors.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">No data yet.</p>
+              ) : (
+                topVendors.map((v) => (
+                  <div key={v.merchant} className="flex items-center gap-3 py-1">
+                    <div
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                      style={{ backgroundColor: initialColor(v.merchant) }}
+                    >
+                      {merchantInitial(v.merchant)}
+                    </div>
+                    <span className="text-sm flex-1 truncate font-medium">{v.merchant}</span>
+                    <span className="font-mono text-sm font-semibold shrink-0 tabular-nums">{fmt(v.total)}</span>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </TabsContent>
+        </Card>
+      </Tabs>
     </div>
   )
 }
