@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Pencil, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +23,7 @@ export function CategoryManager() {
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState(PRESET_COLORS[0])
   const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -59,10 +60,6 @@ export function CategoryManager() {
   }
 
   async function deleteCategory(cat: Category) {
-    if (cat.is_default) {
-      toast.error('Cannot delete default categories')
-      return
-    }
     try {
       await supabase.from('categories').delete().eq('id', cat.id)
       setCategories(categories.filter((c) => c.id !== cat.id))
@@ -74,13 +71,22 @@ export function CategoryManager() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Categories</CardTitle>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-muted-foreground"
+          onClick={() => setEditing((e) => !e)}
+          title={editing ? 'Done' : 'Edit categories'}
+        >
+          {editing ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center gap-1 group">
+            <div key={cat.id} className="flex items-center gap-1">
               <Badge
                 variant="secondary"
                 style={{ backgroundColor: cat.color + '20', color: cat.color }}
@@ -88,11 +94,11 @@ export function CategoryManager() {
               >
                 {cat.name}
               </Badge>
-              {!cat.is_default && (
+              {editing && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5 opacity-0 group-hover:opacity-100 text-muted-foreground"
+                  className="h-5 w-5 text-muted-foreground hover:text-destructive"
                   onClick={() => deleteCategory(cat)}
                 >
                   <Trash2 className="h-3 w-3" />

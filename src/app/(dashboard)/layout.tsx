@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Sidebar } from '@/components/layout/Sidebar'
+import { TopNav } from '@/components/layout/TopNav'
 import { MobileHeader } from '@/components/layout/MobileHeader'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { WorkspaceProvider } from '@/components/layout/WorkspaceProvider'
@@ -19,12 +19,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <WorkspaceProvider workspaces={(workspaces as Workspace[]) ?? []}>
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar user={user} />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <MobileHeader />
-          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
-        </div>
+      <div className="flex flex-col h-screen overflow-hidden">
+        <TopNav user={user} />
+        <MobileHeader />
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
       </div>
       <MobileBottomNav user={user} />
     </WorkspaceProvider>
