@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Download, RotateCcw } from 'lucide-react'
+import { Plus, Download, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,7 @@ export default function ExpensesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -72,6 +73,18 @@ export default function ExpensesPage() {
       <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b">
         <h1 className="text-lg font-semibold">Expenses</h1>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFiltersOpen((o) => !o)}
+            className="relative"
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-1.5" />
+            <span className="hidden sm:inline">Filters</span>
+            {hasFilters && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+            )}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => exportToCSV(expenses)}>
             <Download className="h-4 w-4 mr-1.5" /><span className="hidden sm:inline">CSV</span>
           </Button>
@@ -82,6 +95,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Filters */}
+      {filtersOpen && (
       <div className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-3 border-b bg-muted/30">
         <Input
           placeholder="Search merchant or notes…"
@@ -149,6 +163,7 @@ export default function ExpensesPage() {
           </Button>
         )}
       </div>
+      )}
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
