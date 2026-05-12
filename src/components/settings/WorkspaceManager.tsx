@@ -31,9 +31,11 @@ export function WorkspaceManager() {
     if (!newName.trim()) return
     setAdding(true)
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
       const { data: ws, error } = await supabase
         .from('workspaces')
-        .insert({ name: newName.trim(), type: newType, is_default: false })
+        .insert({ user_id: user.id, name: newName.trim(), type: newType, is_default: false })
         .select()
         .single()
       if (error) throw error
@@ -115,7 +117,11 @@ export function WorkspaceManager() {
             onKeyDown={(e) => e.key === 'Enter' && addWorkspace()}
             className="flex-1"
           />
-          <Select value={newType} onValueChange={(v) => setNewType(v as WorkspaceType)}>
+          <Select
+            value={newType}
+            onValueChange={(v) => setNewType(v as WorkspaceType)}
+            items={WORKSPACE_TYPES.map((t) => ({ value: t.value, label: `${t.emoji} ${t.label}` }))}
+          >
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>

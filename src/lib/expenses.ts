@@ -30,9 +30,11 @@ export async function createExpense(
   payload: Omit<Expense, 'id' | 'user_id' | 'is_deleted' | 'created_at' | 'updated_at' | 'category'>
 ): Promise<Expense> {
   const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
   const { data, error } = await supabase
     .from('expenses')
-    .insert(payload)
+    .insert({ ...payload, user_id: user.id })
     .select('*, category:categories(id,name,color)')
     .single()
   if (error) throw error

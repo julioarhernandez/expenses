@@ -19,7 +19,6 @@ import { useWorkspaceStore } from '@/store/workspace'
 import { ReceiptUploader } from './ReceiptUploader'
 import type { Category, Expense, OcrExtraction, PaymentMethod } from '@/types'
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'MXN', 'BRL']
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'credit_card', label: 'Credit card' },
   { value: 'debit_card', label: 'Debit card' },
@@ -39,7 +38,6 @@ function emptyForm(workspaceId: string) {
   return {
     merchant: '',
     amount: '',
-    currency: 'USD',
     tax_amount: '',
     date: new Date().toISOString().split('T')[0],
     category_id: '',
@@ -63,7 +61,6 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
       setForm({
         merchant: expense.merchant,
         amount: String(expense.amount),
-        currency: expense.currency,
         tax_amount: expense.tax_amount != null ? String(expense.tax_amount) : '',
         date: expense.date,
         category_id: expense.category_id ?? '',
@@ -85,7 +82,6 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
       amount: data.amount ? String(data.amount) : f.amount,
       tax_amount: data.tax_amount != null ? String(data.tax_amount) : f.tax_amount,
       date: data.date || f.date,
-      currency: data.currency || f.currency,
       payment_method: (data.payment_method as PaymentMethod) || f.payment_method,
     }))
   }
@@ -102,7 +98,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
       const payload = {
         merchant: form.merchant,
         amount: parseFloat(form.amount),
-        currency: form.currency,
+        currency: 'USD',
         tax_amount: form.tax_amount ? parseFloat(form.tax_amount) : null,
         date: form.date,
         category_id: form.category_id || null,
@@ -132,7 +128,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-6">
         <SheetHeader className="mb-6">
           <SheetTitle>{expense ? 'Edit expense' : 'Add expense'}</SheetTitle>
         </SheetHeader>
@@ -174,18 +170,6 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
             </div>
 
             <div className="space-y-1.5">
-              <Label>Currency</Label>
-              <Select value={form.currency} onValueChange={(v) => set('currency', v ?? '')}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
               <Label>Date *</Label>
               <Popover open={dateOpen} onOpenChange={setDateOpen}>
                 <PopoverTrigger
@@ -224,7 +208,11 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
 
             <div className="space-y-1.5">
               <Label>Category</Label>
-              <Select value={form.category_id} onValueChange={(v) => set('category_id', v ?? '')}>
+              <Select
+                value={form.category_id}
+                onValueChange={(v) => set('category_id', v ?? '')}
+                items={categories.map((c) => ({ value: c.id, label: c.name }))}
+              >
                 <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
@@ -241,7 +229,11 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
 
             <div className="space-y-1.5">
               <Label>Payment method</Label>
-              <Select value={form.payment_method} onValueChange={(v) => set('payment_method', v ?? '')}>
+              <Select
+                value={form.payment_method}
+                onValueChange={(v) => set('payment_method', v ?? '')}
+                items={PAYMENT_METHODS.map((m) => ({ value: m.value, label: m.label }))}
+              >
                 <SelectTrigger><SelectValue placeholder="Select method" /></SelectTrigger>
                 <SelectContent>
                   {PAYMENT_METHODS.map((m) => (

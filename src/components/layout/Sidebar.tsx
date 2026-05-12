@@ -49,7 +49,7 @@ export function Sidebar({ user }: SidebarProps) {
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   return (
-    <aside className="w-56 shrink-0 border-r bg-background flex flex-col h-screen sticky top-0">
+    <aside className="hidden md:flex w-56 shrink-0 border-r bg-background flex-col h-screen sticky top-0">
       {/* Workspace switcher */}
       <div className="p-3 border-b">
         <DropdownMenu>

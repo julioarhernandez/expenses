@@ -30,6 +30,7 @@ export default function ExpensesPage() {
       .from('categories')
       .select('*')
       .eq('workspace_id', activeWorkspaceId)
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .order('name')
       .then(({ data }) => setCategories((data as Category[]) ?? []))
   }, [activeWorkspaceId])
@@ -70,11 +71,11 @@ export default function ExpensesPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b">
+      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b">
         <h1 className="text-lg font-semibold">Expenses</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => exportToCSV(expenses)}>
-            <Download className="h-4 w-4 mr-1.5" />CSV
+            <Download className="h-4 w-4 mr-1.5" /><span className="hidden sm:inline">CSV</span>
           </Button>
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4 mr-1.5" />Add expense
@@ -83,12 +84,12 @@ export default function ExpensesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2 px-6 py-3 border-b bg-muted/30">
+      <div className="flex flex-wrap items-center gap-2 px-4 md:px-6 py-3 border-b bg-muted/30">
         <Input
           placeholder="Search merchant or notes…"
           value={filters.q}
           onChange={(e) => setFilters({ q: e.target.value })}
-          className="h-8 w-56 bg-background"
+          className="h-8 w-full sm:w-56 bg-background"
         />
         <Input
           type="date"
@@ -107,6 +108,7 @@ export default function ExpensesPage() {
         <Select
           value={filters.category_id ?? ''}
           onValueChange={(v) => setFilters({ category_id: v ?? null })}
+          items={[{ value: '', label: 'All categories' }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
         >
           <SelectTrigger className="h-8 w-40 bg-background">
             <SelectValue placeholder="Category" />
@@ -121,6 +123,14 @@ export default function ExpensesPage() {
         <Select
           value={filters.payment_method ?? ''}
           onValueChange={(v) => setFilters({ payment_method: (v as Expense['payment_method']) ?? null })}
+          items={[
+            { value: '', label: 'All methods' },
+            { value: 'credit_card', label: 'Credit card' },
+            { value: 'debit_card', label: 'Debit card' },
+            { value: 'cash', label: 'Cash' },
+            { value: 'bank_transfer', label: 'Bank transfer' },
+            { value: 'other', label: 'Other' },
+          ]}
         >
           <SelectTrigger className="h-8 w-40 bg-background">
             <SelectValue placeholder="Payment method" />

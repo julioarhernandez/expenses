@@ -53,9 +53,9 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
         <TableRow>
           <TableHead>Merchant</TableHead>
           <TableHead>Date</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Payment</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
           <TableHead className="w-10" />
         </TableRow>
       </TableHeader>
@@ -63,8 +63,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
         {expenses.map((expense) => (
           <TableRow key={expense.id} className="group">
             <TableCell className="font-medium">{expense.merchant}</TableCell>
-            <TableCell className="text-muted-foreground text-sm">
-              {format(new Date(expense.date), 'MMM d, yyyy')}
+            <TableCell className="text-muted-foreground text-xs tabular-nums whitespace-nowrap">
+              {format(new Date(expense.date), 'MMM d, yy')}
+            </TableCell>
+            <TableCell className="text-right font-mono font-medium">
+              {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
             </TableCell>
             <TableCell>
               {expense.category ? (
@@ -81,12 +84,9 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
             <TableCell className="text-muted-foreground text-sm">
               {expense.payment_method ? PAYMENT_LABELS[expense.payment_method] : '—'}
             </TableCell>
-            <TableCell className="text-right font-mono font-medium">
-              {expense.currency} {Number(expense.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </TableCell>
             <TableCell>
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-md opacity-0 group-hover:opacity-100 hover:bg-accent transition-colors">
+                <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                   <MoreHorizontal className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

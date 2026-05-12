@@ -63,6 +63,8 @@ export default async function DashboardPage() {
     .from('categories')
     .select('id,name,color')
     .eq('workspace_id', wsId)
+    .order('sort_order', { ascending: true, nullsFirst: false })
+    .order('name')
 
   const catMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c]))
 
@@ -120,7 +122,7 @@ export default async function DashboardPage() {
     .map(([merchant, total]) => ({ merchant, total }))
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div>
         <h1 className="text-xl font-semibold">{workspace.name}</h1>
         <p className="text-sm text-muted-foreground">{format(now, 'MMMM yyyy')}</p>

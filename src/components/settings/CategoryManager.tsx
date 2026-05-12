@@ -31,6 +31,7 @@ export function CategoryManager() {
       .from('categories')
       .select('*')
       .eq('workspace_id', activeWorkspaceId)
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .order('name')
       .then(({ data }) => setCategories((data as Category[]) ?? []))
   }, [activeWorkspaceId])
@@ -39,9 +40,11 @@ export function CategoryManager() {
     if (!newName.trim() || !activeWorkspaceId) return
     setAdding(true)
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
       const { data, error } = await supabase
         .from('categories')
-        .insert({ name: newName.trim(), color: newColor, workspace_id: activeWorkspaceId, is_default: false })
+        .insert({ user_id: user.id, name: newName.trim(), color: newColor, workspace_id: activeWorkspaceId, is_default: false })
         .select()
         .single()
       if (error) throw error
