@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error && user) {
+      await supabase.rpc('ensure_default_categories', { uid: user.id })
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
