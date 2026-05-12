@@ -58,6 +58,7 @@ export interface OcrExtraction {
   date: string
   currency: string
   payment_method: string | null
+  suggested_category: string | null
 }
 
 export interface DashboardStats {

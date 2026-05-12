@@ -15,8 +15,12 @@ const extractionSchema = {
       type: ['string', 'null'],
       enum: ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'other', null],
     },
+    suggested_category: {
+      type: ['string', 'null'],
+      description: 'Best matching category name from the provided list, or null if none fit',
+    },
   },
-  required: ['merchant', 'amount', 'tax_amount', 'date', 'currency', 'payment_method'],
+  required: ['merchant', 'amount', 'tax_amount', 'date', 'currency', 'payment_method', 'suggested_category'],
   additionalProperties: false,
 }
 
@@ -25,10 +29,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'AI extraction not configured' }, { status: 500 })
   }
 
-  const { text } = await request.json() as { text: string }
+  const { text, categories } = await request.json() as { text: string; categories?: string[] }
   if (!text?.trim()) {
     return NextResponse.json({ error: 'No text provided' }, { status: 400 })
   }
+
+  const categoryInstruction = categories?.length
+    ? `Available categories: ${categories.join(', ')}. Set suggested_category to the best matching category name from that list, or null if none fit.`
+    : 'Set suggested_category to null.'
 
   let completion: Awaited<ReturnType<typeof client.chat.completions.create>>
   try {
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
         {
           role: 'system',
           content:
-            'You are a receipt parser. Extract structured expense data from the receipt text. Use ISO 8601 for dates. Return null for fields you cannot determine.',
+            `You are a receipt parser. Extract structured expense data from the receipt text. Use ISO 8601 for dates. Return null for fields you cannot determine. ${categoryInstruction}`,
         },
         { role: 'user', content: text },
       ],

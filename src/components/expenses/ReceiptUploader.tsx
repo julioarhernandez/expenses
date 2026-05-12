@@ -6,21 +6,24 @@ import { Upload, X, Loader2, FileText, Sparkles, Camera } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
 import type { OcrExtraction } from '@/types'
 
 interface ReceiptUploaderProps {
-  onReceiptUploaded: (data: { url: string; path: string; localUrl?: string }) => void
+  onFileSelected: (file: File, localUrl?: string) => void
+  onFileRemoved?: () => void
   onExtractionComplete: (data: OcrExtraction) => void
   existingUrl?: string
+  categories?: { id: string; name: string }[]
 }
 
-type Step = 'idle' | 'uploading' | 'ocr' | 'extracting' | 'done'
+type Step = 'idle' | 'ocr' | 'extracting' | 'done'
 
 export function ReceiptUploader({
-  onReceiptUploaded,
+  onFileSelected,
+  onFileRemoved,
   onExtractionComplete,
   existingUrl,
+  categories,
 }: ReceiptUploaderProps) {
   const [step, setStep] = useState<Step>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(existingUrl || null)
@@ -29,7 +32,6 @@ export function ReceiptUploader({
 
   const STEP_LABELS: Record<Step, string> = {
     idle: '',
-    uploading: 'Uploading…',
     ocr: 'Reading receipt…',
     extracting: 'Extracting data…',
     done: 'Done',
@@ -37,62 +39,49 @@ export function ReceiptUploader({
 
   const processFile = useCallback(
     async (file: File) => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
       setFileName(file.name)
       const localUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
       if (localUrl) setPreviewUrl(localUrl)
 
-      // 1. Upload to Supabase Storage
-      setStep('uploading')
-      const ext = file.name.split('.').pop()
-      const path = `${user.id}/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('receipts').upload(path, file)
-      if (uploadError) {
-        toast.error(`Upload failed: ${uploadError.message}`)
-        setStep('idle')
+      onFileSelected(file, localUrl)
+
+      if (!file.type.startsWith('image/')) {
+        setStep('done')
         return
       }
 
-      const { data: { publicUrl } } = supabase.storage.from('receipts').getPublicUrl(path)
-      onReceiptUploaded({ url: publicUrl, path, localUrl })
+      // OCR
+      setStep('ocr')
+      const fd = new FormData()
+      fd.append('file', file)
+      const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
+      if (!ocrRes.ok) {
+        const { error: ocrErr } = await ocrRes.json().catch(() => ({ error: undefined })) as { error?: string }
+        toast.error(ocrErr ?? 'OCR failed', { description: 'You can still fill fields manually' })
+        setStep('done')
+        return
+      }
+      const { text } = await ocrRes.json() as { text: string }
 
-      // 2. OCR (images only — skip PDF for now)
-      if (file.type.startsWith('image/')) {
-        setStep('ocr')
-        const fd = new FormData()
-        fd.append('file', file)
-        const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
-        if (!ocrRes.ok) {
-          const { error: ocrErr } = await ocrRes.json().catch(() => ({ error: undefined })) as { error?: string }
-          toast.error(ocrErr ?? 'OCR failed', { description: 'You can still fill fields manually' })
-          setStep('done')
-          return
-        }
-        const { text } = await ocrRes.json() as { text: string }
-
-        // 3. AI extraction
-        setStep('extracting')
-        const aiRes = await fetch('/api/ai-extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
-        })
-        if (!aiRes.ok) {
-          const { error: aiErr } = await aiRes.json().catch(() => ({ error: undefined })) as { error?: string }
-          toast.error(aiErr ?? 'AI extraction failed', { description: 'You can still fill fields manually' })
-        } else {
-          const extracted = await aiRes.json() as OcrExtraction
-          onExtractionComplete(extracted)
-          toast.success('Fields pre-filled from receipt')
-        }
+      // AI extraction
+      setStep('extracting')
+      const aiRes = await fetch('/api/ai-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, categories: categories?.map((c) => c.name) }),
+      })
+      if (!aiRes.ok) {
+        const { error: aiErr } = await aiRes.json().catch(() => ({ error: undefined })) as { error?: string }
+        toast.error(aiErr ?? 'AI extraction failed', { description: 'You can still fill fields manually' })
+      } else {
+        const extracted = await aiRes.json() as OcrExtraction
+        onExtractionComplete(extracted)
+        toast.success('Fields pre-filled from receipt')
       }
 
       setStep('done')
     },
-    [onReceiptUploaded, onExtractionComplete]
+    [onFileSelected, onExtractionComplete, categories]
   )
 
   const onDrop = useCallback(
@@ -182,7 +171,7 @@ export function ReceiptUploader({
       {previewUrl && step === 'done' && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
-          <span className="truncate">{fileName ?? 'Receipt uploaded'}</span>
+          <span className="truncate">{fileName ?? 'Receipt attached'}</span>
           <Button
             type="button"
             variant="ghost"
@@ -192,6 +181,7 @@ export function ReceiptUploader({
               setPreviewUrl(null)
               setFileName(null)
               setStep('idle')
+              onFileRemoved?.()
             }}
           >
             <X className="h-3 w-3" />

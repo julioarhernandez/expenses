@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { createExpense, updateExpense } from '@/lib/expenses'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
+import { createClient } from '@/lib/supabase/client'
 import { ReceiptUploader } from './ReceiptUploader'
 import type { Category, Expense, OcrExtraction, PaymentMethod } from '@/types'
 
@@ -58,11 +59,13 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [receiptRotation, setReceiptRotation] = useState(0)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [form, setForm] = useState(emptyForm(activeWorkspaceId ?? ''))
   const [dateOpen, setDateOpen] = useState(false)
 
   useEffect(() => {
     setLocalReceiptUrl(null)
+    setPendingFile(null)
     if (expense) {
       setForm({
         merchant: expense.merchant,
@@ -82,6 +85,9 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   }, [expense, activeWorkspaceId, open])
 
   function applyOcrExtraction(data: OcrExtraction) {
+    const matchedCategory = data.suggested_category
+      ? categories.find((c) => c.name.toLowerCase() === data.suggested_category!.toLowerCase())
+      : null
     setForm((f) => ({
       ...f,
       merchant: data.merchant || f.merchant,
@@ -89,6 +95,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
       tax_amount: data.tax_amount != null ? String(data.tax_amount) : f.tax_amount,
       date: data.date || f.date,
       payment_method: (data.payment_method as PaymentMethod) || f.payment_method,
+      category_id: matchedCategory ? matchedCategory.id : f.category_id,
     }))
   }
 
@@ -101,6 +108,22 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
     if (!form.merchant || !form.amount || !form.date) return
     setSaving(true)
     try {
+      let receiptUrl = form.receipt_url || null
+      let receiptPath = form.receipt_path || null
+
+      if (pendingFile) {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not authenticated')
+        const ext = pendingFile.name.split('.').pop()
+        const path = `${user.id}/${Date.now()}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('receipts').upload(path, pendingFile)
+        if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
+        const { data: { publicUrl } } = supabase.storage.from('receipts').getPublicUrl(path)
+        receiptUrl = publicUrl
+        receiptPath = path
+      }
+
       const payload = {
         merchant: form.merchant,
         amount: parseFloat(form.amount),
@@ -110,8 +133,8 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         category_id: form.category_id || null,
         payment_method: (form.payment_method as PaymentMethod) || null,
         notes: form.notes || null,
-        receipt_url: form.receipt_url || null,
-        receipt_path: form.receipt_path || null,
+        receipt_url: receiptUrl,
+        receipt_path: receiptPath,
         workspace_id: form.workspace_id,
       }
 
@@ -140,16 +163,20 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         </SheetHeader>
 
         <ReceiptUploader
-          onReceiptUploaded={({ url, path, localUrl }) => {
-            set('receipt_url', url)
-            set('receipt_path', path)
+          onFileSelected={(file, localUrl) => {
+            setPendingFile(file)
             if (localUrl) setLocalReceiptUrl(localUrl)
+          }}
+          onFileRemoved={() => {
+            setPendingFile(null)
+            setLocalReceiptUrl(null)
           }}
           onExtractionComplete={applyOcrExtraction}
           existingUrl={form.receipt_url}
+          categories={categories}
         />
 
-        {form.receipt_url && (
+        {(form.receipt_url || localReceiptUrl) && (
           <>
             <div className="flex justify-end mt-1">
               <Button
