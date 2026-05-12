@@ -47,7 +47,7 @@ export default function ExpensesPage() {
   async function handleDelete(expense: Expense) {
     if (!confirm(`Delete "${expense.merchant}"?`)) return
     try {
-      await softDeleteExpense(expense.id)
+      await softDeleteExpense(expense.id, expense.receipt_path)
       removeExpense(expense.id)
       toast.success('Expense deleted')
     } catch (err: unknown) {
