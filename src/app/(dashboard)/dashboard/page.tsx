@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
@@ -19,12 +20,30 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: workspace } = await supabase
-    .from('workspaces')
-    .select('id,name')
-    .eq('user_id', user.id)
-    .eq('is_default', true)
-    .single()
+  const cookieStore = await cookies()
+  const activeWsId = cookieStore.get('active-workspace-id')?.value
+
+  // Try the cookie-stored workspace first, fall back to the first workspace
+  let workspace = null
+  if (activeWsId) {
+    const { data } = await supabase
+      .from('workspaces')
+      .select('id,name')
+      .eq('user_id', user.id)
+      .eq('id', activeWsId)
+      .single()
+    workspace = data
+  }
+  if (!workspace) {
+    const { data } = await supabase
+      .from('workspaces')
+      .select('id,name')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single()
+    workspace = data
+  }
 
   if (!workspace) {
     return (

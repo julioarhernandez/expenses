@@ -93,7 +93,12 @@ export function WorkspaceManager() {
               <div className="flex items-center gap-2 min-w-0">
                 <span>{typeMap[ws.type]?.emoji ?? '📁'}</span>
                 <span className="text-sm font-medium truncate">{ws.name}</span>
-                {ws.is_default && <Badge variant="secondary" className="text-xs">Default</Badge>}
+                {ws.is_default && (
+                  <span className="flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    <Badge variant="secondary" className="text-xs">Default</Badge>
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {!ws.is_default && (
