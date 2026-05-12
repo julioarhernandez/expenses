@@ -1,6 +1,38 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+
+const MAX_DIMENSION = 1600
+const JPEG_QUALITY = 0.75
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      let { width, height } = img
+      if (width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+        resolve(file)
+        return
+      }
+      const scale = MAX_DIMENSION / Math.max(width, height)
+      width = Math.round(width * scale)
+      height = Math.round(height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file),
+        'image/jpeg',
+        JPEG_QUALITY
+      )
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+    img.src = url
+  })
+}
 import { useDropzone } from 'react-dropzone'
 import { Upload, X, Loader2, FileText, Sparkles, Camera } from 'lucide-react'
 import { toast } from 'sonner'
@@ -43,17 +75,19 @@ export function ReceiptUploader({
       const localUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
       if (localUrl) setPreviewUrl(localUrl)
 
-      onFileSelected(file, localUrl)
-
       if (!file.type.startsWith('image/')) {
+        onFileSelected(file, localUrl)
         setStep('done')
         return
       }
 
+      const compressed = await compressImage(file)
+      onFileSelected(compressed, localUrl)
+
       // OCR
       setStep('ocr')
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file', compressed)
       const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
       if (!ocrRes.ok) {
         const { error: ocrErr } = await ocrRes.json().catch(() => ({ error: undefined })) as { error?: string }
