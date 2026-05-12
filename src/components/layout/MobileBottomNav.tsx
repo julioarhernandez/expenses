@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Receipt, Settings, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   const router = useRouter()
   const supabase = createClient()
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
+  const avatarUrl = user.user_metadata?.avatar_url as string | undefined
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -54,6 +55,7 @@ export function MobileBottomNav({ user }: { user: User }) {
       <DropdownMenu>
         <DropdownMenuTrigger className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors outline-none">
           <Avatar className="h-5 w-5">
+            <AvatarImage src={avatarUrl} alt={user.email ?? ''} />
             <AvatarFallback className="text-[9px]">{initials}</AvatarFallback>
           </Avatar>
           Account
