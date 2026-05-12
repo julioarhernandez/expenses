@@ -45,6 +45,7 @@ function emptyForm(workspaceId: string) {
     date: new Date().toISOString().split('T')[0],
     category_id: '',
     payment_method: '' as PaymentMethod | '',
+    card_last_four: '',
     notes: '',
     receipt_url: '',
     receipt_path: '',
@@ -74,6 +75,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         date: expense.date,
         category_id: expense.category_id ?? '',
         payment_method: expense.payment_method ?? '',
+        card_last_four: expense.card_last_four ?? '',
         notes: expense.notes ?? '',
         receipt_url: expense.receipt_url ?? '',
         receipt_path: expense.receipt_path ?? '',
@@ -95,6 +97,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
       tax_amount: data.tax_amount != null ? String(data.tax_amount) : f.tax_amount,
       date: data.date || f.date,
       payment_method: (data.payment_method as PaymentMethod) || f.payment_method,
+      card_last_four: data.card_last_four || f.card_last_four,
       category_id: matchedCategory ? matchedCategory.id : f.category_id,
     }))
   }
@@ -132,6 +135,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         date: form.date,
         category_id: form.category_id || null,
         payment_method: (form.payment_method as PaymentMethod) || null,
+        card_last_four: form.card_last_four || null,
         notes: form.notes || null,
         receipt_url: receiptUrl,
         receipt_path: receiptPath,
@@ -226,7 +230,7 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                     variant="ghost"
                     size="sm"
                     className="gap-1.5 text-xs text-muted-foreground"
-                    onClick={() => setReceiptRotation((r) => (r + 90) % 360)}
+                    onClick={() => setReceiptRotation((r) => (r - 90 + 360) % 360)}
                   >
                     <RotateCw className="h-3.5 w-3.5" />
                     Rotate
@@ -336,6 +340,20 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Card last 4</Label>
+              <Input
+                value={form.card_last_four}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 4)
+                  set('card_last_four', v)
+                }}
+                placeholder="1234"
+                maxLength={4}
+                inputMode="numeric"
+              />
             </div>
 
             <div className="col-span-2 space-y-1.5">

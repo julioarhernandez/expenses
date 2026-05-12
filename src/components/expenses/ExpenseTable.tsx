@@ -81,8 +81,15 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                 <span className="text-muted-foreground text-sm">—</span>
               )}
             </TableCell>
-            <TableCell className="text-muted-foreground text-sm">
-              {expense.payment_method ? PAYMENT_LABELS[expense.payment_method] : '—'}
+            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+              {expense.payment_method ? (
+                <>
+                  {PAYMENT_LABELS[expense.payment_method]}
+                  {expense.card_last_four && (
+                    <span className="ml-1 font-mono text-xs">••••{expense.card_last_four}</span>
+                  )}
+                </>
+              ) : '—'}
             </TableCell>
             <TableCell>
               <DropdownMenu>

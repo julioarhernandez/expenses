@@ -32,6 +32,7 @@ export interface Expense {
   tax_amount: number | null
   date: string
   payment_method: PaymentMethod | null
+  card_last_four: string | null
   notes: string | null
   receipt_url: string | null
   receipt_path: string | null
@@ -58,6 +59,7 @@ export interface OcrExtraction {
   date: string
   currency: string
   payment_method: string | null
+  card_last_four: string | null
   suggested_category: string | null
 }
 

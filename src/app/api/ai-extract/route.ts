@@ -15,12 +15,16 @@ const extractionSchema = {
       type: ['string', 'null'],
       enum: ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'other', null],
     },
+    card_last_four: {
+      type: ['string', 'null'],
+      description: 'Last 4 digits of the card used, if visible on the receipt (digits only, no spaces or dashes)',
+    },
     suggested_category: {
       type: ['string', 'null'],
       description: 'Best matching category name from the provided list, or null if none fit',
     },
   },
-  required: ['merchant', 'amount', 'tax_amount', 'date', 'currency', 'payment_method', 'suggested_category'],
+  required: ['merchant', 'amount', 'tax_amount', 'date', 'currency', 'payment_method', 'card_last_four', 'suggested_category'],
   additionalProperties: false,
 }
 
