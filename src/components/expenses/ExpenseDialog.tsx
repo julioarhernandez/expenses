@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2, RotateCw, ScanSearch } from 'lucide-react'
+import { CalendarIcon, Loader2, RotateCw, ScanSearch, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
@@ -186,222 +186,207 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
   return (
     <>
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-6">
-        <SheetHeader className="mb-6">
-          <SheetTitle>{expense ? 'Edit expense' : 'Add expense'}</SheetTitle>
-        </SheetHeader>
+      <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-0 border-l border-neutral-100">
+        <div className="p-8 space-y-8">
+          <SheetHeader className="space-y-1">
+            <SheetTitle className="text-2xl font-bold text-[#171717]">{expense ? 'Edit Expense' : 'Add Expense'}</SheetTitle>
+            <p className="text-sm text-neutral-500 font-medium">
+              {expense ? 'Update the details of your transaction.' : 'Enter the details of your new transaction.'}
+            </p>
+          </SheetHeader>
 
-        <ReceiptUploader
-          onFileSelected={(file, localUrl) => {
-            setPendingFile(file)
-            if (localUrl) setLocalReceiptUrl(localUrl)
-          }}
-          onFileRemoved={() => {
-            setPendingFile(null)
-            setLocalReceiptUrl(null)
-          }}
-          onExtractionComplete={applyOcrExtraction}
-          existingUrl={form.receipt_url}
-          categories={categories}
-        />
+          <div className="space-y-8">
+            <div className="bg-neutral-50/50 p-4 rounded-2xl border border-neutral-100">
+              <ReceiptUploader
+                onFileSelected={(file, localUrl) => {
+                  setPendingFile(file)
+                  if (localUrl) setLocalReceiptUrl(localUrl)
+                }}
+                onFileRemoved={() => {
+                  setPendingFile(null)
+                  setLocalReceiptUrl(null)
+                }}
+                onExtractionComplete={applyOcrExtraction}
+                existingUrl={form.receipt_url}
+                categories={categories}
+              />
 
-        {(form.receipt_url || localReceiptUrl) && (
-          <>
-            <div className="flex justify-end mt-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setReceiptOpen(true)}
-                className="h-7 px-2 text-xs text-muted-foreground gap-1.5"
-              >
-                <ScanSearch className="h-3 w-3" />
-                View receipts
-              </Button>
-            </div>
-
-            <Dialog
-              open={receiptsOpen}
-              onOpenChange={(o) => { setReceiptOpen(o); if (!o) setReceiptRotation(0) }}
-            >
-              <DialogContent className="sm:max-w-xl p-2 overflow-hidden" showCloseButton>
-                <TransformWrapper
-                  initialScale={1}
-                  minScale={0.5}
-                  maxScale={8}
-                  doubleClick={{ mode: 'zoomIn' }}
-                >
-                  <TransformComponent
-                    wrapperStyle={{ width: '100%', maxHeight: '75vh' }}
-                    contentStyle={{ width: '100%' }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={localReceiptUrl ?? form.receipt_url}
-                      alt="Receipt"
-                      className="w-full h-auto object-contain rounded select-none"
-                      draggable={false}
-                      style={{
-                        transform: `rotate(${receiptsRotation}deg)`,
-                        transition: 'transform 0.2s ease',
-                      }}
-                    />
-                  </TransformComponent>
-                </TransformWrapper>
-
-                <div className="flex justify-center pt-1">
+              {(form.receipt_url || localReceiptUrl) && (
+                <div className="flex justify-center mt-3">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 text-xs text-muted-foreground"
-                    onClick={() => setReceiptRotation((r) => (r - 90 + 360) % 360)}
+                    onClick={() => setReceiptOpen(true)}
+                    className="h-8 px-3 text-xs font-bold text-neutral-500 hover:text-[#171717] hover:bg-white rounded-lg transition-all gap-2"
                   >
-                    <RotateCw className="h-3.5 w-3.5" />
-                    Rotate
+                    <ScanSearch className="h-3.5 w-3.5" />
+                    Preview Receipt
                   </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-1.5">
-              <Label htmlFor="merchant">Merchant *</Label>
-              <Input
-                id="merchant"
-                value={form.merchant}
-                onChange={(e) => set('merchant', e.target.value)}
-                placeholder="Acme Corp"
-                required
-              />
+              )}
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="amount">Amount *</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.amount}
-                onChange={(e) => set('amount', e.target.value)}
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>Date *</Label>
-              <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                <PopoverTrigger
-                  className={cn(
-                    'flex w-full items-center justify-start gap-2 rounded-md border bg-background px-3 py-2 text-sm font-normal ring-offset-background text-left transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    !form.date && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                  {form.date ? format(new Date(form.date + 'T12:00:00'), 'MMM d, yyyy') : 'Pick a date'}
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={form.date ? new Date(form.date + 'T12:00:00') : undefined}
-                    onSelect={(d) => {
-                      if (d) set('date', d.toISOString().split('T')[0])
-                      setDateOpen(false)
-                    }}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="merchant" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Merchant *</Label>
+                  <Input
+                    id="merchant"
+                    value={form.merchant}
+                    onChange={(e) => set('merchant', e.target.value)}
+                    placeholder="Where did you spend?"
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                    required
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Tax amount</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.tax_amount}
-                onChange={(e) => set('tax_amount', e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Amount *</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium text-sm">$</span>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={form.amount}
+                      onChange={(e) => set('amount', e.target.value)}
+                      placeholder="0.00"
+                      className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11 pl-7 font-semibold"
+                      required
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Category</Label>
-              <Select
-                value={form.category_id}
-                onValueChange={(v) => set('category_id', v ?? '')}
-                items={categories.map((c) => ({ value: c.id, label: c.name }))}
-              >
-                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <span className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full inline-block" style={{ backgroundColor: c.color }} />
-                        {c.name}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Date *</Label>
+                  <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                    <PopoverTrigger
+                      className={cn(
+                        'w-full flex items-center justify-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-3 h-11 text-sm font-medium transition-all hover:bg-neutral-100',
+                        !form.date && 'text-neutral-400'
+                      )}
+                    >
+                      <CalendarIcon className="h-4 w-4 text-neutral-400" />
+                      {form.date ? format(new Date(form.date + 'T12:00:00'), 'MMM d, yyyy') : 'Pick a date'}
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-neutral-100">
+                      <Calendar
+                        mode="single"
+                        selected={form.date ? new Date(form.date + 'T12:00:00') : undefined}
+                        onSelect={(d) => {
+                          if (d) set('date', d.toISOString().split('T')[0])
+                          setDateOpen(false)
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Payment method</Label>
-              <Select
-                value={form.payment_method}
-                onValueChange={(v) => set('payment_method', v ?? '')}
-                items={PAYMENT_METHODS.map((m) => ({ value: m.value, label: m.label }))}
-              >
-                <SelectTrigger><SelectValue placeholder="Select method" /></SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_METHODS.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Category</Label>
+                  <Select
+                    value={form.category_id}
+                    onValueChange={(v) => set('category_id', v ?? '')}
+                  >
+                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id} label={c.name}>
+                          <span className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                            {c.name}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Card last 4</Label>
-              <Input
-                value={form.card_last_four}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, '').slice(0, 4)
-                  set('card_last_four', v)
-                }}
-                placeholder="1234"
-                maxLength={4}
-                inputMode="numeric"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Payment Method</Label>
+                  <Select
+                    value={form.payment_method}
+                    onValueChange={(v) => set('payment_method', v ?? '')}
+                  >
+                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                      <SelectValue placeholder="Select method" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                      {PAYMENT_METHODS.map((m) => (
+                        <SelectItem key={m.value} value={m.value} label={m.label}>{m.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="col-span-2 space-y-1.5">
-              <Label>Notes</Label>
-              <Textarea
-                value={form.notes}
-                onChange={(e) => set('notes', e.target.value)}
-                placeholder="Optional notes…"
-                rows={3}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Tax Amount</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.tax_amount}
+                    onChange={(e) => set('tax_amount', e.target.value)}
+                    placeholder="0.00"
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Card Last 4</Label>
+                  <Input
+                    value={form.card_last_four}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, '').slice(0, 4)
+                      set('card_last_four', v)
+                    }}
+                    placeholder="1234"
+                    maxLength={4}
+                    inputMode="numeric"
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11 font-mono"
+                  />
+                </div>
+
+                <div className="col-span-2 space-y-2">
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Notes</Label>
+                  <Textarea
+                    value={form.notes}
+                    onChange={(e) => set('notes', e.target.value)}
+                    placeholder="Add details, tags, or descriptions…"
+                    rows={3}
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-6 border-t border-neutral-100">
+                <Button 
+                  type="button" 
+                  onClick={onClose} 
+                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={saving} 
+                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    !expense && <Plus className="h-4 w-4" />
+                  )}
+                  {expense ? 'Save Changes' : 'Add Expense'}
+                </Button>
+              </div>
+            </form>
           </div>
-
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" className="flex-1" disabled={saving}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {expense ? 'Save changes' : 'Add expense'}
-            </Button>
-          </div>
-        </form>
+        </div>
       </SheetContent>
     </Sheet>
 
@@ -417,11 +402,17 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
               : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?'}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}>
+        <DialogFooter className="gap-3">
+          <Button 
+            className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm" 
+            onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}
+          >
             Cancel
           </Button>
-          <Button onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}>
+          <Button 
+            className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm"
+            onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}
+          >
             Save anyway
           </Button>
         </DialogFooter>

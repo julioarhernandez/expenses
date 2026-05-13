@@ -150,9 +150,9 @@ export default function ExpensesPage() {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="" label="All Categories">All Categories</SelectItem>
                   {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
