@@ -165,12 +165,7 @@ export default async function DashboardPage() {
           <p className="text-neutral-500 font-medium">{format(now, 'MMMM yyyy', { locale })}</p>
         </div>
         <div className="flex gap-3">
-          <Link
-            href="/expenses/new"
-            className="inline-flex items-center justify-center rounded-lg bg-[#171717] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition-colors"
-          >
-            Add Expense
-          </Link>
+          <AddExpenseButton />
           <button className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors">
             {t('expenses').export_csv}
           </button>
