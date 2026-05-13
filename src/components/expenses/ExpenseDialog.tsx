@@ -291,7 +291,9 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                     onValueChange={(v) => set('category_id', v ?? '')}
                   >
                     <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select category">
+                        {form.category_id ? categories.find(c => c.id === form.category_id)?.name : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
                       {categories.map((c) => (
@@ -313,7 +315,9 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
                     onValueChange={(v) => set('payment_method', v ?? '')}
                   >
                     <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
-                      <SelectValue placeholder="Select method" />
+                      <SelectValue placeholder="Select method">
+                        {form.payment_method ? PAYMENT_METHODS.find(m => m.value === form.payment_method)?.label : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
                       {PAYMENT_METHODS.map((m) => (

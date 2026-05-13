@@ -147,7 +147,9 @@ export default function ExpensesPage() {
                 onValueChange={(v) => setFilters({ category_id: v ?? null })}
               >
                 <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white">
-                  <SelectValue placeholder="All Categories" />
+                  <SelectValue placeholder="All Categories">
+                    {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
                   <SelectItem value="" label="All Categories">All Categories</SelectItem>
