@@ -180,7 +180,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
           <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{lang === 'es' ? 'Este Mes' : 'This Month'}</CardTitle>
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{t('dashboard').this_month}</CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(monthlyTotal)}</p>
@@ -193,7 +193,7 @@ export default async function DashboardPage() {
 
         <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
           <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{lang === 'es' ? 'Mes Pasado' : 'Last Month'}</CardTitle>
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{t('dashboard').last_month}</CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(prevMonthTotal)}</p>
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
 
         <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
           <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{lang === 'es' ? 'Año Actual' : 'Year to Date'}</CardTitle>
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{t('dashboard').year_to_date}</CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(yearlyTotal)}</p>
@@ -213,13 +213,13 @@ export default async function DashboardPage() {
 
         <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
           <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{lang === 'es' ? 'Comercio Top' : 'Top Vendor'}</CardTitle>
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{t('dashboard').top_vendor}</CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             {topVendors.length > 0 ? (
               <>
                 <p className="text-xl font-bold text-[#171717] truncate">{topVendors[0].merchant}</p>
-                <p className="text-xs text-neutral-500 mt-2 font-medium tabular-nums">{fmt(topVendors[0].total)} {lang === 'es' ? 'total' : 'total'}</p>
+                <p className="text-xs text-neutral-500 mt-2 font-medium tabular-nums">{fmt(topVendors[0].total)} total</p>
               </>
             ) : (
               <p className="text-neutral-400 text-sm">—</p>
@@ -243,7 +243,7 @@ export default async function DashboardPage() {
         <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between">
           <h2 className="text-lg font-bold text-[#171717]">{t('dashboard').recent_expenses}</h2>
           <Link href="/expenses" className="text-sm font-semibold text-neutral-500 hover:text-[#171717] transition-colors">
-            {lang === 'es' ? 'Ver Todos' : 'View All'}
+            {t('dashboard').view_all}
           </Link>
         </div>
         <div className="overflow-x-auto">
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
               {recentList.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-neutral-400 text-sm font-medium">
-                    {lang === 'es' ? 'No se encontraron transacciones recientes.' : 'No recent transactions found.'}
+                    {t('dashboard').no_recent}
                   </td>
                 </tr>
               ) : (

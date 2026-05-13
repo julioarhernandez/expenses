@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface DataPoint {
   name: string
@@ -13,14 +14,15 @@ function fmt(n: number) {
 }
 
 export function CategoryBarChart({ data }: { data: DataPoint[] }) {
+  const { t } = useTranslation()
   if (data.length === 0) {
     return (
       <Card className="border-border/50">
         <CardHeader className="pb-2 pt-4 px-4">
-          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">By category</CardTitle>
+          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard').by_category}</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 flex items-center justify-center h-32 text-muted-foreground text-sm">
-          No data yet
+          {t('dashboard').no_data}
         </CardContent>
       </Card>
     )
@@ -32,7 +34,7 @@ export function CategoryBarChart({ data }: { data: DataPoint[] }) {
   return (
     <Card className="border-border/50">
       <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">By category</CardTitle>
+        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard').by_category}</CardTitle>
       </CardHeader>
       <CardContent className="px-4 pb-4 space-y-2.5">
         {rows.map((d) => (

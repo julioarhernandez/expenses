@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase } from 'lucide-react'
+import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -45,6 +45,7 @@ export function TopNav({ user }: { user: User }) {
     { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
     { href: '/expenses', label: t('nav').expenses, icon: Receipt },
     { href: '/settings', label: t('nav').settings, icon: Settings },
+    { href: '/settings?tab=profile', label: t('nav').account, icon: User },
   ]
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
