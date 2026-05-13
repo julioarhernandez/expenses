@@ -73,14 +73,13 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
           {expenses.map((expense) => (
             <tr key={expense.id} className="hover:bg-neutral-50/50 transition-colors group">
               <td className="px-6 py-4 max-w-[200px]">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-neutral-800 text-sm truncate">{expense.merchant}</span>
+                <div className="flex items-center gap-2">
                   {expense.is_recurring && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
+                    <span className="inline-flex items-center justify-center p-1 rounded-full bg-violet-50 text-violet-600 border border-violet-100 shrink-0">
                       <RefreshCw className="h-2.5 w-2.5" />
-                      {t('recurring').badge}
                     </span>
                   )}
+                  <span className="font-semibold text-neutral-800 text-sm truncate">{expense.merchant}</span>
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">

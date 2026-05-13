@@ -436,10 +436,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <RefreshCw className="h-3.5 w-3.5 text-neutral-500" />
-                        <span className="text-sm font-semibold text-neutral-700">{t('recurring').make_recurring}</span>
-                      </div>
+                      <span className="text-sm font-semibold text-neutral-700">{t('recurring').make_recurring}</span>
                     </label>
 
                     {isRecurring && (
