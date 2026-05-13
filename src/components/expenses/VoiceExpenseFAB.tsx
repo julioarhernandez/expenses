@@ -29,7 +29,7 @@ export function VoiceExpenseFAB() {
   
   const supabase = createClient()
   
-  const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null
+  const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null
   const recognitionRef = useRef<any>(null)
 
   useEffect(() => {

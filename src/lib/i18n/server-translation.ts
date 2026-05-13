@@ -7,8 +7,8 @@ export async function getServerTranslation() {
   
   const t = <K extends keyof typeof translations.en>(
     key: K
-  ): typeof translations.en[K] => {
-    return translations[lang][key] || translations.en[key]
+  ): any => {
+    return (translations[lang] as any)[key] || (translations.en as any)[key]
   }
 
   return { t, lang }

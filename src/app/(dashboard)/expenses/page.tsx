@@ -21,7 +21,7 @@ export default function ExpensesPage() {
   const { expenses, filters, isLoading, setExpenses, setFilters, resetFilters, removeExpense, setLoading, openDialog } =
     useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [categories, setCategories] = useState<Category[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -45,16 +45,16 @@ export default function ExpensesPage() {
   }, [activeWorkspaceId, filters, setExpenses, setLoading])
 
   async function handleDelete(expense: Expense) {
-    const message = t('es') === 'es' 
+    const message = lang === 'es' 
       ? `¿Eliminar "${expense.merchant}"?` 
       : `Delete "${expense.merchant}"?`
     if (!confirm(message)) return
     try {
       await softDeleteExpense(expense.id, expense.receipt_path)
       removeExpense(expense.id)
-      toast.success(t('es') === 'es' ? 'Gasto eliminado' : 'Expense deleted')
+      toast.success(lang === 'es' ? 'Gasto eliminado' : 'Expense deleted')
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : (t('es') === 'es' ? 'Error al eliminar' : 'Failed to delete'))
+      toast.error(err instanceof Error ? err.message : (lang === 'es' ? 'Error al eliminar' : 'Failed to delete'))
     }
   }
 
@@ -75,7 +75,7 @@ export default function ExpensesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-[#171717]">{t('nav').expenses}</h1>
-          <p className="text-neutral-500 font-medium">{t('expenses').track_spending}</p>
+          <p className="text-neutral-500 font-medium">{t('expenses').subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Button
@@ -115,16 +115,16 @@ export default function ExpensesPage() {
         <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').search}</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('common').search}</label>
               <Input
-                placeholder={t('expenses').merchant_placeholder + '…'}
+                placeholder={t('expenses').search_placeholder + '…'}
                 value={filters.q}
                 onChange={(e) => setFilters({ q: e.target.value })}
                 className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').date}</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').from_date}</label>
               <Input
                 type="date"
                 value={filters.from ?? ''}
@@ -133,7 +133,7 @@ export default function ExpensesPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').to}</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').to_date}</label>
               <Input
                 type="date"
                 value={filters.to ?? ''}
@@ -148,13 +148,13 @@ export default function ExpensesPage() {
                 onValueChange={(v) => setFilters({ category_id: v ?? null })}
               >
                 <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white">
-                  <SelectValue placeholder={t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}>
+                  <SelectValue placeholder={lang === 'es' ? 'Todas las categorías' : 'All Categories'}>
                     {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                  <SelectItem value="" label={t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}>
-                    {t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}
+                  <SelectItem value="" label={lang === 'es' ? 'Todas las categorías' : 'All Categories'}>
+                    {lang === 'es' ? 'Todas las categorías' : 'All Categories'}
                   </SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
