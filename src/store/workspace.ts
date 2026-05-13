@@ -17,11 +17,14 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       activeWorkspaceId: null,
       setWorkspaces: (workspaces) => {
         set({ workspaces })
-        if (!get().activeWorkspaceId && workspaces.length > 0) {
-          const first = workspaces[0]
-          set({ activeWorkspaceId: first.id })
+        const currentActive = get().activeWorkspaceId
+        const activeExists = currentActive ? workspaces.some(w => w.id === currentActive) : false
+
+        if (!activeExists && workspaces.length > 0) {
+          const defaultWs = workspaces.find((w) => w.is_default) || workspaces[0]
+          set({ activeWorkspaceId: defaultWs.id })
           if (typeof document !== 'undefined') {
-            document.cookie = `active-workspace-id=${first.id}; path=/; max-age=31536000`
+            document.cookie = `active-workspace-id=${defaultWs.id}; path=/; max-age=31536000`
           }
         }
       },
