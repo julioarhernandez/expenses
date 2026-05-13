@@ -113,6 +113,14 @@ export async function fetchExpenses(workspaceId: string, filters: ExpenseFilters
     recurringRows = []
   }
 
+  // Apply recurring filter
+  if (filters.is_recurring === true) {
+    return recurringRows.sort((a, b) => b.date.localeCompare(a.date))
+  }
+  if (filters.is_recurring === false) {
+    return regularExpenses
+  }
+
   const all = [...regularExpenses, ...recurringRows]
   all.sort((a, b) => {
     if (b.date !== a.date) return b.date.localeCompare(a.date)

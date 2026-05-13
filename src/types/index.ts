@@ -74,6 +74,7 @@ export interface ExpenseFilters {
   min_amount: number | null
   max_amount: number | null
   payment_method: PaymentMethod | null
+  is_recurring: boolean | null
 }
 
 export interface OcrExtraction {

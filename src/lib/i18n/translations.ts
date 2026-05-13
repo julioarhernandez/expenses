@@ -76,6 +76,9 @@ export const translations = {
       amount_and: 'and',
       transactions_one: 'transaction',
       transactions_other: 'transactions',
+      type_all: 'All types',
+      type_recurring: 'Recurring',
+      type_one_time: 'One-time',
     },
     receipt: {
       upload_prompt: 'Upload receipt',
@@ -233,6 +236,9 @@ export const translations = {
       amount_and: 'y',
       transactions_one: 'transacción',
       transactions_other: 'transacciones',
+      type_all: 'Todos',
+      type_recurring: 'Recurrentes',
+      type_one_time: 'Únicos',
     },
     receipt: {
       upload_prompt: 'Subir recibo',

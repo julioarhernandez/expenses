@@ -27,6 +27,7 @@ const defaultFilters: ExpenseFilters = {
   min_amount: null,
   max_amount: null,
   payment_method: null,
+  is_recurring: null,
 }
 
 export const useExpenseStore = create<ExpenseStore>((set) => ({

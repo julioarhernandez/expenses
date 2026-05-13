@@ -129,7 +129,8 @@ export default function ExpensesPage() {
 
   const hasFilters = !!(
     filters.q || filters.from || filters.to || filters.category_id ||
-    filters.payment_method || filters.min_amount != null || filters.max_amount != null
+    filters.payment_method || filters.min_amount != null || filters.max_amount != null ||
+    filters.is_recurring != null
   )
 
   return (
@@ -261,7 +262,13 @@ export default function ExpensesPage() {
                 }}
               >
                 <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm w-[140px]">
-                  <SelectValue placeholder={t('expenses').amount_any} />
+                  <SelectValue placeholder={t('expenses').amount_any}>
+                    {amountOp === 'lt' ? t('expenses').amount_lt
+                      : amountOp === 'gt' ? t('expenses').amount_gt
+                      : amountOp === 'eq' ? t('expenses').amount_eq
+                      : amountOp === 'between' ? t('expenses').amount_between
+                      : undefined}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
                   <SelectItem value="" label={t('expenses').amount_any}>{t('expenses').amount_any}</SelectItem>
@@ -310,6 +317,32 @@ export default function ExpensesPage() {
                   )}
                 </>
               )}
+            </div>
+          </div>
+
+          {/* Row 4: Type filter */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('recurring').badge}</label>
+            <div className="flex gap-1.5">
+              {([
+                { value: 'all', label: t('expenses').type_all, filter: null },
+                { value: 'recurring', label: t('expenses').type_recurring, filter: true },
+                { value: 'one_time', label: t('expenses').type_one_time, filter: false },
+              ] as const).map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => setFilters({ is_recurring: p.filter })}
+                  className={cn(
+                    'px-3 py-1 rounded-full text-xs font-semibold border transition-all',
+                    filters.is_recurring === p.filter
+                      ? 'bg-[#171717] text-white border-[#171717]'
+                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400 hover:text-neutral-900'
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
           </div>
 
