@@ -34,3 +34,46 @@ export async function fetchRecurringExpenses(workspaceId: string): Promise<Recur
   if (error) throw error
   return data as RecurringExpense[]
 }
+
+export async function fetchRecurringExpenseById(id: string): Promise<RecurringExpense> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('recurring_expenses')
+    .select('*, category:categories(id,name,color)')
+    .eq('id', id)
+    .single()
+  if (error) throw error
+  return data as RecurringExpense
+}
+
+export async function updateRecurringExpense(
+  id: string,
+  updates: {
+    merchant?: string
+    amount?: number
+    frequency?: RecurringFrequency
+    start_date?: string
+    end_date?: string | null
+    category_id?: string | null
+    notes?: string | null
+  }
+): Promise<RecurringExpense> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('recurring_expenses')
+    .update(updates)
+    .eq('id', id)
+    .select('*, category:categories(id,name,color)')
+    .single()
+  if (error) throw error
+  return data as RecurringExpense
+}
+
+export async function deactivateRecurringExpense(id: string): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('recurring_expenses')
+    .update({ is_active: false })
+    .eq('id', id)
+  if (error) throw error
+}

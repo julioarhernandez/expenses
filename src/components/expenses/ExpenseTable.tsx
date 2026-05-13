@@ -25,9 +25,11 @@ interface ExpenseTableProps {
   isLoading: boolean
   onEdit: (expense: Expense) => void
   onDelete: (expense: Expense) => void
+  onEditRecurring?: (recurringId: string) => void
+  onDeleteRecurring?: (recurringId: string) => void
 }
 
-export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecurring, onDeleteRecurring }: ExpenseTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-4 p-6">
@@ -109,35 +111,52 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                 ) : <span className="text-neutral-300">—</span>}
               </td>
               <td className="px-6 py-4 text-right">
-                {!expense.is_recurring && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-[#171717] hover:bg-neutral-100 transition-all outline-none">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2 shadow-xl border-slate-100">
-                      {expense.receipt_url && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
-                            className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
-                          >
-                            <Receipt className="mr-3 h-4 w-4" />Receipt
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-50" />
-                        </>
-                      )}
-                      <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
-                        <Pencil className="mr-3 h-4 w-4" />Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onDelete(expense)}
-                        className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
-                      >
-                        <Trash2 className="mr-3 h-4 w-4" />Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-[#171717] hover:bg-neutral-100 transition-all outline-none">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-xl border-slate-100">
+                    {expense.is_recurring ? (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onEditRecurring?.(expense.recurring_expense_id!)}
+                          className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
+                        >
+                          <RefreshCw className="mr-3 h-4 w-4" />Edit Recurring
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDeleteRecurring?.(expense.recurring_expense_id!)}
+                          className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
+                        >
+                          <Trash2 className="mr-3 h-4 w-4" />Delete Recurring
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        {expense.receipt_url && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
+                              className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
+                            >
+                              <Receipt className="mr-3 h-4 w-4" />Receipt
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-slate-50" />
+                          </>
+                        )}
+                        <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
+                          <Pencil className="mr-3 h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDelete(expense)}
+                          className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
+                        >
+                          <Trash2 className="mr-3 h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </td>
             </tr>
           ))}

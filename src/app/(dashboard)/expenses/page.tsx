@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ExpenseTable } from '@/components/expenses/ExpenseTable'
 import { ExpenseDialog } from '@/components/expenses/ExpenseDialog'
+import { RecurringExpenseDialog } from '@/components/expenses/RecurringExpenseDialog'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
 import { fetchExpenses, softDeleteExpense } from '@/lib/expenses'
+import { deactivateRecurringExpense } from '@/lib/recurring'
 import { exportToCSV } from '@/lib/export'
 import { createClient } from '@/lib/supabase/client'
 import type { Category, Expense } from '@/types'
@@ -22,6 +24,8 @@ export default function ExpensesPage() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [categories, setCategories] = useState<Category[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const supabase = createClient()
@@ -40,7 +44,7 @@ export default function ExpensesPage() {
       .then(setExpenses)
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false))
-  }, [activeWorkspaceId, filters, setExpenses, setLoading])
+  }, [activeWorkspaceId, filters, setExpenses, setLoading, refreshKey])
 
   async function handleDelete(expense: Expense) {
     if (!confirm(`Delete "${expense.merchant}"?`)) return
@@ -48,6 +52,17 @@ export default function ExpensesPage() {
       await softDeleteExpense(expense.id, expense.receipt_path)
       removeExpense(expense.id)
       toast.success('Expense deleted')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete')
+    }
+  }
+
+  async function handleDeleteRecurring(recurringId: string) {
+    if (!confirm('Stop this recurring expense? All future occurrences will no longer appear.')) return
+    try {
+      await deactivateRecurringExpense(recurringId)
+      toast.success('Recurring expense stopped')
+      setRefreshKey((k) => k + 1)
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete')
     }
@@ -174,10 +189,17 @@ export default function ExpensesPage() {
           isLoading={isLoading}
           onEdit={openEdit}
           onDelete={handleDelete}
+          onEditRecurring={setEditingRecurringId}
+          onDeleteRecurring={handleDeleteRecurring}
         />
       </div>
 
-
+      <RecurringExpenseDialog
+        recurringId={editingRecurringId}
+        categories={categories}
+        onClose={() => setEditingRecurringId(null)}
+        onSaved={() => { setEditingRecurringId(null); setRefreshKey((k) => k + 1) }}
+      />
     </div>
   )
 }
