@@ -50,7 +50,11 @@ export async function POST(request: NextRequest) {
         {
           role: 'system',
           content:
-            `You are an expense parsing assistant. Extract structured expense data from the receipt text or user's speech transcript. Use ISO 8601 for dates (if relative like 'yesterday', infer based on current date if needed, but usually just return a valid date or null). Return null for fields you cannot determine. ${categoryInstruction}`,
+            `You are an expense parsing assistant. Extract structured expense data from the receipt text or user's speech transcript. 
+            Current date: ${new Date().toISOString().split('T')[0]}.
+            The input might be a natural language transcript in English or Spanish.
+            Use ISO 8601 for dates (if relative like 'yesterday' or 'ayer', calculate based on Current date). 
+            Return null for fields you cannot determine. ${categoryInstruction}`,
         },
         { role: 'user', content: text },
       ],

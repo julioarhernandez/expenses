@@ -50,6 +50,7 @@ export function VoiceExpenseFAB() {
       setIsRecording(false)
       const transcript = event.results[0][0].transcript
       if (transcript) {
+        toast.info(`Heard: "${transcript}"`)
         await processSpeech(transcript)
       }
     }
@@ -67,7 +68,7 @@ export function VoiceExpenseFAB() {
     }
 
     recognitionRef.current = recognition
-  }, [SpeechRecognition, activeWorkspaceId, categories])
+  }, [SpeechRecognition, activeWorkspaceId, language])
 
   async function processSpeech(transcript: string) {
     if (!activeWorkspaceId) return
