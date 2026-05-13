@@ -72,9 +72,9 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
         <tbody className="divide-y divide-neutral-100">
           {expenses.map((expense) => (
             <tr key={expense.id} className="hover:bg-neutral-50/50 transition-colors group">
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-neutral-800 text-sm">{expense.merchant}</span>
+              <td className="px-6 py-4 max-w-[200px]">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-neutral-800 text-sm truncate">{expense.merchant}</span>
                   {expense.is_recurring && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
                       <RefreshCw className="h-2.5 w-2.5" />
@@ -168,6 +168,21 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-neutral-100 bg-neutral-50/80">
+            <td className="px-6 py-3" colSpan={2}>
+              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+                {expenses.length} {expenses.length === 1 ? t('expenses').transactions_one : t('expenses').transactions_other}
+              </span>
+            </td>
+            <td className="px-6 py-3 text-right">
+              <span className="font-bold text-neutral-900 text-sm tabular-nums">
+                {expenses.reduce((s, e) => s + Number(e.amount), 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+              </span>
+            </td>
+            <td colSpan={3} />
+          </tr>
+        </tfoot>
       </table>
     </div>
   )

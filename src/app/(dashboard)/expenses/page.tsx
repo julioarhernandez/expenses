@@ -28,6 +28,10 @@ export default function ExpensesPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [datePeriod, setDatePeriod] = useState<'all' | 'this_month' | 'last_month' | 'last_3' | 'this_year' | 'custom'>('all')
+  const [amountOp, setAmountOp] = useState<'' | 'lt' | 'gt' | 'eq' | 'between'>('')
+  const [amountVal, setAmountVal] = useState('')
+  const [amountVal2, setAmountVal2] = useState('')
 
   useEffect(() => {
     const supabase = createClient()
@@ -47,6 +51,48 @@ export default function ExpensesPage() {
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false))
   }, [activeWorkspaceId, filters, setExpenses, setLoading, refreshKey])
+
+  function applyDatePeriod(period: typeof datePeriod) {
+    setDatePeriod(period)
+    if (period === 'custom') return
+    const now = new Date()
+    const today = now.toISOString().split('T')[0]
+    const presets: Record<string, { from: string | null; to: string | null }> = {
+      all: { from: null, to: null },
+      this_month: { from: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0], to: today },
+      last_month: {
+        from: new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0],
+        to: new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0],
+      },
+      last_3: { from: new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString().split('T')[0], to: today },
+      this_year: { from: new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0], to: today },
+    }
+    setFilters(presets[period])
+  }
+
+  function applyAmountFilter(op: typeof amountOp, val: string, val2 = amountVal2) {
+    const v = parseFloat(val)
+    const v2 = parseFloat(val2)
+    if (!op || !val || isNaN(v)) {
+      setFilters({ min_amount: null, max_amount: null })
+    } else if (op === 'lt') {
+      setFilters({ min_amount: null, max_amount: v })
+    } else if (op === 'gt') {
+      setFilters({ min_amount: v, max_amount: null })
+    } else if (op === 'eq') {
+      setFilters({ min_amount: v, max_amount: v })
+    } else if (op === 'between') {
+      setFilters({ min_amount: v, max_amount: !isNaN(v2) && val2 ? v2 : null })
+    }
+  }
+
+  function handleResetFilters() {
+    resetFilters()
+    setDatePeriod('all')
+    setAmountOp('')
+    setAmountVal('')
+    setAmountVal2('')
+  }
 
   async function handleDelete(expense: Expense) {
     const message = lang === 'es' 
@@ -81,8 +127,10 @@ export default function ExpensesPage() {
     openDialog({ expense })
   }
 
-  const hasFilters =
-    filters.q || filters.from || filters.to || filters.category_id || filters.payment_method
+  const hasFilters = !!(
+    filters.q || filters.from || filters.to || filters.category_id ||
+    filters.payment_method || filters.min_amount != null || filters.max_amount != null
+  )
 
   return (
     <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-[#FAFAFA] min-h-screen">
@@ -127,61 +175,148 @@ export default function ExpensesPage() {
 
       {/* Filters Panel */}
       {filtersOpen && (
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('common').search}</label>
-              <Input
-                placeholder={t('expenses').search_placeholder + '…'}
-                value={filters.q}
-                onChange={(e) => setFilters({ q: e.target.value })}
-                className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white"
-              />
+        <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4 space-y-4">
+
+          {/* Row 1: Search + Category */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              placeholder={t('expenses').search_placeholder}
+              value={filters.q}
+              onChange={(e) => setFilters({ q: e.target.value })}
+              className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+            />
+            <Select
+              value={filters.category_id ?? ''}
+              onValueChange={(v) => setFilters({ category_id: v || null })}
+            >
+              <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm">
+                <SelectValue placeholder={t('expenses').all_categories}>
+                  {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                <SelectItem value="" label={t('expenses').all_categories}>{t('expenses').all_categories}</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Row 2: Date period chips */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('expenses').date}</label>
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                { value: 'all', label: t('expenses').date_all },
+                { value: 'this_month', label: t('expenses').date_this_month },
+                { value: 'last_month', label: t('expenses').date_last_month },
+                { value: 'last_3', label: t('expenses').date_last_3 },
+                { value: 'this_year', label: t('expenses').date_this_year },
+                { value: 'custom', label: t('expenses').date_custom },
+              ] as const).map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => applyDatePeriod(p.value)}
+                  className={cn(
+                    'px-3 py-1 rounded-full text-xs font-semibold border transition-all',
+                    datePeriod === p.value
+                      ? 'bg-[#171717] text-white border-[#171717]'
+                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400 hover:text-neutral-900'
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').from_date}</label>
-              <Input
-                type="date"
-                value={filters.from ?? ''}
-                onChange={(e) => setFilters({ from: e.target.value || null })}
-                className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').to_date}</label>
-              <Input
-                type="date"
-                value={filters.to ?? ''}
-                onChange={(e) => setFilters({ to: e.target.value || null })}
-                className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').category}</label>
+            {datePeriod === 'custom' && (
+              <div className="flex gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                <Input
+                  type="date"
+                  value={filters.from ?? ''}
+                  onChange={(e) => setFilters({ from: e.target.value || null })}
+                  className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+                />
+                <Input
+                  type="date"
+                  value={filters.to ?? ''}
+                  onChange={(e) => setFilters({ to: e.target.value || null })}
+                  className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Row 3: Amount filter */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('expenses').amount}</label>
+            <div className="flex items-center gap-2 flex-wrap">
               <Select
-                value={filters.category_id ?? ''}
-                onValueChange={(v) => setFilters({ category_id: v ?? null })}
+                value={amountOp}
+                onValueChange={(v) => {
+                  const op = (v || '') as typeof amountOp
+                  setAmountOp(op)
+                  applyAmountFilter(op, amountVal, amountVal2)
+                }}
               >
-                <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white">
-                  <SelectValue placeholder={lang === 'es' ? 'Todas las categorías' : 'All Categories'}>
-                    {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
-                  </SelectValue>
+                <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm w-[140px]">
+                  <SelectValue placeholder={t('expenses').amount_any} />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                  <SelectItem value="" label={lang === 'es' ? 'Todas las categorías' : 'All Categories'}>
-                    {lang === 'es' ? 'Todas las categorías' : 'All Categories'}
-                  </SelectItem>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
-                  ))}
+                  <SelectItem value="" label={t('expenses').amount_any}>{t('expenses').amount_any}</SelectItem>
+                  <SelectItem value="lt" label={t('expenses').amount_lt}>{t('expenses').amount_lt}</SelectItem>
+                  <SelectItem value="gt" label={t('expenses').amount_gt}>{t('expenses').amount_gt}</SelectItem>
+                  <SelectItem value="eq" label={t('expenses').amount_eq}>{t('expenses').amount_eq}</SelectItem>
+                  <SelectItem value="between" label={t('expenses').amount_between}>{t('expenses').amount_between}</SelectItem>
                 </SelectContent>
               </Select>
+              {amountOp && (
+                <>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs font-medium">$</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={amountVal}
+                      onChange={(e) => {
+                        setAmountVal(e.target.value)
+                        applyAmountFilter(amountOp, e.target.value, amountVal2)
+                      }}
+                      placeholder="0.00"
+                      className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm pl-6 w-28"
+                    />
+                  </div>
+                  {amountOp === 'between' && (
+                    <>
+                      <span className="text-xs text-neutral-400 font-medium">{t('expenses').amount_and}</span>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs font-medium">$</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={amountVal2}
+                          onChange={(e) => {
+                            setAmountVal2(e.target.value)
+                            applyAmountFilter(amountOp, amountVal, e.target.value)
+                          }}
+                          placeholder="0.00"
+                          className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm pl-6 w-28"
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
+
           {hasFilters && (
-            <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
-              <Button variant="ghost" size="sm" onClick={resetFilters} className="text-neutral-500 hover:text-red-500">
-                <RotateCcw className="h-3.5 w-3.5 mr-2" />
+            <div className="pt-1 flex justify-end border-t border-neutral-50">
+              <Button variant="ghost" size="sm" onClick={handleResetFilters} className="text-neutral-500 hover:text-red-500 h-8 text-xs">
+                <RotateCcw className="h-3 w-3 mr-1.5" />
                 {t('expenses').reset_filters}
               </Button>
             </div>
