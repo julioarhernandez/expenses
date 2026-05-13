@@ -41,10 +41,10 @@ export function CategoryBarChart({ data }: { data: DataPoint[] }) {
               <span className="text-xs font-medium truncate">{d.name}</span>
               <span className="text-xs text-muted-foreground shrink-0 ml-2 tabular-nums">{fmt(d.total)}</span>
             </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
               <div
-                className="h-full rounded-full"
-                style={{ width: `${(d.total / max) * 100}%`, backgroundColor: d.color }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${(d.total / max) * 100}%`, backgroundColor: '#404040' }}
               />
             </div>
           </div>

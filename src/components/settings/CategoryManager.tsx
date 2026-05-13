@@ -73,68 +73,86 @@ export function CategoryManager() {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Categories</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground"
+    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+          Categories
+          <span className="text-xs font-medium bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+            {categories.length} Total
+          </span>
+        </h2>
+        <button
           onClick={() => setEditing((e) => !e)}
+          className={`p-2 rounded-xl transition-colors ${editing ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400 hover:bg-slate-100'}`}
           title={editing ? 'Done' : 'Edit categories'}
         >
-          {editing ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center gap-1">
-              <Badge
-                variant="secondary"
-                style={{ backgroundColor: cat.color + '20', color: cat.color }}
-                className="text-sm"
+          {editing ? <Check className="h-5 w-5" /> : <Pencil className="h-5 w-5" />}
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-8">
+        {categories.length === 0 ? (
+          <p className="text-sm text-slate-400 font-medium py-4 italic">No categories created yet.</p>
+        ) : (
+          categories.map((cat) => (
+            <div key={cat.id} className="flex items-center gap-1 group">
+              <div 
+                style={{ backgroundColor: cat.color + '15', color: cat.color, borderColor: cat.color + '30' }}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all hover:scale-105"
               >
                 {cat.name}
-              </Badge>
+              </div>
               {editing && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 text-muted-foreground hover:text-destructive"
+                <button
                   onClick={() => deleteCategory(cat)}
+                  className="p-1 text-slate-300 hover:text-red-500 transition-colors"
                 >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                  <Trash2 className="h-4 w-4" />
+                </button>
               )}
             </div>
-          ))}
-        </div>
+          ))
+        )}
+      </div>
 
-        <div className="flex gap-2 pt-2 flex-wrap">
-          <Input
-            placeholder="Category name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-            className="flex-1 min-w-40"
-          />
-          <div className="flex gap-1.5 items-center flex-wrap">
+      {/* Add Category Form */}
+      <div className="pt-6 border-t border-slate-100">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 group">
+              <input 
+                className="w-full pl-4 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all outline-none" 
+                placeholder="Category name..." 
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+              />
+            </div>
+            <button 
+              onClick={addCategory}
+              disabled={adding || !newName.trim()}
+              className="w-full sm:w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
             {PRESET_COLORS.map((c) => (
               <button
                 key={c}
                 type="button"
-                className={`h-6 w-6 rounded-full ring-offset-2 transition-all ${newColor === c ? 'ring-2 ring-foreground' : 'hover:scale-110'}`}
+                className={`h-7 w-7 rounded-full ring-offset-2 transition-all ${newColor === c ? 'ring-2 ring-slate-900 scale-110' : 'hover:scale-110 opacity-60 hover:opacity-100'}`}
                 style={{ backgroundColor: c }}
                 onClick={() => setNewColor(c)}
               />
             ))}
           </div>
-          <Button onClick={addCategory} disabled={adding || !newName.trim()}>
-            <Plus className="h-4 w-4 mr-1" />Add
-          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

@@ -82,67 +82,119 @@ export function WorkspaceManager() {
   const typeMap = Object.fromEntries(WORKSPACE_TYPES.map((t) => [t.value, t]))
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Workspaces</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          {workspaces.map((ws) => (
-            <div key={ws.id} className="flex items-center justify-between gap-2 py-2 border-b last:border-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <span>{typeMap[ws.type]?.emoji ?? '📁'}</span>
-                <span className="text-sm font-medium truncate">{ws.name}</span>
-                {ws.is_default && (
-                  <span className="flex items-center gap-1">
-                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                    <Badge variant="secondary" className="text-xs">Default</Badge>
-                  </span>
-                )}
+    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+      <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+        Workspaces
+        <span className="text-xs font-medium bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+          {workspaces.length} Total
+        </span>
+      </h2>
+
+      {/* Workspace List */}
+      <div className="space-y-4 mb-8">
+        {workspaces.map((ws) => {
+          const typeInfo = typeMap[ws.type] || { emoji: '📁' }
+          const isDefault = ws.is_default
+
+          return (
+            <div 
+              key={ws.id} 
+              className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                isDefault 
+                  ? 'bg-indigo-50/30 border-indigo-100 shadow-sm shadow-indigo-100/50' 
+                  : 'bg-slate-50/50 border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-md hover:shadow-slate-200/50'
+              }`}
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 ${
+                  ws.type === 'personal' ? 'bg-purple-100' : 
+                  ws.type === 'business' ? 'bg-blue-100' : 
+                  ws.type === 'freelance' ? 'bg-emerald-100' : 'bg-orange-100'
+                }`}>
+                  {typeInfo.emoji}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800 truncate">{ws.name}</span>
+                    {isDefault && (
+                      <svg className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    )}
+                  </div>
+                  {isDefault && (
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-600 bg-white px-1.5 py-0.5 rounded-md border border-indigo-100">Default</span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
-                {!ws.is_default && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDefault(ws)} title="Set as default">
-                    <Star className="h-3.5 w-3.5" />
-                  </Button>
+
+              <div className="flex items-center gap-1 shrink-0 ml-4">
+                {!isDefault && (
+                  <button 
+                    onClick={() => setDefault(ws)}
+                    className="p-2 text-slate-300 hover:text-amber-400 transition-colors" 
+                    title="Set as default"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                    </svg>
+                  </button>
                 )}
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteWorkspace(ws)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <button 
+                  onClick={() => deleteWorkspace(ws)}
+                  className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  </svg>
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          )
+        })}
+      </div>
 
-        <div className="flex gap-2 pt-2">
-          <Input
-            placeholder="Workspace name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addWorkspace()}
-            className="flex-1"
-          />
-          <Select
-            value={newType}
-            onValueChange={(v) => setNewType(v as WorkspaceType)}
-            items={WORKSPACE_TYPES.map((t) => ({ value: t.value, label: `${t.emoji} ${t.label}` }))}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
+      {/* Add New Workspace Form */}
+      <div className="pt-6 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 group">
+            <input 
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all outline-none" 
+              placeholder="Workspace name..." 
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addWorkspace()}
+            />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none opacity-60">
+              <span className="text-sm">{typeMap[newType]?.emoji}</span>
+              <svg className="w-3 h-3 ml-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+            </div>
+            
+            {/* Hidden select for workspace type, accessible via click on emoji */}
+            <select 
+              className="absolute left-0 top-0 w-11 h-full opacity-0 cursor-pointer"
+              value={newType}
+              onChange={(e) => setNewType(e.target.value as WorkspaceType)}
+            >
               {WORKSPACE_TYPES.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.emoji} {t.label}
-                </SelectItem>
+                <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>
               ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={addWorkspace} disabled={adding || !newName.trim()}>
-            <Plus className="h-4 w-4" />
-          </Button>
+            </select>
+          </div>
+          <button 
+            onClick={addWorkspace}
+            disabled={adding || !newName.trim()}
+            className="w-full sm:w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+            </svg>
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

@@ -20,16 +20,7 @@ function merchantInitial(name: string) {
   return name.trim().charAt(0).toUpperCase()
 }
 
-const INITIAL_COLORS = [
-  '#6366f1','#f59e0b','#10b981','#f43f5e','#0ea5e9',
-  '#a855f7','#f97316','#64748b','#84cc16','#06b6d4',
-]
 
-function initialColor(name: string) {
-  let h = 0
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
-  return INITIAL_COLORS[h % INITIAL_COLORS.length]
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -160,140 +151,146 @@ export default async function DashboardPage() {
   const recentList = (recent as unknown as RecentExpense[]) ?? []
 
   return (
-    <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">{workspace.name}</h1>
-        <p className="text-xs text-muted-foreground">{format(now, 'MMMM yyyy')}</p>
+    <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-[#FAFAFA] min-h-screen">
+      {/* Header & Actions */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-[#171717]">{workspace.name} Dashboard</h1>
+          <p className="text-neutral-500 font-medium">{format(now, 'MMMM yyyy')}</p>
+        </div>
+        <div className="flex gap-3">
+          <Link 
+            href="/expenses/new"
+            className="inline-flex items-center justify-center rounded-lg bg-[#171717] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition-colors"
+          >
+            Add Expense
+          </Link>
+          <button className="inline-flex items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-colors">
+            Export Report
+          </button>
+        </div>
       </div>
 
-      {/* Stat cards — 2-column grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="border-border/50">
-          <CardHeader className="pb-0 pt-3 px-4">
-            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">This month</CardTitle>
+      {/* Stat cards — 4-column grid on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+          <CardHeader className="pb-1 pt-6 px-6">
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">This Month</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-3">
-            <p className="text-xl font-bold tabular-nums">{fmt(monthlyTotal)}</p>
-            <p className={`flex items-center gap-1 text-[11px] mt-0.5 ${changeDir === 'up' ? 'text-red-500' : changeDir === 'down' ? 'text-green-500' : 'text-muted-foreground'}`}>
-              <ChangeIcon className="h-3 w-3" />
-              {changePct === 0 ? 'Same as last month' : `${Math.abs(changePct).toFixed(1)}% vs last month`}
-            </p>
+          <CardContent className="px-6 pb-6">
+            <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(monthlyTotal)}</p>
+            <div className={`flex items-center gap-1 text-xs mt-2 font-semibold ${changeDir === 'up' ? 'text-[#B58371]' : changeDir === 'down' ? 'text-[#8DA399]' : 'text-neutral-400'}`}>
+              <ChangeIcon className="h-3.5 w-3.5" />
+              <span>{changePct === 0 ? 'No change' : `${Math.abs(changePct).toFixed(1)}% vs last month`}</span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-0 pt-3 px-4">
-            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Last month</CardTitle>
+        <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+          <CardHeader className="pb-1 pt-6 px-6">
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Last Month</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-3">
-            <p className="text-xl font-bold tabular-nums">{fmt(prevMonthTotal)}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{format(new Date(now.getFullYear(), now.getMonth() - 1, 1), 'MMMM')}</p>
+          <CardContent className="px-6 pb-6">
+            <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(prevMonthTotal)}</p>
+            <p className="text-xs text-neutral-500 mt-2 font-medium">{format(new Date(now.getFullYear(), now.getMonth() - 1, 1), 'MMMM')}</p>
           </CardContent>
         </Card>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-0 pt-3 px-4">
-            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Total expenses</CardTitle>
+        <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+          <CardHeader className="pb-1 pt-6 px-6">
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Year to Date</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-3">
-            <p className="text-xl font-bold tabular-nums">{fmt(yearlyTotal)}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Year to date</p>
+          <CardContent className="px-6 pb-6">
+            <p className="text-3xl font-bold text-[#171717] tabular-nums">{fmt(yearlyTotal)}</p>
+            <p className="text-xs text-neutral-500 mt-2 font-medium">Jan — {format(now, 'MMM')}</p>
           </CardContent>
         </Card>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-0 pt-3 px-4">
-            <CardTitle className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Top vendor</CardTitle>
+        <Card className="bg-white border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+          <CardHeader className="pb-1 pt-6 px-6">
+            <CardTitle className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Top Vendor</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-3">
+          <CardContent className="px-6 pb-6">
             {topVendors.length > 0 ? (
               <>
-                <p className="text-base font-bold truncate leading-tight">{topVendors[0].merchant}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">{fmt(topVendors[0].total)}</p>
+                <p className="text-xl font-bold text-[#171717] truncate">{topVendors[0].merchant}</p>
+                <p className="text-xs text-neutral-500 mt-2 font-medium tabular-nums">{fmt(topVendors[0].total)} total</p>
               </>
             ) : (
-              <p className="text-muted-foreground text-sm">—</p>
+              <p className="text-neutral-400 text-sm">—</p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts — full width trend + bar chart */}
-      <SpendingTrendChart data={trendData} />
-      <CategoryBarChart data={categoryData} />
+      {/* Charts section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <SpendingTrendChart data={trendData} />
+        </div>
+        <div>
+          <CategoryBarChart data={categoryData} />
+        </div>
+      </div>
 
-      {/* Tabbed: Top Vendors + Recent Expenses */}
-      <Tabs defaultValue="recent">
-        <Card className="border-border/50">
-          <CardHeader className="pb-0 pt-3 px-4">
-            <div className="flex items-center justify-between">
-              <TabsList className="h-7">
-                <TabsTrigger value="recent" className="text-xs px-2.5">Recent</TabsTrigger>
-                <TabsTrigger value="vendors" className="text-xs px-2.5">Top vendors</TabsTrigger>
-              </TabsList>
-              <Link href="/expenses" className="text-xs text-primary hover:underline">View all</Link>
-            </div>
-          </CardHeader>
-
-          <TabsContent value="recent">
-            <CardContent className="px-4 pb-3 pt-2 space-y-1.5">
+      {/* Recent Activity Table */}
+      <div className="bg-white border border-neutral-200 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#171717]">Recent Activity</h2>
+          <Link href="/expenses" className="text-sm font-semibold text-neutral-500 hover:text-[#171717] transition-colors">
+            View All
+          </Link>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-neutral-50/50 border-b border-neutral-100">
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Merchant</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Date</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Category</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
               {recentList.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">No expenses yet.</p>
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-neutral-400 text-sm font-medium">No recent transactions found.</td>
+                </tr>
               ) : (
                 recentList.map((e) => (
-                  <div key={e.id} className="flex items-center gap-3 py-1">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                      style={{ backgroundColor: e.category?.color ?? initialColor(e.merchant) }}
-                    >
-                      {merchantInitial(e.merchant)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate leading-tight">{e.merchant}</p>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-[11px] text-muted-foreground">{format(new Date(e.date + 'T12:00:00'), 'MMM d')}</p>
-                        {e.category && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] px-1.5 py-0 h-4"
-                            style={{ backgroundColor: e.category.color + '20', color: e.category.color }}
-                          >
-                            {e.category.name}
-                          </Badge>
-                        )}
+                  <tr key={e.id} className="hover:bg-neutral-50/50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 font-bold text-xs">
+                          {merchantInitial(e.merchant)}
+                        </div>
+                        <span className="font-semibold text-neutral-800 text-sm truncate max-w-[150px]">{e.merchant}</span>
                       </div>
-                    </div>
-                    <span className="font-mono text-sm font-semibold shrink-0 tabular-nums">
-                      {e.currency} {Number(e.amount).toFixed(2)}
-                    </span>
-                  </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-neutral-500 font-medium">
+                      {format(new Date(e.date + 'T12:00:00'), 'MMM d, yyyy')}
+                    </td>
+                    <td className="px-6 py-4">
+                      {e.category ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-neutral-100 text-neutral-600">
+                          {e.category.name}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-bold text-neutral-900 text-sm tabular-nums">
+                        {e.currency} {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </td>
+                  </tr>
                 ))
               )}
-            </CardContent>
-          </TabsContent>
-
-          <TabsContent value="vendors">
-            <CardContent className="px-4 pb-3 pt-2 space-y-1.5">
-              {topVendors.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">No data yet.</p>
-              ) : (
-                topVendors.map((v) => (
-                  <div key={v.merchant} className="flex items-center gap-3 py-1">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                      style={{ backgroundColor: initialColor(v.merchant) }}
-                    >
-                      {merchantInitial(v.merchant)}
-                    </div>
-                    <span className="text-sm flex-1 truncate font-medium">{v.merchant}</span>
-                    <span className="font-mono text-sm font-semibold shrink-0 tabular-nums">{fmt(v.total)}</span>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </TabsContent>
-        </Card>
-      </Tabs>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }
