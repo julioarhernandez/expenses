@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         {
           role: 'system',
           content:
-            `You are a receipt parser. Extract structured expense data from the receipt text. Use ISO 8601 for dates. Return null for fields you cannot determine. ${categoryInstruction}`,
+            `You are an expense parsing assistant. Extract structured expense data from the receipt text or user's speech transcript. Use ISO 8601 for dates (if relative like 'yesterday', infer based on current date if needed, but usually just return a valid date or null). Return null for fields you cannot determine. ${categoryInstruction}`,
         },
         { role: 'user', content: text },
       ],
