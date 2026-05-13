@@ -5,10 +5,12 @@ import type { Workspace } from '@/types'
 interface WorkspaceStore {
   workspaces: Workspace[]
   activeWorkspaceId: string | null
-  language: 'en-US' | 'es-ES'
+  voiceLanguage: 'en-US' | 'es-ES'
+  uiLanguage: 'en' | 'es'
   setWorkspaces: (workspaces: Workspace[]) => void
   setActiveWorkspaceId: (id: string) => void
-  setLanguage: (lang: 'en-US' | 'es-ES') => void
+  setVoiceLanguage: (lang: 'en-US' | 'es-ES') => void
+  setUiLanguage: (lang: 'en' | 'es') => void
   activeWorkspace: () => Workspace | null
 }
 
@@ -17,7 +19,8 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     (set, get) => ({
       workspaces: [],
       activeWorkspaceId: null,
-      language: 'en-US',
+      voiceLanguage: 'en-US',
+      uiLanguage: 'en',
       setWorkspaces: (workspaces) => {
         set({ workspaces })
         const currentActive = get().activeWorkspaceId
@@ -37,7 +40,13 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           document.cookie = `active-workspace-id=${id}; path=/; max-age=31536000`
         }
       },
-      setLanguage: (lang) => set({ language: lang }),
+      setVoiceLanguage: (lang) => set({ voiceLanguage: lang }),
+      setUiLanguage: (lang) => {
+        set({ uiLanguage: lang })
+        if (typeof document !== 'undefined') {
+          document.cookie = `ui-language=${lang}; path=/; max-age=31536000`
+        }
+      },
       activeWorkspace: () => {
         const { workspaces, activeWorkspaceId } = get()
         return workspaces.find((w) => w.id === activeWorkspaceId) ?? null

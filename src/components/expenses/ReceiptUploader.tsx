@@ -38,6 +38,7 @@ import { Upload, X, Loader2, FileText, Sparkles, Camera } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { OcrExtraction } from '@/types'
 
 interface ReceiptUploaderProps {
@@ -57,6 +58,7 @@ export function ReceiptUploader({
   existingUrl,
   categories,
 }: ReceiptUploaderProps) {
+  const { t } = useTranslation()
   const [step, setStep] = useState<Step>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(existingUrl || null)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -64,9 +66,9 @@ export function ReceiptUploader({
 
   const STEP_LABELS: Record<Step, string> = {
     idle: '',
-    ocr: 'Reading receipt…',
-    extracting: 'Extracting data…',
-    done: 'Done',
+    ocr: t('es') === 'es' ? 'Leyendo recibo...' : 'Reading receipt…',
+    extracting: t('es') === 'es' ? 'Extrayendo datos...' : 'Extracting data…',
+    done: t('es') === 'es' ? 'Listo' : 'Done',
   }
 
   const processFile = useCallback(
@@ -91,7 +93,9 @@ export function ReceiptUploader({
       const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
       if (!ocrRes.ok) {
         const { error: ocrErr } = await ocrRes.json().catch(() => ({ error: undefined })) as { error?: string }
-        toast.error(ocrErr ?? 'OCR failed', { description: 'You can still fill fields manually' })
+        toast.error(ocrErr ?? (t('es') === 'es' ? 'Error en OCR' : 'OCR failed'), { 
+          description: t('es') === 'es' ? 'Aún puedes completar los campos manualmente' : 'You can still fill fields manually' 
+        })
         setStep('done')
         return
       }
@@ -106,11 +110,13 @@ export function ReceiptUploader({
       })
       if (!aiRes.ok) {
         const { error: aiErr } = await aiRes.json().catch(() => ({ error: undefined })) as { error?: string }
-        toast.error(aiErr ?? 'AI extraction failed', { description: 'You can still fill fields manually' })
+        toast.error(aiErr ?? (t('es') === 'es' ? 'Error en extracción IA' : 'AI extraction failed'), { 
+          description: t('es') === 'es' ? 'Aún puedes completar los campos manualmente' : 'You can still fill fields manually' 
+        })
       } else {
         const extracted = await aiRes.json() as OcrExtraction
         onExtractionComplete(extracted)
-        toast.success('Fields pre-filled from receipt')
+        toast.success(t('es') === 'es' ? 'Campos pre-completados del recibo' : 'Fields pre-filled from receipt')
       }
 
       setStep('done')
@@ -182,7 +188,9 @@ export function ReceiptUploader({
                 <>
                   <Upload className="h-6 w-6 text-muted-foreground" />
                   <p className="text-xs text-muted-foreground">
-                    {isDragActive ? 'Drop receipt here' : 'Upload receipt'}
+                    {isDragActive 
+                      ? (t('es') === 'es' ? 'Suelta el recibo aquí' : 'Drop receipt here') 
+                      : (t('es') === 'es' ? 'Subir recibo' : 'Upload receipt')}
                   </p>
                 </>
               )}
@@ -198,14 +206,14 @@ export function ReceiptUploader({
           onClick={() => cameraInputRef.current?.click()}
         >
           <Camera className="h-5 w-5" />
-          Photo
+          {t('es') === 'es' ? 'Foto' : 'Photo'}
         </Button>
       </div>
 
       {previewUrl && step === 'done' && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
-          <span className="truncate">{fileName ?? 'Receipt attached'}</span>
+          <span className="truncate">{fileName ?? (t('es') === 'es' ? 'Recibo adjunto' : 'Receipt attached')}</span>
           <Button
             type="button"
             variant="ghost"

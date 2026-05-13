@@ -18,17 +18,11 @@ import { cn } from '@/lib/utils'
 import { createExpense, updateExpense } from '@/lib/expenses'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useTranslation } from '@/hooks/useTranslation'
+import { es, enUS } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase/client'
 import { ReceiptUploader } from './ReceiptUploader'
 import type { Category, Expense, OcrExtraction, PaymentMethod } from '@/types'
-
-const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'credit_card', label: 'Credit card' },
-  { value: 'debit_card', label: 'Debit card' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'bank_transfer', label: 'Bank transfer' },
-  { value: 'other', label: 'Other' },
-]
 
 interface ExpenseDialogProps {
   open: boolean
@@ -57,6 +51,16 @@ function emptyForm(workspaceId: string) {
 export function ExpenseDialog({ open, onClose, expense, draft, categories }: ExpenseDialogProps) {
   const { addExpense, updateExpense: updateStore, expenses } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
+  const { t, lang } = useTranslation()
+  const locale = lang === 'es' ? es : enUS
+
+  const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+    { value: 'credit_card', label: t('es') === 'es' ? 'Tarjeta de crédito' : 'Credit card' },
+    { value: 'debit_card', label: t('es') === 'es' ? 'Tarjeta de débito' : 'Debit card' },
+    { value: 'cash', label: t('es') === 'es' ? 'Efectivo' : 'Cash' },
+    { value: 'bank_transfer', label: t('es') === 'es' ? 'Transferencia bancaria' : 'Bank transfer' },
+    { value: 'other', label: t('es') === 'es' ? 'Otro' : 'Other' },
+  ]
   const [saving, setSaving] = useState(false)
   const [duplicateWarning, setDuplicateWarning] = useState<{ exact: boolean } | null>(null)
   const [pendingSubmit, setPendingSubmit] = useState<(() => Promise<void>) | null>(null)
@@ -204,9 +208,13 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
       <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-0 border-l border-neutral-100">
         <div className="p-8 space-y-8">
           <SheetHeader className="space-y-1">
-            <SheetTitle className="text-2xl font-bold text-[#171717]">{expense ? 'Edit Expense' : 'Add Expense'}</SheetTitle>
+            <SheetTitle className="text-2xl font-bold text-[#171717]">
+              {expense ? (t('es') === 'es' ? 'Editar Gasto' : 'Edit Expense') : t('expenses').add_expense}
+            </SheetTitle>
             <p className="text-sm text-neutral-500 font-medium">
-              {expense ? 'Update the details of your transaction.' : 'Enter the details of your new transaction.'}
+              {expense 
+                ? (t('es') === 'es' ? 'Actualiza los detalles de tu transacción.' : 'Update the details of your transaction.') 
+                : (t('es') === 'es' ? 'Ingresa los detalles de tu nueva transacción.' : 'Enter the details of your new transaction.')}
             </p>
           </SheetHeader>
 
@@ -245,19 +253,19 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                 <div className="col-span-2 space-y-2">
-                  <Label htmlFor="merchant" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Merchant *</Label>
+                  <Label htmlFor="merchant" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').merchant} *</Label>
                   <Input
                     id="merchant"
                     value={form.merchant}
                     onChange={(e) => set('merchant', e.target.value)}
-                    placeholder="Where did you spend?"
+                    placeholder={t('expenses').merchant_placeholder}
                     className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Amount *</Label>
+                  <Label htmlFor="amount" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').amount} *</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium text-sm">$</span>
                     <Input
@@ -275,7 +283,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Date *</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').date} *</Label>
                   <Popover open={dateOpen} onOpenChange={setDateOpen}>
                     <PopoverTrigger
                       className={cn(
@@ -284,11 +292,12 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                       )}
                     >
                       <CalendarIcon className="h-4 w-4 text-neutral-400" />
-                      {form.date ? format(new Date(form.date + 'T12:00:00'), 'MMM d, yyyy') : 'Pick a date'}
+                      {form.date ? format(new Date(form.date + 'T12:00:00'), 'MMM d, yyyy', { locale }) : (t('es') === 'es' ? 'Seleccionar fecha' : 'Pick a date')}
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-neutral-100">
                       <Calendar
                         mode="single"
+                        locale={locale}
                         selected={form.date ? new Date(form.date + 'T12:00:00') : undefined}
                         onSelect={(d) => {
                           if (d) set('date', d.toISOString().split('T')[0])
@@ -300,13 +309,13 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Category</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').category}</Label>
                   <Select
                     value={form.category_id}
                     onValueChange={(v) => set('category_id', v ?? '')}
                   >
                     <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
-                      <SelectValue placeholder="Select category">
+                      <SelectValue placeholder={t('es') === 'es' ? 'Seleccionar categoría' : 'Select category'}>
                         {form.category_id ? categories.find(c => c.id === form.category_id)?.name : undefined}
                       </SelectValue>
                     </SelectTrigger>
@@ -324,13 +333,13 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Payment Method</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').payment_method}</Label>
                   <Select
                     value={form.payment_method}
                     onValueChange={(v) => set('payment_method', v ?? '')}
                   >
                     <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
-                      <SelectValue placeholder="Select method">
+                      <SelectValue placeholder={t('es') === 'es' ? 'Seleccionar método' : 'Select method'}>
                         {form.payment_method ? PAYMENT_METHODS.find(m => m.value === form.payment_method)?.label : undefined}
                       </SelectValue>
                     </SelectTrigger>
@@ -343,7 +352,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Tax Amount</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('es') === 'es' ? 'Monto Impuestos' : 'Tax Amount'}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -356,7 +365,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Card Last 4</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('es') === 'es' ? 'Últimos 4 dígitos' : 'Card Last 4'}</Label>
                   <Input
                     value={form.card_last_four}
                     onChange={(e) => {
@@ -371,11 +380,11 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="col-span-2 space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Notes</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('es') === 'es' ? 'Notas' : 'Notes'}</Label>
                   <Textarea
                     value={form.notes}
                     onChange={(e) => set('notes', e.target.value)}
-                    placeholder="Add details, tags, or descriptions…"
+                    placeholder={t('es') === 'es' ? 'Añadir detalles, etiquetas o descripciones...' : 'Add details, tags, or descriptions…'}
                     rows={3}
                     className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white resize-none"
                   />
@@ -388,7 +397,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                   onClick={onClose} 
                   className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm"
                 >
-                  Cancel
+                  {t('es') === 'es' ? 'Cancelar' : 'Cancel'}
                 </Button>
                 <Button 
                   type="submit" 
@@ -400,7 +409,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                   ) : (
                     !expense && <Plus className="h-4 w-4" />
                   )}
-                  {expense ? 'Save Changes' : 'Add Expense'}
+                  {expense ? (t('es') === 'es' ? 'Guardar cambios' : 'Save Changes') : t('expenses').add_expense}
                 </Button>
               </div>
             </form>
@@ -413,12 +422,18 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>
-            {duplicateWarning?.exact ? 'Possible duplicate' : 'Similar expense found'}
+            {duplicateWarning?.exact 
+              ? (t('es') === 'es' ? 'Posible duplicado' : 'Possible duplicate') 
+              : (t('es') === 'es' ? 'Gasto similar encontrado' : 'Similar expense found')}
           </DialogTitle>
           <DialogDescription>
             {duplicateWarning?.exact
-              ? 'An expense with the same merchant, amount, date, and category already exists. Are you sure you want to add it?'
-              : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?'}
+              ? (t('es') === 'es' 
+                  ? 'Ya existe un gasto con el mismo comercio, monto, fecha y categoría. ¿Estás seguro de que quieres añadirlo?' 
+                  : 'An expense with the same merchant, amount, date, and category already exists. Are you sure you want to add it?')
+              : (t('es') === 'es' 
+                  ? 'Ya existe un gasto con el mismo monto, fecha y categoría pero con un comercio diferente. Esto podría ser un duplicado. ¿Quieres proceder?' 
+                  : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-3">
@@ -426,13 +441,13 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
             className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm" 
             onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}
           >
-            Cancel
+            {t('es') === 'es' ? 'Cancelar' : 'Cancel'}
           </Button>
           <Button 
             className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm"
             onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}
           >
-            Save anyway
+            {t('es') === 'es' ? 'Guardar de todas formas' : 'Save anyway'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -10,24 +10,22 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslation } from '@/hooks/useTranslation'
+import { es, enUS } from 'date-fns/locale'
 import type { Expense } from '@/types'
 
-const PAYMENT_LABELS: Record<string, string> = {
-  credit_card: 'Credit card',
-  debit_card: 'Debit card',
-  cash: 'Cash',
-  bank_transfer: 'Bank transfer',
-  other: 'Other',
-}
-
-interface ExpenseTableProps {
-  expenses: Expense[]
-  isLoading: boolean
-  onEdit: (expense: Expense) => void
-  onDelete: (expense: Expense) => void
-}
-
 export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
+  const { t, lang } = useTranslation()
+  const locale = lang === 'es' ? es : enUS
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    credit_card: t('es') === 'es' ? 'Tarjeta de crédito' : 'Credit card',
+    debit_card: t('es') === 'es' ? 'Tarjeta de débito' : 'Debit card',
+    cash: t('es') === 'es' ? 'Efectivo' : 'Cash',
+    bank_transfer: t('es') === 'es' ? 'Transferencia bancaria' : 'Bank transfer',
+    other: t('es') === 'es' ? 'Otro' : 'Other',
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4 p-6">
@@ -41,8 +39,10 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
   if (expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-400">
-        <p className="text-sm font-medium">No expenses found.</p>
-        <p className="text-xs mt-1">Try adjusting your filters or add a new expense.</p>
+        <p className="text-sm font-medium">{t('expenses').no_expenses}</p>
+        <p className="text-xs mt-1">
+          {t('es') === 'es' ? 'Intenta ajustar tus filtros o añade un nuevo gasto.' : 'Try adjusting your filters or add a new expense.'}
+        </p>
       </div>
     )
   }
@@ -52,11 +52,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
       <table className="w-full text-left">
         <thead>
           <tr className="bg-neutral-50/50 border-b border-neutral-100">
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Merchant</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">Date</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Amount</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Category</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Payment</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">{t('expenses').merchant}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">{t('expenses').date}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">{t('expenses').amount}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">{t('expenses').category}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">{t('expenses').payment_method}</th>
             <th className="px-6 py-3 w-10" />
           </tr>
         </thead>
@@ -67,7 +67,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                 <span className="font-semibold text-neutral-800 text-sm">{expense.merchant}</span>
               </td>
               <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">
-                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy')}
+                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy', { locale })}
               </td>
               <td className="px-6 py-4 text-right">
                 <span className="font-bold text-neutral-900 text-sm tabular-nums">
@@ -112,19 +112,19 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                           onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
                           className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
                         >
-                          <Receipt className="mr-3 h-4 w-4" />Receipt
+                          <Receipt className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Recibo' : 'Receipt'}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-slate-50" />
                       </>
                     )}
                     <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
-                      <Pencil className="mr-3 h-4 w-4" />Edit
+                      <Pencil className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Editar' : 'Edit'}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => onDelete(expense)}
                       className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
                     >
-                      <Trash2 className="mr-3 h-4 w-4" />Delete
+                      <Trash2 className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Eliminar' : 'Delete'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

@@ -11,6 +11,7 @@ import { ExpenseTable } from '@/components/expenses/ExpenseTable'
 import { ExpenseDialog } from '@/components/expenses/ExpenseDialog'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useTranslation } from '@/hooks/useTranslation'
 import { fetchExpenses, softDeleteExpense } from '@/lib/expenses'
 import { exportToCSV } from '@/lib/export'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +21,7 @@ export default function ExpensesPage() {
   const { expenses, filters, isLoading, setExpenses, setFilters, resetFilters, removeExpense, setLoading, openDialog } =
     useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
+  const { t } = useTranslation()
   const [categories, setCategories] = useState<Category[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -43,13 +45,16 @@ export default function ExpensesPage() {
   }, [activeWorkspaceId, filters, setExpenses, setLoading])
 
   async function handleDelete(expense: Expense) {
-    if (!confirm(`Delete "${expense.merchant}"?`)) return
+    const message = t('es') === 'es' 
+      ? `¿Eliminar "${expense.merchant}"?` 
+      : `Delete "${expense.merchant}"?`
+    if (!confirm(message)) return
     try {
       await softDeleteExpense(expense.id, expense.receipt_path)
       removeExpense(expense.id)
-      toast.success('Expense deleted')
+      toast.success(t('es') === 'es' ? 'Gasto eliminado' : 'Expense deleted')
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete')
+      toast.error(err instanceof Error ? err.message : (t('es') === 'es' ? 'Error al eliminar' : 'Failed to delete'))
     }
   }
 
@@ -69,8 +74,8 @@ export default function ExpensesPage() {
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#171717]">Expenses</h1>
-          <p className="text-neutral-500 font-medium">Manage and track your spending</p>
+          <h1 className="text-3xl font-bold tracking-tight text-[#171717]">{t('nav').expenses}</h1>
+          <p className="text-neutral-500 font-medium">{t('expenses').track_spending}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Button
@@ -82,7 +87,7 @@ export default function ExpensesPage() {
             )}
           >
             <SlidersHorizontal className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Filters</span>
+            <span className="hidden md:inline">{t('expenses').filters}</span>
             {hasFilters && (
               <span className="ml-1.5 md:ml-2 h-2 w-2 rounded-full bg-[#6366F1]" />
             )}
@@ -93,14 +98,14 @@ export default function ExpensesPage() {
             className="rounded-lg border-neutral-200 bg-white px-3 md:px-4 h-9 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all"
           >
             <Download className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Export CSV</span>
+            <span className="hidden md:inline">{t('expenses').export_csv}</span>
           </Button>
           <Button 
             onClick={openCreate}
             className="rounded-lg bg-[#171717] px-4 h-9 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition-all ml-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Expense
+            {t('expenses').add_expense}
           </Button>
         </div>
       </div>
@@ -110,16 +115,16 @@ export default function ExpensesPage() {
         <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Search</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').search}</label>
               <Input
-                placeholder="Merchant or notes…"
+                placeholder={t('expenses').merchant_placeholder + '…'}
                 value={filters.q}
                 onChange={(e) => setFilters({ q: e.target.value })}
                 className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">From Date</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').date}</label>
               <Input
                 type="date"
                 value={filters.from ?? ''}
@@ -128,7 +133,7 @@ export default function ExpensesPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">To Date</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').to}</label>
               <Input
                 type="date"
                 value={filters.to ?? ''}
@@ -137,18 +142,20 @@ export default function ExpensesPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Category</label>
+              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expenses').category}</label>
               <Select
                 value={filters.category_id ?? ''}
                 onValueChange={(v) => setFilters({ category_id: v ?? null })}
               >
                 <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white">
-                  <SelectValue placeholder="All Categories">
+                  <SelectValue placeholder={t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}>
                     {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                  <SelectItem value="" label="All Categories">All Categories</SelectItem>
+                  <SelectItem value="" label={t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}>
+                    {t('es') === 'es' ? 'Todas las categorías' : 'All Categories'}
+                  </SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                   ))}
@@ -160,7 +167,7 @@ export default function ExpensesPage() {
             <div className="mt-4 pt-4 border-t border-neutral-50 flex justify-end">
               <Button variant="ghost" size="sm" onClick={resetFilters} className="text-neutral-500 hover:text-red-500">
                 <RotateCcw className="h-3.5 w-3.5 mr-2" />
-                Reset Filters
+                {t('expenses').reset_filters}
               </Button>
             </div>
           )}
