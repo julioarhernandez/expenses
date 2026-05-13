@@ -34,6 +34,7 @@ interface ExpenseDialogProps {
   open: boolean
   onClose: () => void
   expense?: Expense | null
+  draft?: Partial<Expense> | null
   categories: Category[]
 }
 
@@ -53,7 +54,7 @@ function emptyForm(workspaceId: string) {
   }
 }
 
-export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDialogProps) {
+export function ExpenseDialog({ open, onClose, expense, draft, categories }: ExpenseDialogProps) {
   const { addExpense, updateExpense: updateStore, expenses } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const [saving, setSaving] = useState(false)
@@ -83,10 +84,24 @@ export function ExpenseDialog({ open, onClose, expense, categories }: ExpenseDia
         receipt_path: expense.receipt_path ?? '',
         workspace_id: expense.workspace_id,
       })
+    } else if (draft) {
+      setForm({
+        ...emptyForm(activeWorkspaceId ?? ''),
+        merchant: draft.merchant || '',
+        amount: draft.amount ? String(draft.amount) : '',
+        tax_amount: draft.tax_amount != null ? String(draft.tax_amount) : '',
+        date: draft.date || new Date().toISOString().split('T')[0],
+        category_id: draft.category_id || '',
+        payment_method: draft.payment_method || '',
+        card_last_four: draft.card_last_four || '',
+        notes: draft.notes || '',
+        receipt_url: draft.receipt_url || '',
+        receipt_path: draft.receipt_path || '',
+      })
     } else {
       setForm(emptyForm(activeWorkspaceId ?? ''))
     }
-  }, [expense, activeWorkspaceId, open])
+  }, [expense, draft, activeWorkspaceId, open])
 
   function applyOcrExtraction(data: OcrExtraction) {
     const matchedCategory = data.suggested_category

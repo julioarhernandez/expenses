@@ -5,6 +5,7 @@ import { MobileHeader } from '@/components/layout/MobileHeader'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { WorkspaceProvider } from '@/components/layout/WorkspaceProvider'
 import { VoiceExpenseFAB } from '@/components/expenses/VoiceExpenseFAB'
+import { GlobalExpenseDialog } from '@/components/expenses/GlobalExpenseDialog'
 import type { Workspace } from '@/types'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
       <MobileBottomNav user={user} />
       <VoiceExpenseFAB />
+      <GlobalExpenseDialog />
     </WorkspaceProvider>
   )
 }

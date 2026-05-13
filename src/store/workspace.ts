@@ -5,8 +5,10 @@ import type { Workspace } from '@/types'
 interface WorkspaceStore {
   workspaces: Workspace[]
   activeWorkspaceId: string | null
+  language: 'en-US' | 'es-ES'
   setWorkspaces: (workspaces: Workspace[]) => void
   setActiveWorkspaceId: (id: string) => void
+  setLanguage: (lang: 'en-US' | 'es-ES') => void
   activeWorkspace: () => Workspace | null
 }
 
@@ -15,6 +17,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     (set, get) => ({
       workspaces: [],
       activeWorkspaceId: null,
+      language: 'en-US',
       setWorkspaces: (workspaces) => {
         set({ workspaces })
         const currentActive = get().activeWorkspaceId
@@ -34,6 +37,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           document.cookie = `active-workspace-id=${id}; path=/; max-age=31536000`
         }
       },
+      setLanguage: (lang) => set({ language: lang }),
       activeWorkspace: () => {
         const { workspaces, activeWorkspaceId } = get()
         return workspaces.find((w) => w.id === activeWorkspaceId) ?? null

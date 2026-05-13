@@ -17,11 +17,9 @@ import { createClient } from '@/lib/supabase/client'
 import type { Category, Expense } from '@/types'
 
 export default function ExpensesPage() {
-  const { expenses, filters, isLoading, setExpenses, setFilters, resetFilters, removeExpense, setLoading } =
+  const { expenses, filters, isLoading, setExpenses, setFilters, resetFilters, removeExpense, setLoading, openDialog } =
     useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -56,13 +54,11 @@ export default function ExpensesPage() {
   }
 
   function openCreate() {
-    setEditingExpense(null)
-    setDialogOpen(true)
+    openDialog()
   }
 
   function openEdit(expense: Expense) {
-    setEditingExpense(expense)
-    setDialogOpen(true)
+    openDialog({ expense })
   }
 
   const hasFilters =
@@ -181,12 +177,7 @@ export default function ExpensesPage() {
         />
       </div>
 
-      <ExpenseDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        expense={editingExpense}
-        categories={categories}
-      />
+
     </div>
   )
 }

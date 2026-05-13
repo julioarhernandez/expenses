@@ -5,6 +5,9 @@ interface ExpenseStore {
   expenses: Expense[]
   filters: ExpenseFilters
   isLoading: boolean
+  isDialogOpen: boolean
+  draftExpense: Partial<Expense> | null
+  editingExpense: Expense | null
   setExpenses: (expenses: Expense[]) => void
   addExpense: (expense: Expense) => void
   updateExpense: (id: string, updates: Partial<Expense>) => void
@@ -12,6 +15,8 @@ interface ExpenseStore {
   setFilters: (filters: Partial<ExpenseFilters>) => void
   resetFilters: () => void
   setLoading: (loading: boolean) => void
+  openDialog: (data?: { draft?: Partial<Expense> | null; expense?: Expense | null }) => void
+  closeDialog: () => void
 }
 
 const defaultFilters: ExpenseFilters = {
@@ -28,6 +33,9 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
   expenses: [],
   filters: defaultFilters,
   isLoading: false,
+  isDialogOpen: false,
+  draftExpense: null,
+  editingExpense: null,
   setExpenses: (expenses) => set({ expenses }),
   addExpense: (expense) =>
     set((state) => ({ expenses: [expense, ...state.expenses] })),
@@ -43,4 +51,10 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
     set((state) => ({ filters: { ...state.filters, ...filters } })),
   resetFilters: () => set({ filters: defaultFilters }),
   setLoading: (isLoading) => set({ isLoading }),
+  openDialog: (data = {}) => set({ 
+    isDialogOpen: true, 
+    draftExpense: data.draft || null, 
+    editingExpense: data.expense || null 
+  }),
+  closeDialog: () => set({ isDialogOpen: false, draftExpense: null, editingExpense: null }),
 }))

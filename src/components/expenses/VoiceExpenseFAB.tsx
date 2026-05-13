@@ -18,7 +18,7 @@ export function VoiceExpenseFAB() {
   
   useEffect(() => setMounted(true), [])
   
-  const { activeWorkspaceId } = useWorkspaceStore()
+  const { activeWorkspaceId, language } = useWorkspaceStore()
   const addExpense = useExpenseStore(s => s.addExpense)
   const supabase = createClient()
   
@@ -42,7 +42,7 @@ export function VoiceExpenseFAB() {
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
-    recognition.lang = 'en-US'
+    recognition.lang = language
 
     recognition.onstart = () => setIsRecording(true)
     
@@ -101,22 +101,25 @@ export function VoiceExpenseFAB() {
       const expenseAmount = extracted.amount || 0
       const expenseMerchant = extracted.merchant || 'Unknown'
       
-      const newExpense = await createExpense({
-        workspace_id: activeWorkspaceId,
-        merchant: expenseMerchant,
-        amount: expenseAmount,
-        tax_amount: extracted.tax_amount ?? null,
-        date: expenseDate,
-        currency: extracted.currency || 'USD',
-        payment_method: extracted.payment_method || 'other',
-        card_last_four: extracted.card_last_four ?? null,
-        notes: `Voice note: "${transcript}"`,
-        category_id: categoryId,
-        receipt_path: null
+      const { openDialog } = useExpenseStore.getState()
+      
+      openDialog({
+        draft: {
+          workspace_id: activeWorkspaceId,
+          merchant: expenseMerchant,
+          amount: expenseAmount,
+          tax_amount: extracted.tax_amount ?? null,
+          date: expenseDate,
+          currency: extracted.currency || 'USD',
+          payment_method: extracted.payment_method || 'other',
+          card_last_four: extracted.card_last_four ?? null,
+          notes: `Voice note: "${transcript}"`,
+          category_id: categoryId,
+          receipt_path: null
+        } as any
       })
       
-      addExpense(newExpense)
-      toast.success(`Added ${expenseMerchant} - $${expenseAmount}`, { id: toastId })
+      toast.success(`Ready! Check the details for ${expenseMerchant}`, { id: toastId })
     } catch (err: any) {
       console.error(err)
       toast.error('Failed to process voice expense', { id: toastId })
