@@ -2,6 +2,27 @@ export type WorkspaceType = 'personal' | 'business' | 'freelance' | 'side_projec
 
 export type PaymentMethod = 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'other'
 
+export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+export interface RecurringExpense {
+  id: string
+  user_id: string
+  workspace_id: string
+  category_id: string | null
+  merchant: string
+  amount: number
+  currency: string
+  frequency: RecurringFrequency
+  start_date: string
+  end_date: string | null
+  last_generated_date: string | null
+  notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  category?: Category
+}
+
 export interface Workspace {
   id: string
   user_id: string
@@ -40,6 +61,9 @@ export interface Expense {
   created_at: string
   updated_at: string
   category?: Category
+  // Virtual fields for recurring expense occurrences (not persisted in DB)
+  is_recurring?: boolean
+  recurring_expense_id?: string | null
 }
 
 export interface ExpenseFilters {

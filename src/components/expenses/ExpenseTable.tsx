@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, Pencil, Receipt, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Receipt, RefreshCw, Trash2 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -64,7 +64,15 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
           {expenses.map((expense) => (
             <tr key={expense.id} className="hover:bg-neutral-50/50 transition-colors group">
               <td className="px-6 py-4">
-                <span className="font-semibold text-neutral-800 text-sm">{expense.merchant}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-neutral-800 text-sm">{expense.merchant}</span>
+                  {expense.is_recurring && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
+                      <RefreshCw className="h-2.5 w-2.5" />
+                      Recurring
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">
                 {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy')}
@@ -101,33 +109,35 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                 ) : <span className="text-neutral-300">—</span>}
               </td>
               <td className="px-6 py-4 text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-[#171717] hover:bg-neutral-100 transition-all outline-none">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2 shadow-xl border-slate-100">
-                    {expense.receipt_url && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
-                          className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
-                        >
-                          <Receipt className="mr-3 h-4 w-4" />Receipt
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-slate-50" />
-                      </>
-                    )}
-                    <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
-                      <Pencil className="mr-3 h-4 w-4" />Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onDelete(expense)}
-                      className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
-                    >
-                      <Trash2 className="mr-3 h-4 w-4" />Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {!expense.is_recurring && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-[#171717] hover:bg-neutral-100 transition-all outline-none">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2 shadow-xl border-slate-100">
+                      {expense.receipt_url && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
+                            className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
+                          >
+                            <Receipt className="mr-3 h-4 w-4" />Receipt
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-slate-50" />
+                        </>
+                      )}
+                      <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
+                        <Pencil className="mr-3 h-4 w-4" />Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onDelete(expense)}
+                        className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
+                      >
+                        <Trash2 className="mr-3 h-4 w-4" />Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </td>
             </tr>
           ))}

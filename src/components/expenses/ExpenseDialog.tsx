@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2, RotateCw, ScanSearch, Plus } from 'lucide-react'
+import { CalendarIcon, Loader2, RefreshCw, ScanSearch, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
@@ -16,11 +16,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { createExpense, updateExpense } from '@/lib/expenses'
+import { createRecurringExpense } from '@/lib/recurring'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
 import { createClient } from '@/lib/supabase/client'
 import { ReceiptUploader } from './ReceiptUploader'
-import type { Category, Expense, OcrExtraction, PaymentMethod } from '@/types'
+import type { Category, Expense, OcrExtraction, PaymentMethod, RecurringFrequency } from '@/types'
+
+const RECURRING_FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+]
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'credit_card', label: 'Credit card' },
@@ -66,10 +74,16 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [form, setForm] = useState(emptyForm(activeWorkspaceId ?? ''))
   const [dateOpen, setDateOpen] = useState(false)
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('monthly')
+  const [recurringEndDate, setRecurringEndDate] = useState('')
 
   useEffect(() => {
     setLocalReceiptUrl(null)
     setPendingFile(null)
+    setIsRecurring(false)
+    setRecurringFrequency('monthly')
+    setRecurringEndDate('')
     if (expense) {
       setForm({
         merchant: expense.merchant,
@@ -164,7 +178,23 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
       } else {
         const created = await createExpense(payload)
         addExpense(created)
-        toast.success('Expense added')
+
+        if (isRecurring) {
+          await createRecurringExpense({
+            merchant: payload.merchant,
+            amount: payload.amount,
+            currency: payload.currency,
+            frequency: recurringFrequency,
+            start_date: payload.date,
+            end_date: recurringEndDate || null,
+            category_id: payload.category_id ?? null,
+            notes: payload.notes ?? null,
+            workspace_id: payload.workspace_id,
+          })
+          toast.success('Expense added as recurring')
+        } else {
+          toast.success('Expense added')
+        }
       }
       onClose()
     } catch (err: unknown) {
@@ -380,6 +410,68 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                     className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white resize-none"
                   />
                 </div>
+
+                {!expense && (
+                  <div className="col-span-2 pt-2">
+                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={isRecurring}
+                          onChange={(e) => setIsRecurring(e.target.checked)}
+                        />
+                        <div className={cn(
+                          'h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center',
+                          isRecurring
+                            ? 'bg-[#171717] border-[#171717]'
+                            : 'bg-white border-neutral-300 group-hover:border-neutral-400'
+                        )}>
+                          {isRecurring && (
+                            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12">
+                              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="h-3.5 w-3.5 text-neutral-500" />
+                        <span className="text-sm font-semibold text-neutral-700">Make this a recurring expense</span>
+                      </div>
+                    </label>
+
+                    {isRecurring && (
+                      <div className="mt-4 grid grid-cols-2 gap-4 pl-8 animate-in fade-in slide-in-from-top-2 duration-150">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Frequency *</Label>
+                          <Select
+                            value={recurringFrequency}
+                            onValueChange={(v) => setRecurringFrequency(v as RecurringFrequency)}
+                          >
+                            <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                              {RECURRING_FREQUENCIES.map((f) => (
+                                <SelectItem key={f.value} value={f.value} label={f.label}>{f.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">End Date</Label>
+                          <Input
+                            type="date"
+                            value={recurringEndDate}
+                            onChange={(e) => setRecurringEndDate(e.target.value)}
+                            min={form.date}
+                            className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3 pt-6 border-t border-neutral-100">
