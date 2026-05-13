@@ -246,9 +246,9 @@ export default async function DashboardPage() {
             <thead>
               <tr className="bg-neutral-50/50 border-b border-neutral-100">
                 <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Merchant</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Date</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Category</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">Date</th>
                 <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Amount</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Category</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -260,29 +260,31 @@ export default async function DashboardPage() {
                 recentList.map((e) => (
                   <tr key={e.id} className="hover:bg-neutral-50/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 font-bold text-xs">
-                          {merchantInitial(e.merchant)}
-                        </div>
-                        <span className="font-semibold text-neutral-800 text-sm truncate max-w-[150px]">{e.merchant}</span>
-                      </div>
+                      <span className="font-semibold text-neutral-800 text-sm truncate max-w-[150px]">{e.merchant}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-500 font-medium">
+                    <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">
                       {format(new Date(e.date + 'T12:00:00'), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-6 py-4">
-                      {e.category ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-neutral-100 text-neutral-600">
-                          {e.category.name}
-                        </span>
-                      ) : (
-                        <span className="text-neutral-300">—</span>
-                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="font-bold text-neutral-900 text-sm tabular-nums">
                         {e.currency} {Number(e.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {e.category ? (
+                        <span 
+                          style={{ 
+                            backgroundColor: e.category.color + '15', 
+                            color: e.category.color, 
+                            borderColor: e.category.color + '30' 
+                          }}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
+                        >
+                          {e.category.name}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-300">—</span>
+                      )}
                     </td>
                   </tr>
                 ))
