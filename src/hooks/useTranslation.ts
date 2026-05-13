@@ -6,10 +6,10 @@ import { translations } from '@/lib/i18n/translations'
 export function useTranslation() {
   const uiLanguage = useWorkspaceStore((s) => s.uiLanguage)
   
-  const t = <K extends keyof typeof translations.en>(
-    key: K
-  ): typeof translations.en[K] => {
-    return translations[uiLanguage][key] || translations.en[key]
+  // Use any to bypass strict literal type checking between different language dictionaries
+  const t = (key: keyof typeof translations.en): any => {
+    const dict = (translations as any)[uiLanguage] || translations.en
+    return dict[key]
   }
 
   return { t, lang: uiLanguage }

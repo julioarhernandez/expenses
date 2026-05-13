@@ -14,6 +14,13 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { es, enUS } from 'date-fns/locale'
 import type { Expense } from '@/types'
 
+interface ExpenseTableProps {
+  expenses: Expense[]
+  isLoading: boolean
+  onEdit: (expense: Expense) => void
+  onDelete: (expense: Expense) => void
+}
+
 export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
   const { t, lang } = useTranslation()
   const locale = lang === 'es' ? es : enUS

@@ -421,15 +421,15 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
         <DialogHeader>
           <DialogTitle>
             {duplicateWarning?.exact 
-              ? (t('es') === 'es' ? 'Posible duplicado' : 'Possible duplicate') 
-              : (t('es') === 'es' ? 'Gasto similar encontrado' : 'Similar expense found')}
+              ? (lang === 'es' ? 'Posible duplicado' : 'Possible duplicate') 
+              : (lang === 'es' ? 'Gasto similar encontrado' : 'Similar expense found')}
           </DialogTitle>
           <DialogDescription>
             {duplicateWarning?.exact
-              ? (t('es') === 'es' 
+              ? (lang === 'es' 
                   ? 'Ya existe un gasto con el mismo comercio, monto, fecha y categoría. ¿Estás seguro de que quieres añadirlo?' 
                   : 'An expense with the same merchant, amount, date, and category already exists. Are you sure you want to add it?')
-              : (t('es') === 'es' 
+              : (lang === 'es' 
                   ? 'Ya existe un gasto con el mismo monto, fecha y categoría pero con un comercio diferente. Esto podría ser un duplicado. ¿Quieres proceder?' 
                   : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?')}
           </DialogDescription>
