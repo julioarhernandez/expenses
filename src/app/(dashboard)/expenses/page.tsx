@@ -95,8 +95,8 @@ export default function ExpensesPage() {
   }
 
   async function handleDelete(expense: Expense) {
-    const message = lang === 'es' 
-      ? `¿Eliminar "${expense.merchant}"?` 
+    const message = lang === 'es'
+      ? `¿Eliminar "${expense.merchant}"?`
       : `Delete "${expense.merchant}"?`
     if (!confirm(message)) return
     try {
@@ -156,15 +156,15 @@ export default function ExpensesPage() {
               <span className="ml-1.5 md:ml-2 h-2 w-2 rounded-full bg-[#6366F1]" />
             )}
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => exportToCSV(expenses)}
             className="rounded-lg border-neutral-200 bg-white px-3 md:px-4 h-9 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all"
           >
             <Download className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">{t('expenses').export_csv}</span>
           </Button>
-          <Button 
+          <Button
             onClick={openCreate}
             className="rounded-lg bg-[#171717] px-4 h-9 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition-all ml-auto"
           >
@@ -206,7 +206,7 @@ export default function ExpensesPage() {
 
           {/* Row 2: Date period chips */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('expenses').date}</label>
+            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('expenses').date}</label>
             <div className="flex flex-wrap gap-1.5">
               {([
                 { value: 'all', label: t('expenses').date_all },
@@ -251,7 +251,7 @@ export default function ExpensesPage() {
 
           {/* Row 3: Amount filter */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('expenses').amount}</label>
+            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('expenses').amount}</label>
             <div className="flex items-center gap-2 flex-wrap">
               <Select
                 value={amountOp}
@@ -265,9 +265,9 @@ export default function ExpensesPage() {
                   <SelectValue placeholder={t('expenses').amount_any}>
                     {amountOp === 'lt' ? t('expenses').amount_lt
                       : amountOp === 'gt' ? t('expenses').amount_gt
-                      : amountOp === 'eq' ? t('expenses').amount_eq
-                      : amountOp === 'between' ? t('expenses').amount_between
-                      : undefined}
+                        : amountOp === 'eq' ? t('expenses').amount_eq
+                          : amountOp === 'between' ? t('expenses').amount_between
+                            : undefined}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
@@ -322,7 +322,7 @@ export default function ExpensesPage() {
 
           {/* Row 4: Type filter */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-0.5">{t('recurring').badge}</label>
+            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('recurring').badge}</label>
             <div className="flex gap-1.5">
               {([
                 { value: 'all', label: t('expenses').type_all, filter: null },
