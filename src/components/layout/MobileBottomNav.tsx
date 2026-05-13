@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTranslation } from '@/hooks/useTranslation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -19,6 +20,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useTranslation()
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   async function signOut() {
@@ -27,9 +29,9 @@ export function MobileBottomNav({ user }: { user: User }) {
   }
 
   const navItems = [
-    { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-    { href: '/expenses', label: 'Expenses', icon: Receipt },
-    { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
+    { href: '/expenses', label: t('nav').expenses, icon: Receipt },
+    { href: '/settings', label: t('nav').settings, icon: Settings },
   ]
 
   return (
@@ -75,16 +77,18 @@ export function MobileBottomNav({ user }: { user: User }) {
               )}>
                 {initials}
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Account</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {t('nav').account}
+              </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" className="w-48 mb-4 rounded-2xl p-2 shadow-xl border-slate-100">
               <div className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">{user.email}</div>
               <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl focus:bg-slate-50">
-                <Settings className="mr-2 h-4 w-4" />Settings
+                <Settings className="mr-2 h-4 w-4" />{t('nav').settings}
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-50" />
               <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 text-red-500 focus:text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />Sign out
+                <LogOut className="mr-2 h-4 w-4" />{t('nav').logout}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

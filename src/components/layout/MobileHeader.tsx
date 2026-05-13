@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useTranslation } from '@/hooks/useTranslation'
 
 const WORKSPACE_TYPE_ICONS: Record<string, string> = {
   personal: '👤',
@@ -25,10 +26,11 @@ export function MobileHeader() {
   useEffect(() => setMounted(true), [])
   const router = useRouter()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
+  const { t, lang } = useTranslation()
   const active = activeWorkspace()
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
-  const wsName = mounted && active ? active.name : 'Workspace'
+  const wsName = mounted && active ? active.name : (lang === 'es' ? 'Espacio' : 'Workspace')
 
   return (
     <header className="flex md:hidden items-center justify-between gap-3 px-4 h-16 border-b border-slate-100 bg-white sticky top-0 z-50 shrink-0">
@@ -48,7 +50,9 @@ export function MobileHeader() {
           <ChevronDown className="h-3.5 w-3.5 text-slate-400" strokeWidth={2.5} />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-slate-100 mt-2">
-          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Switch Workspace</div>
+          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">
+            {t('nav').switch_workspace}
+          </div>
           {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
@@ -65,7 +69,9 @@ export function MobileHeader() {
           <DropdownMenuSeparator className="bg-slate-50" />
           <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')} className="rounded-xl px-3 py-2 focus:bg-slate-900 focus:text-white cursor-pointer">
             <Plus className="mr-3 h-4 w-4" />
-            <span className="font-semibold text-sm">New workspace</span>
+            <span className="font-semibold text-sm">
+              {t('nav').new_workspace}
+            </span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

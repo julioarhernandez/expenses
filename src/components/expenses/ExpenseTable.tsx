@@ -10,15 +10,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslation } from '@/hooks/useTranslation'
+import { es, enUS } from 'date-fns/locale'
 import type { Expense } from '@/types'
-
-const PAYMENT_LABELS: Record<string, string> = {
-  credit_card: 'Credit card',
-  debit_card: 'Debit card',
-  cash: 'Cash',
-  bank_transfer: 'Bank transfer',
-  other: 'Other',
-}
 
 interface ExpenseTableProps {
   expenses: Expense[]
@@ -29,7 +23,18 @@ interface ExpenseTableProps {
   onDeleteRecurring?: (recurringId: string) => void
 }
 
-export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecurring, onDeleteRecurring }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
+  const { t, lang } = useTranslation()
+  const locale = lang === 'es' ? es : enUS
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    credit_card: lang === 'es' ? 'Tarjeta de crédito' : 'Credit card',
+    debit_card: lang === 'es' ? 'Tarjeta de débito' : 'Debit card',
+    cash: lang === 'es' ? 'Efectivo' : 'Cash',
+    bank_transfer: lang === 'es' ? 'Transferencia bancaria' : 'Bank transfer',
+    other: lang === 'es' ? 'Otro' : 'Other',
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4 p-6">
@@ -43,8 +48,10 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
   if (expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-400">
-        <p className="text-sm font-medium">No expenses found.</p>
-        <p className="text-xs mt-1">Try adjusting your filters or add a new expense.</p>
+        <p className="text-sm font-medium">{t('expenses').no_expenses}</p>
+        <p className="text-xs mt-1">
+          {t('expenses').no_expenses_subtitle}
+        </p>
       </div>
     )
   }
@@ -54,11 +61,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
       <table className="w-full text-left">
         <thead>
           <tr className="bg-neutral-50/50 border-b border-neutral-100">
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Merchant</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">Date</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Amount</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Category</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Payment</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">{t('expenses').merchant}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">{t('expenses').date}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">{t('expenses').amount}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">{t('expenses').category}</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">{t('expenses').payment_method}</th>
             <th className="px-6 py-3 w-10" />
           </tr>
         </thead>
@@ -77,7 +84,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">
-                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy')}
+                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy', { locale })}
               </td>
               <td className="px-6 py-4 text-right">
                 <span className="font-bold text-neutral-900 text-sm tabular-nums">
@@ -86,11 +93,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
               </td>
               <td className="px-6 py-4 text-right">
                 {expense.category ? (
-                  <span 
-                    style={{ 
-                      backgroundColor: expense.category.color + '15', 
-                      color: expense.category.color, 
-                      borderColor: expense.category.color + '30' 
+                  <span
+                    style={{
+                      backgroundColor: expense.category.color + '15',
+                      color: expense.category.color,
+                      borderColor: expense.category.color + '30'
                     }}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
                   >
