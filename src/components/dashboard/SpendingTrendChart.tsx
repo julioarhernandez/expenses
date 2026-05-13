@@ -4,12 +4,15 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, parseISO } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { useTranslation } from '@/hooks/useTranslation'
+
 interface DataPoint {
   month: string
   total: number
 }
 
 export function SpendingTrendChart({ data }: { data: DataPoint[] }) {
+  const { t } = useTranslation()
   const formatted = data.map((d) => ({
     month: format(parseISO(d.month), 'MMM yy'),
     total: Number(d.total),
@@ -18,7 +21,7 @@ export function SpendingTrendChart({ data }: { data: DataPoint[] }) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">Monthly spending</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard').monthly_spending}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={200}>

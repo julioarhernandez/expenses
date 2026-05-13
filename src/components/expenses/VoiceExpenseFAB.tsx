@@ -6,23 +6,29 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useExpenseStore } from '@/store/expenses'
-import { createExpense } from '@/lib/expenses'
 import { format } from 'date-fns'
 import type { Category } from '@/types'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export function VoiceExpenseFAB() {
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
+  const voiceLanguage = useWorkspaceStore((s) => s.voiceLanguage)
+  const { openDialog } = useExpenseStore()
+  const { t, lang } = useTranslation()
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showHint, setShowHint] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [mounted, setMounted] = useState(false)
   
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    const timer = setTimeout(() => setShowHint(false), 12000)
+    return () => clearTimeout(timer)
+  }, [])
   
-  const { activeWorkspaceId, language } = useWorkspaceStore()
-  const addExpense = useExpenseStore(s => s.addExpense)
   const supabase = createClient()
   
-  // @ts-ignore
   const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null
   const recognitionRef = useRef<any>(null)
 
@@ -42,7 +48,7 @@ export function VoiceExpenseFAB() {
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
-    recognition.lang = language
+    recognition.lang = voiceLanguage
 
     recognition.onstart = () => setIsRecording(true)
     
@@ -50,7 +56,7 @@ export function VoiceExpenseFAB() {
       setIsRecording(false)
       const transcript = event.results[0][0].transcript
       if (transcript) {
-        toast.info(`Heard: "${transcript}"`)
+        toast.info(lang === 'es' ? `Escuchado: "${transcript}"` : `Heard: "${transcript}"`)
         await processSpeech(transcript)
       }
     }
@@ -59,7 +65,7 @@ export function VoiceExpenseFAB() {
       console.error('Speech recognition error', event.error)
       setIsRecording(false)
       if (event.error !== 'no-speech') {
-        toast.error('Failed to recognize speech. Please try again.')
+        toast.error(lang === 'es' ? 'Error al reconocer voz. Intenta de nuevo.' : 'Failed to recognize speech. Please try again.')
       }
     }
 
@@ -68,13 +74,13 @@ export function VoiceExpenseFAB() {
     }
 
     recognitionRef.current = recognition
-  }, [SpeechRecognition, activeWorkspaceId, language])
+  }, [SpeechRecognition, mounted, activeWorkspaceId, voiceLanguage, lang])
 
   async function processSpeech(transcript: string) {
     if (!activeWorkspaceId) return
     setIsProcessing(true)
     
-    const toastId = toast.loading(`Processing: "${transcript}"...`)
+    const toastId = toast.loading(lang === 'es' ? `Procesando: "${transcript}"...` : `Processing: "${transcript}"...`)
     
     try {
       const res = await fetch('/api/ai-extract', {
@@ -102,8 +108,6 @@ export function VoiceExpenseFAB() {
       const expenseAmount = extracted.amount || 0
       const expenseMerchant = extracted.merchant || 'Unknown'
       
-      const { openDialog } = useExpenseStore.getState()
-      
       openDialog({
         draft: {
           workspace_id: activeWorkspaceId,
@@ -114,16 +118,16 @@ export function VoiceExpenseFAB() {
           currency: extracted.currency || 'USD',
           payment_method: extracted.payment_method || 'other',
           card_last_four: extracted.card_last_four ?? null,
-          notes: `Voice note: "${transcript}"`,
+          notes: lang === 'es' ? `Nota de voz: "${transcript}"` : `Voice note: "${transcript}"`,
           category_id: categoryId,
           receipt_path: null
         } as any
       })
       
-      toast.success(`Ready! Check the details for ${expenseMerchant}`, { id: toastId })
+      toast.success(lang === 'es' ? `¡Listo! Revisa los detalles para ${expenseMerchant}` : `Ready! Check the details for ${expenseMerchant}`, { id: toastId })
     } catch (err: any) {
       console.error(err)
-      toast.error('Failed to process voice expense', { id: toastId })
+      toast.error(lang === 'es' ? 'Error al procesar gasto por voz' : 'Failed to process voice expense', { id: toastId })
     } finally {
       setIsProcessing(false)
     }
@@ -131,7 +135,7 @@ export function VoiceExpenseFAB() {
 
   const toggleRecording = () => {
     if (!SpeechRecognition) {
-      toast.error('Speech recognition is not supported in this browser.')
+      toast.error(lang === 'es' ? 'El reconocimiento de voz no es soportado en este navegador.' : 'Speech recognition is not supported in this browser.')
       return
     }
     
@@ -145,15 +149,15 @@ export function VoiceExpenseFAB() {
   if (!mounted || !SpeechRecognition) return null
 
   const examples = {
-    'en-US': 'Try: "Brunch at Panera yesterday $40" or "Gas at 7-Eleven $30"',
-    'es-ES': 'Prueba: "Brunch en Panera ayer $40" o "Gasolina en 7-Eleven $30"'
+    en: 'Brunch at Panera yesterday 40 dollars or gas at 7eleven 30 dollars',
+    es: 'Brunch en Panera ayer 40 dólares o gasolina en 7eleven 30 dólares'
   }
 
   return (
     <div className="fixed z-50 bottom-28 right-6 md:bottom-8 md:right-8 flex items-center gap-3">
-      {mounted && !isRecording && !isProcessing && (
-        <div className="bg-white/40 backdrop-blur-md border border-slate-200/50 px-3 py-1.5 rounded-xl shadow-sm text-[11px] font-medium text-slate-500 animate-in fade-in slide-in-from-right-4 duration-700 max-w-[150px] text-right leading-tight">
-          {examples[language] || examples['en-US']}
+      {mounted && showHint && !isRecording && !isProcessing && (
+        <div className="bg-white/60 backdrop-blur-md border border-neutral-200/50 px-3 py-2 rounded-xl shadow-lg text-[11px] font-medium text-neutral-600 animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[180px] text-right leading-tight">
+          {examples[lang] || examples['en']}
         </div>
       )}
       <button
@@ -161,10 +165,10 @@ export function VoiceExpenseFAB() {
         disabled={isProcessing}
         className={`flex items-center justify-center transition-all duration-300 shadow-xl
           w-14 h-14 rounded-full
-          ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-slate-900 hover:bg-slate-800 hover:scale-105 active:scale-95'}
+          ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-neutral-900 hover:bg-neutral-800 hover:scale-105 active:scale-95'}
           ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
         `}
-        title="Add expense by voice"
+        title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
       >
         {isProcessing ? (
           <Loader2 className="w-6 h-6 text-white animate-spin" />

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase } from 'lucide-react'
+import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useTranslation } from '@/hooks/useTranslation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -35,12 +36,20 @@ export function TopNav({ user }: { user: User }) {
   const router = useRouter()
   const supabase = createClient()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
+  const { t } = useTranslation()
   const active = activeWorkspace()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
+  const navItems = [
+    { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
+    { href: '/expenses', label: t('nav').expenses, icon: Receipt },
+    { href: '/settings', label: t('nav').settings, icon: Settings },
+    { href: '/settings?tab=profile', label: t('nav').account, icon: User },
+  ]
+
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
-  const wsName = mounted && active ? active.name : 'Workspace'
+  const wsName = mounted && active ? active.name : (t('nav').expenses === 'Gastos' ? 'Espacio' : 'Workspace')
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   async function signOut() {
@@ -61,19 +70,19 @@ export function TopNav({ user }: { user: User }) {
       {/* Nav links */}
       <nav className="flex items-center gap-1 ml-4">
         {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '/')
+          const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all',
-                active
+                isActive
                   ? 'bg-slate-100 text-slate-900 shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               )}
             >
-              <Icon className={cn("h-4 w-4 shrink-0", active && "text-[#6366F1]")} />
+              <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-[#6366F1]")} />
               {label}
             </Link>
           )
@@ -91,7 +100,9 @@ export function TopNav({ user }: { user: User }) {
           <ChevronDown className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-slate-100 mt-2">
-          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Switch Workspace</div>
+          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">
+            {t('nav').switch_workspace}
+          </div>
           {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
@@ -108,7 +119,9 @@ export function TopNav({ user }: { user: User }) {
           <DropdownMenuSeparator className="bg-slate-50" />
           <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')} className="rounded-xl px-3 py-2 focus:bg-slate-900 focus:text-white cursor-pointer">
             <Plus className="mr-3 h-4 w-4" />
-            <span className="font-semibold">New workspace</span>
+            <span className="font-semibold">
+              {t('nav').new_workspace}
+            </span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -124,11 +137,11 @@ export function TopNav({ user }: { user: User }) {
           <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">{user.email}</div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push('/settings')}>
-            <Briefcase className="mr-2 h-4 w-4" />Settings
+            <Briefcase className="mr-2 h-4 w-4" />{t('nav').settings}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={signOut} variant="destructive">
-            <LogOut className="mr-2 h-4 w-4" />Sign out
+            <LogOut className="mr-2 h-4 w-4" />{t('nav').logout}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

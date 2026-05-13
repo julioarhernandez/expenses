@@ -11,16 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { Workspace, WorkspaceType } from '@/types'
 
-const WORKSPACE_TYPES: { value: WorkspaceType; label: string; emoji: string }[] = [
-  { value: 'personal', label: 'Personal', emoji: '👤' },
-  { value: 'business', label: 'Business', emoji: '🏢' },
-  { value: 'freelance', label: 'Freelance', emoji: '💼' },
-  { value: 'side_project', label: 'Side project', emoji: '🚀' },
+const getWorkspaceTypes = (t: any) => [
+  { value: 'personal' as WorkspaceType, label: t('settings').personal, emoji: '👤' },
+  { value: 'business' as WorkspaceType, label: t('settings').business, emoji: '🏢' },
+  { value: 'freelance' as WorkspaceType, label: t('settings').freelance, emoji: '💼' },
+  { value: 'side_project' as WorkspaceType, label: t('settings').side_project, emoji: '🚀' },
 ]
 
 export function WorkspaceManager() {
+  const { t } = useTranslation()
+  const WORKSPACE_TYPES = getWorkspaceTypes(t)
   const { workspaces, setWorkspaces, setActiveWorkspaceId } = useWorkspaceStore()
   const [newName, setNewName] = useState('')
   const [newType, setNewType] = useState<WorkspaceType>('business')
@@ -42,9 +45,9 @@ export function WorkspaceManager() {
       const updated = [...workspaces, ws as Workspace]
       setWorkspaces(updated)
       setNewName('')
-      toast.success('Workspace created')
+      toast.success(t('settings').workspace_created)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create workspace')
+      toast.error(err instanceof Error ? err.message : t('common').error)
     } finally {
       setAdding(false)
     }
@@ -57,25 +60,25 @@ export function WorkspaceManager() {
       const updated = workspaces.map((w) => ({ ...w, is_default: w.id === ws.id }))
       setWorkspaces(updated)
       setActiveWorkspaceId(ws.id)
-      toast.success(`"${ws.name}" is now the default workspace`)
+      toast.success(`"${ws.name}" ${t('settings').workspace_default_success}`)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to update default')
+      toast.error(err instanceof Error ? err.message : t('common').error)
     }
   }
 
   async function deleteWorkspace(ws: Workspace) {
     if (workspaces.length <= 1) {
-      toast.error('You must have at least one workspace')
+      toast.error(t('settings').min_one_workspace)
       return
     }
-    if (!confirm(`Delete workspace "${ws.name}"? All expenses in it will be deleted.`)) return
+    if (!confirm(t('settings').delete_confirm.replace('{name}', ws.name))) return
     try {
       await supabase.from('workspaces').delete().eq('id', ws.id)
       const updated = workspaces.filter((w) => w.id !== ws.id)
       setWorkspaces(updated)
-      toast.success('Workspace deleted')
+      toast.success(t('settings').workspace_deleted)
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete workspace')
+      toast.error(err instanceof Error ? err.message : t('common').error)
     }
   }
 
@@ -84,9 +87,9 @@ export function WorkspaceManager() {
   return (
     <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
       <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-        Workspaces
+        {t('settings').workspaces_title}
         <span className="text-xs font-medium bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
-          {workspaces.length} Total
+          {workspaces.length} {t('settings').total}
         </span>
       </h2>
 
@@ -150,7 +153,7 @@ export function WorkspaceManager() {
           <div className="relative flex-1 group">
             <input 
               className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all outline-none" 
-              placeholder="Workspace name..." 
+              placeholder={t('settings').workspace_name_placeholder} 
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
