@@ -30,9 +30,9 @@ interface ExpenseTableProps {
 export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
   if (isLoading) {
     return (
-      <div className="space-y-2 p-4">
+      <div className="space-y-4 p-6">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
+          <Skeleton key={i} className="h-16 w-full rounded-xl" />
         ))}
       </div>
     )
@@ -40,89 +40,99 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
 
   if (expenses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-        <p className="text-sm">No expenses yet.</p>
-        <p className="text-xs mt-1">Click &ldquo;Add expense&rdquo; to get started.</p>
+      <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-400">
+        <p className="text-sm font-medium">No expenses found.</p>
+        <p className="text-xs mt-1">Try adjusting your filters or add a new expense.</p>
       </div>
     )
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Merchant</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Payment</TableHead>
-          <TableHead className="w-10" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {expenses.map((expense) => (
-          <TableRow key={expense.id} className="group">
-            <TableCell className="font-medium">{expense.merchant}</TableCell>
-            <TableCell className="text-muted-foreground text-xs tabular-nums whitespace-nowrap">
-              {format(new Date(expense.date), 'MMM d, yy')}
-            </TableCell>
-            <TableCell className="text-right font-mono font-medium">
-              {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-            </TableCell>
-            <TableCell>
-              {expense.category ? (
-                <Badge
-                  variant="secondary"
-                  style={{ backgroundColor: expense.category.color + '20', color: expense.category.color }}
-                >
-                  {expense.category.name}
-                </Badge>
-              ) : (
-                <span className="text-muted-foreground text-sm">—</span>
-              )}
-            </TableCell>
-            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-              {expense.payment_method ? (
-                <>
-                  {PAYMENT_LABELS[expense.payment_method]}
-                  {expense.card_last_four && (
-                    <span className="ml-1 font-mono text-xs">••••{expense.card_last_four}</span>
-                  )}
-                </>
-              ) : '—'}
-            </TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                  <MoreHorizontal className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {expense.receipt_url && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
-                        className="flex items-center"
-                      >
-                        <Receipt className="mr-2 h-4 w-4" />Receipt
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem onClick={() => onEdit(expense)}>
-                    <Pencil className="mr-2 h-4 w-4" />Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDelete(expense)}
-                    className="text-destructive"
+    <div className="overflow-x-auto">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="bg-neutral-50/50 border-b border-neutral-100">
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Merchant</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest w-[140px]">Date</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Amount</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest text-right">Category</th>
+            <th className="px-6 py-3 text-[11px] font-bold text-neutral-400 uppercase tracking-widest">Payment</th>
+            <th className="px-6 py-3 w-10" />
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-100">
+          {expenses.map((expense) => (
+            <tr key={expense.id} className="hover:bg-neutral-50/50 transition-colors group">
+              <td className="px-6 py-4">
+                <span className="font-semibold text-neutral-800 text-sm">{expense.merchant}</span>
+              </td>
+              <td className="px-6 py-4 text-sm text-neutral-500 font-medium w-[140px] whitespace-nowrap">
+                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy')}
+              </td>
+              <td className="px-6 py-4 text-right">
+                <span className="font-bold text-neutral-900 text-sm tabular-nums">
+                  {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-right">
+                {expense.category ? (
+                  <span 
+                    style={{ 
+                      backgroundColor: expense.category.color + '15', 
+                      color: expense.category.color, 
+                      borderColor: expense.category.color + '30' 
+                    }}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+                    {expense.category.name}
+                  </span>
+                ) : (
+                  <span className="text-neutral-300">—</span>
+                )}
+              </td>
+              <td className="px-6 py-4 text-sm text-neutral-500 font-medium">
+                {expense.payment_method ? (
+                  <span className="whitespace-nowrap">
+                    {PAYMENT_LABELS[expense.payment_method]}
+                    {expense.card_last_four && (
+                      <span className="ml-1 text-[10px] text-neutral-400">••••{expense.card_last_four}</span>
+                    )}
+                  </span>
+                ) : <span className="text-neutral-300">—</span>}
+              </td>
+              <td className="px-6 py-4 text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-[#171717] hover:bg-neutral-100 transition-all outline-none">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2 shadow-xl border-slate-100">
+                    {expense.receipt_url && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
+                          className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
+                        >
+                          <Receipt className="mr-3 h-4 w-4" />Receipt
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-slate-50" />
+                      </>
+                    )}
+                    <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
+                      <Pencil className="mr-3 h-4 w-4" />Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete(expense)}
+                      className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
+                    >
+                      <Trash2 className="mr-3 h-4 w-4" />Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
