@@ -78,7 +78,7 @@ export function MobileBottomNav({ user }: { user: User }) {
                 {initials}
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                {t('es') === 'es' ? 'Cuenta' : 'Account'}
+                {t('nav').account}
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" className="w-48 mb-4 rounded-2xl p-2 shadow-xl border-slate-100">

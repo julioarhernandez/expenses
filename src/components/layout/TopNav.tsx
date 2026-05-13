@@ -49,7 +49,7 @@ export function TopNav({ user }: { user: User }) {
   ]
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
-  const wsName = mounted && active ? active.name : (t('settings').workspaces.slice(0, -1) || 'Workspace')
+  const wsName = mounted && active ? active.name : (t('nav').expenses === 'Gastos' ? 'Espacio' : 'Workspace')
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   async function signOut() {
@@ -101,7 +101,7 @@ export function TopNav({ user }: { user: User }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-slate-100 mt-2">
           <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">
-            {t('es') === 'es' ? 'Cambiar Espacio' : 'Switch Workspace'}
+            {t('nav').switch_workspace}
           </div>
           {workspaces.map((ws) => (
             <DropdownMenuItem
@@ -120,7 +120,7 @@ export function TopNav({ user }: { user: User }) {
           <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')} className="rounded-xl px-3 py-2 focus:bg-slate-900 focus:text-white cursor-pointer">
             <Plus className="mr-3 h-4 w-4" />
             <span className="font-semibold">
-              {t('es') === 'es' ? 'Nuevo espacio' : 'New workspace'}
+              {t('nav').new_workspace}
             </span>
           </DropdownMenuItem>
         </DropdownMenuContent>
