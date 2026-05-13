@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2, RefreshCw, ScanSearch, Plus } from 'lucide-react'
+import { CalendarIcon, Loader2, ScanSearch, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { toast } from 'sonner'
