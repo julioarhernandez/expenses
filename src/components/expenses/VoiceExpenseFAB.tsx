@@ -143,22 +143,34 @@ export function VoiceExpenseFAB() {
 
   if (!mounted || !SpeechRecognition) return null
 
+  const examples = {
+    'en-US': 'Try: "Brunch at Panera yesterday $40" or "Gas at 7-Eleven $30"',
+    'es-ES': 'Prueba: "Brunch en Panera ayer $40" o "Gasolina en 7-Eleven $30"'
+  }
+
   return (
-    <button
-      onClick={toggleRecording}
-      disabled={isProcessing}
-      className={`fixed z-50 flex items-center justify-center transition-all duration-300 shadow-xl
-        bottom-28 right-6 md:bottom-8 md:right-8 w-14 h-14 rounded-full
-        ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-slate-900 hover:bg-slate-800 hover:scale-105 active:scale-95'}
-        ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
-      title="Add expense by voice"
-    >
-      {isProcessing ? (
-        <Loader2 className="w-6 h-6 text-white animate-spin" />
-      ) : (
-        <Mic className="w-6 h-6 text-white" />
+    <div className="fixed z-50 bottom-28 right-6 md:bottom-8 md:right-8 flex items-center gap-3">
+      {mounted && !isRecording && !isProcessing && (
+        <div className="bg-white/40 backdrop-blur-md border border-slate-200/50 px-3 py-1.5 rounded-xl shadow-sm text-[11px] font-medium text-slate-500 animate-in fade-in slide-in-from-right-4 duration-700 max-w-[150px] text-right leading-tight">
+          {examples[language] || examples['en-US']}
+        </div>
       )}
-    </button>
+      <button
+        onClick={toggleRecording}
+        disabled={isProcessing}
+        className={`flex items-center justify-center transition-all duration-300 shadow-xl
+          w-14 h-14 rounded-full
+          ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-slate-900 hover:bg-slate-800 hover:scale-105 active:scale-95'}
+          ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
+        title="Add expense by voice"
+      >
+        {isProcessing ? (
+          <Loader2 className="w-6 h-6 text-white animate-spin" />
+        ) : (
+          <Mic className="w-6 h-6 text-white" />
+        )}
+      </button>
+    </div>
   )
 }
