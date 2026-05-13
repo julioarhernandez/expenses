@@ -16,13 +16,8 @@ import {
 import { buttonVariants } from '@/components/ui/button'
 import { useWorkspaceStore } from '@/store/workspace'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { User } from '@supabase/supabase-js'
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/expenses', label: 'Expenses', icon: Receipt },
-  { href: '/settings', label: 'Settings', icon: Settings },
-]
 
 const WORKSPACE_TYPE_ICONS: Record<string, string> = {
   personal: '👤',
@@ -40,12 +35,13 @@ export function Sidebar({ user }: SidebarProps) {
   const router = useRouter()
   const supabase = createClient()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
+  const { t, lang } = useTranslation()
   const active = activeWorkspace()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
-  const wsName = mounted && active ? active.name : 'Select workspace'
+  const wsName = mounted && active ? active.name : (lang === 'es' ? 'Seleccionar espacio' : 'Select workspace')
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -53,6 +49,12 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
+
+  const navItems = [
+    { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
+    { href: '/expenses', label: t('nav').expenses, icon: Receipt },
+    { href: '/settings', label: t('nav').settings, icon: Settings },
+  ]
 
   return (
     <aside className="hidden md:flex w-56 shrink-0 border-r bg-background flex-col h-screen sticky top-0">
@@ -91,7 +93,7 @@ export function Sidebar({ user }: SidebarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')}>
               <Plus className="mr-2 h-3.5 w-3.5" />
-              New workspace
+              {t('nav').new_workspace}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -132,11 +134,11 @@ export function Sidebar({ user }: SidebarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => router.push('/settings')}>
-              <Briefcase className="mr-2 h-4 w-4" />Settings
+              <Briefcase className="mr-2 h-4 w-4" />{t('nav').settings}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut} variant="destructive">
-              <LogOut className="mr-2 h-4 w-4" />Sign out
+              <LogOut className="mr-2 h-4 w-4" />{t('nav').logout}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

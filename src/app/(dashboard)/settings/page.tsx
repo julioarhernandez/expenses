@@ -21,22 +21,22 @@ export default function SettingsPage() {
 
       <Tabs defaultValue="workspaces" className="w-full">
         {/* Tab Navigation */}
-        <TabsList className="flex p-1.5 bg-slate-200/50 rounded-2xl mb-8 h-auto">
+        <TabsList className="flex p-2 bg-slate-200/50 rounded-2xl mb-8 h-auto">
           <TabsTrigger 
             value="workspaces" 
-            className="flex-1 py-2.5 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
           >
             {t('settings').workspaces}
           </TabsTrigger>
           <TabsTrigger 
             value="categories" 
-            className="flex-1 py-2.5 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
           >
             {t('settings').categories}
           </TabsTrigger>
           <TabsTrigger 
             value="preferences" 
-            className="flex-1 py-2.5 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
           >
             {t('settings').preferences}
           </TabsTrigger>
