@@ -19,11 +19,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
   const locale = lang === 'es' ? es : enUS
 
   const PAYMENT_LABELS: Record<string, string> = {
-    credit_card: t('es') === 'es' ? 'Tarjeta de crédito' : 'Credit card',
-    debit_card: t('es') === 'es' ? 'Tarjeta de débito' : 'Debit card',
-    cash: t('es') === 'es' ? 'Efectivo' : 'Cash',
-    bank_transfer: t('es') === 'es' ? 'Transferencia bancaria' : 'Bank transfer',
-    other: t('es') === 'es' ? 'Otro' : 'Other',
+    credit_card: lang === 'es' ? 'Tarjeta de crédito' : 'Credit card',
+    debit_card: lang === 'es' ? 'Tarjeta de débito' : 'Debit card',
+    cash: lang === 'es' ? 'Efectivo' : 'Cash',
+    bank_transfer: lang === 'es' ? 'Transferencia bancaria' : 'Bank transfer',
+    other: lang === 'es' ? 'Otro' : 'Other',
   }
 
   if (isLoading) {
@@ -41,7 +41,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
       <div className="flex flex-col items-center justify-center py-20 text-center text-neutral-400">
         <p className="text-sm font-medium">{t('expenses').no_expenses}</p>
         <p className="text-xs mt-1">
-          {t('es') === 'es' ? 'Intenta ajustar tus filtros o añade un nuevo gasto.' : 'Try adjusting your filters or add a new expense.'}
+          {t('expenses').no_expenses_subtitle}
         </p>
       </div>
     )
@@ -112,19 +112,19 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                           onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
                           className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
                         >
-                          <Receipt className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Recibo' : 'Receipt'}
+                          <Receipt className="mr-3 h-4 w-4" />{lang === 'es' ? 'Recibo' : 'Receipt'}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-slate-50" />
                       </>
                     )}
                     <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
-                      <Pencil className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Editar' : 'Edit'}
+                      <Pencil className="mr-3 h-4 w-4" />{t('common').edit}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => onDelete(expense)}
                       className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
                     >
-                      <Trash2 className="mr-3 h-4 w-4" />{t('es') === 'es' ? 'Eliminar' : 'Delete'}
+                      <Trash2 className="mr-3 h-4 w-4" />{t('common').delete}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
