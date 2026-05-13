@@ -23,7 +23,7 @@ interface ExpenseTableProps {
   onDeleteRecurring?: (recurringId: string) => void
 }
 
-export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecurring, onDeleteRecurring }: ExpenseTableProps) {
   const { t, lang } = useTranslation()
   const locale = lang === 'es' ? es : enUS
 
@@ -78,7 +78,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                   {expense.is_recurring && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
                       <RefreshCw className="h-2.5 w-2.5" />
-                      Recurring
+                      {t('recurring').badge}
                     </span>
                   )}
                 </div>
@@ -129,13 +129,13 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                           onClick={() => onEditRecurring?.(expense.recurring_expense_id!)}
                           className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
                         >
-                          <RefreshCw className="mr-3 h-4 w-4" />Edit Recurring
+                          <RefreshCw className="mr-3 h-4 w-4" />{t('recurring').edit_recurring}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDeleteRecurring?.(expense.recurring_expense_id!)}
                           className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
                         >
-                          <Trash2 className="mr-3 h-4 w-4" />Delete Recurring
+                          <Trash2 className="mr-3 h-4 w-4" />{t('recurring').delete_recurring}
                         </DropdownMenuItem>
                       </>
                     ) : (
@@ -146,19 +146,19 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete }: ExpenseT
                               onClick={() => window.open(expense.receipt_url!, '_blank', 'noopener,noreferrer')}
                               className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50"
                             >
-                              <Receipt className="mr-3 h-4 w-4" />Receipt
+                              <Receipt className="mr-3 h-4 w-4" />{t('recurring').receipt}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-slate-50" />
                           </>
                         )}
                         <DropdownMenuItem onClick={() => onEdit(expense)} className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-slate-50">
-                          <Pencil className="mr-3 h-4 w-4" />Edit
+                          <Pencil className="mr-3 h-4 w-4" />{t('recurring').edit}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDelete(expense)}
                           className="rounded-xl px-3 py-2 cursor-pointer transition-colors focus:bg-red-50 text-red-500 focus:text-red-600"
                         >
-                          <Trash2 className="mr-3 h-4 w-4" />Delete
+                          <Trash2 className="mr-3 h-4 w-4" />{t('recurring').delete}
                         </DropdownMenuItem>
                       </>
                     )}

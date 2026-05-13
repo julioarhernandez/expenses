@@ -14,14 +14,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { fetchRecurringExpenseById, updateRecurringExpense } from '@/lib/recurring'
+import { useTranslation } from '@/hooks/useTranslation'
 import type { Category, RecurringExpense, RecurringFrequency } from '@/types'
 
-const RECURRING_FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-]
+const RECURRING_FREQUENCY_VALUES: RecurringFrequency[] = ['daily', 'weekly', 'monthly', 'yearly']
 
 interface RecurringExpenseDialogProps {
   recurringId: string | null
@@ -55,6 +51,7 @@ function formFromRecurring(r: RecurringExpense) {
 }
 
 export function RecurringExpenseDialog({ recurringId, categories, onClose, onSaved }: RecurringExpenseDialogProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState(emptyForm())
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -102,14 +99,14 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
         <div className="p-8 space-y-8">
           <SheetHeader className="space-y-1">
             <div className="flex items-center gap-2">
-              <SheetTitle className="text-2xl font-bold text-[#171717]">Edit Recurring</SheetTitle>
+              <SheetTitle className="text-2xl font-bold text-[#171717]">{t('recurring').edit_title}</SheetTitle>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-violet-600 border border-violet-100">
                 <RefreshCw className="h-2.5 w-2.5" />
                 Recurring
               </span>
             </div>
             <p className="text-sm text-neutral-500 font-medium">
-              Changes apply to all future occurrences of this expense.
+              {t('recurring').edit_desc}
             </p>
           </SheetHeader>
 
@@ -149,7 +146,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Frequency *</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').frequency} *</Label>
                   <Select
                     value={form.frequency}
                     onValueChange={(v) => set('frequency', v ?? 'monthly')}
@@ -158,15 +155,15 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                      {RECURRING_FREQUENCIES.map((f) => (
-                        <SelectItem key={f.value} value={f.value} label={f.label}>{f.label}</SelectItem>
+                      {RECURRING_FREQUENCY_VALUES.map((v) => (
+                        <SelectItem key={v} value={v} label={t('recurring')[v]}>{t('recurring')[v]}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Start Date *</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').start_date} *</Label>
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                     <PopoverTrigger
                       className={cn(
@@ -191,7 +188,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">End Date</Label>
+                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').end_date}</Label>
                   <Input
                     type="date"
                     value={form.end_date}
@@ -243,7 +240,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                   onClick={onClose}
                   className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm"
                 >
-                  Cancel
+                  {t('common').cancel}
                 </Button>
                 <Button
                   type="submit"
@@ -251,7 +248,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                   className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                  Save Changes
+                  {t('recurring').save_changes}
                 </Button>
               </div>
             </form>

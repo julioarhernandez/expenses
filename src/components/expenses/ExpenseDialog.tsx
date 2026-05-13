@@ -25,12 +25,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ReceiptUploader } from './ReceiptUploader'
 import type { Category, Expense, OcrExtraction, PaymentMethod, RecurringFrequency } from '@/types'
 
-const RECURRING_FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-]
+const RECURRING_FREQUENCY_VALUES: RecurringFrequency[] = ['daily', 'weekly', 'monthly', 'yearly']
 
 interface ExpenseDialogProps {
   open: boolean
@@ -443,14 +438,14 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                       </div>
                       <div className="flex items-center gap-2">
                         <RefreshCw className="h-3.5 w-3.5 text-neutral-500" />
-                        <span className="text-sm font-semibold text-neutral-700">Make this a recurring expense</span>
+                        <span className="text-sm font-semibold text-neutral-700">{t('recurring').make_recurring}</span>
                       </div>
                     </label>
 
                     {isRecurring && (
                       <div className="mt-4 grid grid-cols-2 gap-4 pl-8 animate-in fade-in slide-in-from-top-2 duration-150">
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">Frequency *</Label>
+                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').frequency} *</Label>
                           <Select
                             value={recurringFrequency}
                             onValueChange={(v) => setRecurringFrequency(v as RecurringFrequency)}
@@ -459,14 +454,14 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
-                              {RECURRING_FREQUENCIES.map((f) => (
-                                <SelectItem key={f.value} value={f.value} label={f.label}>{f.label}</SelectItem>
+                              {RECURRING_FREQUENCY_VALUES.map((v) => (
+                                <SelectItem key={v} value={v} label={t('recurring')[v]}>{t('recurring')[v]}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">End Date</Label>
+                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').end_date}</Label>
                           <Input
                             type="date"
                             value={recurringEndDate}
