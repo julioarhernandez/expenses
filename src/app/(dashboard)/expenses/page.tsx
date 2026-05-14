@@ -134,20 +134,20 @@ export default function ExpensesPage() {
   )
 
   return (
-    <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-[#FAFAFA] min-h-screen">
+    <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-background min-h-screen">
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#171717]">{t('nav').expenses}</h1>
-          <p className="text-neutral-500 font-medium">{t('expenses').subtitle}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('nav').expenses}</h1>
+          <p className="text-muted-foreground font-medium">{t('expenses').subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <Button
             variant="outline"
             onClick={() => setFiltersOpen((o) => !o)}
             className={cn(
-              "rounded-lg border-neutral-200 bg-white px-3 md:px-4 h-9 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all",
-              filtersOpen && "bg-neutral-100 border-neutral-300"
+              "rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all",
+              filtersOpen && "bg-accent"
             )}
           >
             <SlidersHorizontal className="h-4 w-4 md:mr-2" />
@@ -159,14 +159,14 @@ export default function ExpensesPage() {
           <Button
             variant="outline"
             onClick={() => exportToCSV(expenses)}
-            className="rounded-lg border-neutral-200 bg-white px-3 md:px-4 h-9 text-sm font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 transition-all"
+            className="rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all"
           >
             <Download className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">{t('expenses').export_csv}</span>
           </Button>
           <Button
             onClick={openCreate}
-            className="rounded-lg bg-[#171717] px-4 h-9 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition-all ml-auto"
+            className="rounded-lg px-4 h-9 text-sm font-semibold shadow-sm transition-all ml-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             {t('expenses').add_expense}
@@ -176,7 +176,7 @@ export default function ExpensesPage() {
 
       {/* Filters Panel */}
       {filtersOpen && (
-        <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4 space-y-4">
+        <div className="bg-card border border-border rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] animate-in fade-in slide-in-from-top-4 space-y-4">
 
           {/* Row 1: Search + Category */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -184,18 +184,18 @@ export default function ExpensesPage() {
               placeholder={t('expenses').search_placeholder}
               value={filters.q}
               onChange={(e) => setFilters({ q: e.target.value })}
-              className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+              className="rounded-lg h-9 text-sm"
             />
             <Select
               value={filters.category_id ?? ''}
               onValueChange={(v) => setFilters({ category_id: v || null })}
             >
-              <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm">
+              <SelectTrigger className="rounded-lg h-9 text-sm">
                 <SelectValue placeholder={t('expenses').all_categories}>
                   {filters.category_id ? categories.find(c => c.id === filters.category_id)?.name : undefined}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+              <SelectContent className="rounded-xl shadow-xl">
                 <SelectItem value="" label={t('expenses').all_categories}>{t('expenses').all_categories}</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
@@ -206,7 +206,7 @@ export default function ExpensesPage() {
 
           {/* Row 2: Date period chips */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('expenses').date}</label>
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5">{t('expenses').date}</label>
             <div className="flex flex-wrap gap-1.5">
               {([
                 { value: 'all', label: t('expenses').date_all },
@@ -223,8 +223,8 @@ export default function ExpensesPage() {
                   className={cn(
                     'px-3 py-1 rounded-full text-xs font-semibold border transition-all',
                     datePeriod === p.value
-                      ? 'bg-[#171717] text-white border-[#171717]'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400 hover:text-neutral-900'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50 hover:text-foreground'
                   )}
                 >
                   {p.label}
@@ -237,13 +237,13 @@ export default function ExpensesPage() {
                   type="date"
                   value={filters.from ?? ''}
                   onChange={(e) => setFilters({ from: e.target.value || null })}
-                  className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+                  className="rounded-lg h-9 text-sm"
                 />
                 <Input
                   type="date"
                   value={filters.to ?? ''}
                   onChange={(e) => setFilters({ to: e.target.value || null })}
-                  className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm"
+                  className="rounded-lg h-9 text-sm"
                 />
               </div>
             )}
@@ -251,7 +251,7 @@ export default function ExpensesPage() {
 
           {/* Row 3: Amount filter */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('expenses').amount}</label>
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5">{t('expenses').amount}</label>
             <div className="flex items-center gap-2 flex-wrap">
               <Select
                 value={amountOp}
@@ -261,7 +261,7 @@ export default function ExpensesPage() {
                   applyAmountFilter(op, amountVal, amountVal2)
                 }}
               >
-                <SelectTrigger className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm w-[140px]">
+                <SelectTrigger className="rounded-lg h-9 text-sm w-[140px]">
                   <SelectValue placeholder={t('expenses').amount_any}>
                     {amountOp === 'lt' ? t('expenses').amount_lt
                       : amountOp === 'gt' ? t('expenses').amount_gt
@@ -270,7 +270,7 @@ export default function ExpensesPage() {
                             : undefined}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                <SelectContent className="rounded-xl shadow-xl">
                   <SelectItem value="" label={t('expenses').amount_any}>{t('expenses').amount_any}</SelectItem>
                   <SelectItem value="lt" label={t('expenses').amount_lt}>{t('expenses').amount_lt}</SelectItem>
                   <SelectItem value="gt" label={t('expenses').amount_gt}>{t('expenses').amount_gt}</SelectItem>
@@ -281,7 +281,7 @@ export default function ExpensesPage() {
               {amountOp && (
                 <>
                   <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs font-medium">$</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-medium">$</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -292,14 +292,14 @@ export default function ExpensesPage() {
                         applyAmountFilter(amountOp, e.target.value, amountVal2)
                       }}
                       placeholder="0.00"
-                      className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm pl-6 w-28"
+                      className="rounded-lg h-9 text-sm pl-6 w-28"
                     />
                   </div>
                   {amountOp === 'between' && (
                     <>
-                      <span className="text-xs text-neutral-400 font-medium">{t('expenses').amount_and}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{t('expenses').amount_and}</span>
                       <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs font-medium">$</span>
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-medium">$</span>
                         <Input
                           type="number"
                           step="0.01"
@@ -310,7 +310,7 @@ export default function ExpensesPage() {
                             applyAmountFilter(amountOp, amountVal, e.target.value)
                           }}
                           placeholder="0.00"
-                          className="rounded-lg bg-neutral-50 border-neutral-100 focus:bg-white h-9 text-sm pl-6 w-28"
+                          className="rounded-lg h-9 text-sm pl-6 w-28"
                         />
                       </div>
                     </>
@@ -322,7 +322,7 @@ export default function ExpensesPage() {
 
           {/* Row 4: Type filter */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1 mb-1.5">{t('recurring').badge}</label>
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5">{t('recurring').badge}</label>
             <div className="flex gap-1.5">
               {([
                 { value: 'all', label: t('expenses').type_all, filter: null },
@@ -336,8 +336,8 @@ export default function ExpensesPage() {
                   className={cn(
                     'px-3 py-1 rounded-full text-xs font-semibold border transition-all',
                     filters.is_recurring === p.filter
-                      ? 'bg-[#171717] text-white border-[#171717]'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400 hover:text-neutral-900'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-transparent text-muted-foreground border-border hover:border-foreground/50 hover:text-foreground'
                   )}
                 >
                   {p.label}
@@ -347,8 +347,8 @@ export default function ExpensesPage() {
           </div>
 
           {hasFilters && (
-            <div className="pt-1 flex justify-end border-t border-neutral-50">
-              <Button variant="ghost" size="sm" onClick={handleResetFilters} className="text-neutral-500 hover:text-red-500 h-8 text-xs">
+            <div className="pt-1 flex justify-end border-t border-border/50">
+              <Button variant="ghost" size="sm" onClick={handleResetFilters} className="text-muted-foreground hover:text-destructive h-8 text-xs">
                 <RotateCcw className="h-3 w-3 mr-1.5" />
                 {t('expenses').reset_filters}
               </Button>
@@ -358,7 +358,7 @@ export default function ExpensesPage() {
       )}
 
       {/* Table Container */}
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-card border border-border rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
         <ExpenseTable
           expenses={expenses}
           isLoading={isLoading}
