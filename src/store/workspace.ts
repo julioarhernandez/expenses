@@ -7,10 +7,12 @@ interface WorkspaceStore {
   activeWorkspaceId: string | null
   voiceLanguage: 'en-US' | 'es-ES'
   uiLanguage: 'en' | 'es'
+  theme: 'light' | 'dark'
   setWorkspaces: (workspaces: Workspace[]) => void
   setActiveWorkspaceId: (id: string) => void
   setVoiceLanguage: (lang: 'en-US' | 'es-ES') => void
   setUiLanguage: (lang: 'en' | 'es') => void
+  setTheme: (theme: 'light' | 'dark') => void
   activeWorkspace: () => Workspace | null
 }
 
@@ -21,6 +23,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
       activeWorkspaceId: null,
       voiceLanguage: 'en-US',
       uiLanguage: 'en',
+      theme: 'light',
       setWorkspaces: (workspaces) => {
         set({ workspaces })
         const currentActive = get().activeWorkspaceId
@@ -40,6 +43,7 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
           document.cookie = `active-workspace-id=${id}; path=/; max-age=31536000`
         }
       },
+      setTheme: (theme) => set({ theme }),
       setVoiceLanguage: (lang) => set({ voiceLanguage: lang }),
       setUiLanguage: (lang) => {
         set({ uiLanguage: lang })

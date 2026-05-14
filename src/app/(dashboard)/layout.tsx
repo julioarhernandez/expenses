@@ -4,6 +4,7 @@ import { TopNav } from '@/components/layout/TopNav'
 import { MobileHeader } from '@/components/layout/MobileHeader'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { WorkspaceProvider } from '@/components/layout/WorkspaceProvider'
+import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { VoiceExpenseFAB } from '@/components/expenses/VoiceExpenseFAB'
 import { GlobalExpenseDialog } from '@/components/expenses/GlobalExpenseDialog'
 import type { Workspace } from '@/types'
@@ -21,6 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <WorkspaceProvider workspaces={(workspaces as Workspace[]) ?? []}>
+      <ThemeProvider>
       <div className="flex flex-col h-screen overflow-hidden">
         <TopNav user={user} />
         <MobileHeader />
@@ -29,6 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <MobileBottomNav user={user} />
       <VoiceExpenseFAB />
       <GlobalExpenseDialog />
+      </ThemeProvider>
     </WorkspaceProvider>
   )
 }

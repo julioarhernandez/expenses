@@ -8,35 +8,35 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
 
 export default function SettingsPage() {
-  const { voiceLanguage, setVoiceLanguage, uiLanguage, setUiLanguage } = useWorkspaceStore()
+  const { voiceLanguage, setVoiceLanguage, uiLanguage, setUiLanguage, theme, setTheme } = useWorkspaceStore()
   const { t } = useTranslation()
 
   return (
-    <div className="min-h-full bg-[#F8FAFC] px-6 pt-8 pb-32">
+    <div className="min-h-full bg-background px-6 pt-8 pb-32">
       {/* Header Section */}
       <section className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 text-slate-900">{t('settings').title}</h1>
-        <p className="text-slate-500 font-medium">{t('settings').subtitle}</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">{t('settings').title}</h1>
+        <p className="text-muted-foreground font-medium">{t('settings').subtitle}</p>
       </section>
 
       <Tabs defaultValue="workspaces" className="w-full">
         {/* Tab Navigation */}
-        <TabsList className="flex w-full p-2 bg-slate-100 rounded-3xl mb-8 h-16">
-          <TabsTrigger 
-            value="workspaces" 
-            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+        <TabsList className="flex w-full p-2 bg-muted rounded-3xl mb-8 h-16">
+          <TabsTrigger
+            value="workspaces"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-all"
           >
             {t('settings').workspaces}
           </TabsTrigger>
-          <TabsTrigger 
-            value="categories" 
-            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+          <TabsTrigger
+            value="categories"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-all"
           >
             {t('settings').categories}
           </TabsTrigger>
-          <TabsTrigger 
-            value="preferences" 
-            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 hover:text-slate-700 transition-all"
+          <TabsTrigger
+            value="preferences"
+            className="flex-1 py-4 text-sm font-semibold rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-all"
           >
             {t('settings').preferences}
           </TabsTrigger>
@@ -49,17 +49,17 @@ export default function SettingsPage() {
           <CategoryManager />
         </TabsContent>
         <TabsContent value="preferences" className="mt-0 outline-none">
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">{t('settings').app_preferences}</h2>
+          <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+            <h2 className="text-xl font-bold text-card-foreground mb-6">{t('settings').app_preferences}</h2>
             <div className="space-y-10">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">{t('settings').app_language}</label>
-                <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('settings').app_language}</label>
+                <div className="flex p-1 bg-muted rounded-xl w-fit">
                   <button
                     onClick={() => setUiLanguage('en')}
                     className={cn(
                       "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
-                      uiLanguage === 'en' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      uiLanguage === 'en' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     English
@@ -68,23 +68,23 @@ export default function SettingsPage() {
                     onClick={() => setUiLanguage('es')}
                     className={cn(
                       "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
-                      uiLanguage === 'es' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      uiLanguage === 'es' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     Español
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{t('settings').app_language_desc}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('settings').app_language_desc}</p>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">{t('settings').voice_language}</label>
-                <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('settings').voice_language}</label>
+                <div className="flex p-1 bg-muted rounded-xl w-fit">
                   <button
                     onClick={() => setVoiceLanguage('en-US')}
                     className={cn(
                       "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
-                      voiceLanguage === 'en-US' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      voiceLanguage === 'en-US' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     English (US)
@@ -93,13 +93,34 @@ export default function SettingsPage() {
                     onClick={() => setVoiceLanguage('es-ES')}
                     className={cn(
                       "px-4 py-2 text-sm font-semibold rounded-lg transition-all",
-                      voiceLanguage === 'es-ES' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      voiceLanguage === 'es-ES' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     Español (ES)
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{t('settings').voice_language_desc}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('settings').voice_language_desc}</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('settings').dark_mode}</label>
+                <button
+                  role="switch"
+                  aria-checked={theme === 'dark'}
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className={cn(
+                    "relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    theme === 'dark' ? "bg-slate-800" : "bg-slate-200"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
+                      theme === 'dark' ? "translate-x-6" : "translate-x-1"
+                    )}
+                  />
+                </button>
+                <p className="text-xs text-muted-foreground mt-1">{t('settings').dark_mode_desc}</p>
               </div>
             </div>
           </div>
