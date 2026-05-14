@@ -242,13 +242,21 @@ export async function GET(request: NextRequest) {
       }
 
       // Workspace Header Card
-      doc.setFillColor(colors.bgLight[0], colors.bgLight[1], colors.bgLight[2])
-      doc.roundedRect(14, currentY, 182, 10, 2, 2, 'F')
-      doc.setTextColor(colors.primaryDark[0], colors.primaryDark[1], colors.primaryDark[2])
+      doc.setFillColor(255, 255, 255)
+      doc.roundedRect(14, currentY, 182, 12, 2, 2, 'F')
+      
+      // Workspace Icon
+      try {
+        const wsIconPath = path.join(process.cwd(), 'public', 'report-workspace.png')
+        const wsIconData = fs.readFileSync(wsIconPath).toString('base64')
+        doc.addImage(wsIconData, 'PNG', 14, currentY + 1, 10.6, 10) // Centered 10mm icon in 12mm bar
+      } catch (e) {}
+
+      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      doc.text(ws.name.toUpperCase(), 18, currentY + 6.5)
-      currentY += 12
+      doc.setFontSize(14)
+      doc.text(ws.name.toUpperCase(), 28, currentY + 8.5) // Centered text baseline
+      currentY += 16
 
       // Main Expenses Table
       autoTable(doc, {
