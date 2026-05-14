@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Star } from 'lucide-react'
+import { Plus, Trash2, Star, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -148,7 +148,25 @@ export function WorkspaceManager() {
       {/* Add New Workspace Form */}
       <div className="pt-6 border-t border-border">
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
+          <div className="relative flex-1 flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1 py-1 rounded-lg hover:bg-muted transition-colors outline-none z-10">
+                <span className="text-sm">{typeMap[newType]?.emoji}</span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[160px]">
+                {WORKSPACE_TYPES.map((wt) => (
+                  <DropdownMenuItem
+                    key={wt.value}
+                    onClick={() => setNewType(wt.value)}
+                    className={newType === wt.value ? 'bg-accent' : ''}
+                  >
+                    <span className="mr-2">{wt.emoji}</span>
+                    {wt.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <input
               className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-background transition-all outline-none"
               placeholder={t('settings').workspace_name_placeholder}
@@ -157,22 +175,6 @@ export function WorkspaceManager() {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addWorkspace()}
             />
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none opacity-60">
-              <span className="text-sm">{typeMap[newType]?.emoji}</span>
-              <svg className="w-3 h-3 ml-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </div>
-
-            <select
-              className="absolute left-0 top-0 w-11 h-full opacity-0 cursor-pointer"
-              value={newType}
-              onChange={(e) => setNewType(e.target.value as WorkspaceType)}
-            >
-              {WORKSPACE_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>
-              ))}
-            </select>
           </div>
           <button
             onClick={addWorkspace}
