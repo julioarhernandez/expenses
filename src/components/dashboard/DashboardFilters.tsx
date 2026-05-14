@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition, useState, useEffect } from 'react'
-import { Download, Loader2 } from 'lucide-react'
+import { Download, Loader2, FileText } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
 
@@ -197,48 +197,60 @@ export function DashboardFilters({
 
         {/* Loading indicator */}
         {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-
-        {/* Export */}
-        <a
-          href={exportUrl}
-          download
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-all"
-        >
-          <Download className="h-3.5 w-3.5" />
-          {t('expenses').export_csv}
-        </a>
       </div>
 
       {/* Workspace checkboxes */}
       {workspaces.length > 1 && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-border/50">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest shrink-0">
+        <div className="flex flex-col gap-3 pt-3 border-t border-border/50">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
             {t('dashboard').compare_workspaces}
           </span>
-          {workspaces.map((ws) => {
-            const checked = selectedIds.includes(ws.id)
-            const isLast = checked && selectedIds.length === 1
-            return (
-              <label
-                key={ws.id}
-                className={cn(
-                  'flex items-center gap-1.5 cursor-pointer select-none',
-                  isLast && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={isLast}
-                  onChange={(e) => handleWorkspace(ws.id, e.target.checked)}
-                  className="w-3.5 h-3.5 rounded accent-[#6366F1]"
-                />
-                <span className="text-xs font-semibold text-foreground">{ws.name}</span>
-              </label>
-            )
-          })}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {workspaces.map((ws) => {
+              const checked = selectedIds.includes(ws.id)
+              const isLast = checked && selectedIds.length === 1
+              return (
+                <label
+                  key={ws.id}
+                  className={cn(
+                    'flex items-center gap-1.5 cursor-pointer select-none',
+                    isLast && 'opacity-50 cursor-not-allowed'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={isLast}
+                    onChange={(e) => handleWorkspace(ws.id, e.target.checked)}
+                    className="w-3.5 h-3.5 rounded accent-[#6366F1]"
+                  />
+                  <span className="text-xs font-semibold text-foreground">{ws.name}</span>
+                </label>
+              )
+            })}
+          </div>
         </div>
       )}
+
+      {/* Export Actions */}
+      <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+        <a
+          href={exportUrl}
+          download
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-all"
+        >
+          <Download className="h-3.5 w-3.5" />
+          {t('expenses').export_csv}
+        </a>
+        <a
+          href={exportUrl + '&format=pdf'}
+          download
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-all"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          {t('expenses').export_pdf}
+        </a>
+      </div>
     </div>
   )
 }
