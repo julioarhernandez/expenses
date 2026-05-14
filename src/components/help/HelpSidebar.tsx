@@ -3,7 +3,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useHelpStore, type HelpTopic } from '@/store/help'
 import { useTranslation } from '@/hooks/useTranslation'
-import { Mic, LayoutDashboard, Receipt, Tag, RefreshCw } from 'lucide-react'
+import { Mic, LayoutDashboard, Receipt, Tag, RefreshCw, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TOPICS: { id: HelpTopic; icon: React.ElementType; label: { en: string; es: string } }[] = [
@@ -12,6 +12,7 @@ const TOPICS: { id: HelpTopic; icon: React.ElementType; label: { en: string; es:
   { id: 'dashboard',  icon: LayoutDashboard,label: { en: 'Dashboard',     es: 'Panel' } },
   { id: 'categories', icon: Tag,            label: { en: 'Categories',    es: 'Categorías' } },
   { id: 'recurring',  icon: RefreshCw,      label: { en: 'Recurring',     es: 'Recurrentes' } },
+  { id: 'settings',   icon: Settings,       label: { en: 'Settings',      es: 'Ajustes' } },
 ]
 
 function VoiceHelp({ lang }: { lang: string }) {
@@ -251,12 +252,75 @@ function RecurringHelp({ lang }: { lang: string }) {
   )
 }
 
+function SettingsHelp({ lang }: { lang: string }) {
+  const isEs = lang === 'es'
+  return (
+    <div className="space-y-5">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Espacios de trabajo' : 'Workspaces'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Crea espacios separados para personal, negocio, freelance u otros proyectos. Cada espacio tiene sus propias categorías, gastos y configuración independiente.'
+            : 'Create separate spaces for personal, business, freelance, or other projects. Each workspace has its own categories, expenses, and independent settings.'}
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Categorías' : 'Categories'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Crea, edita y elimina categorías para organizar tus gastos. Asigna un nombre y color a cada una. Las categorías son específicas por espacio de trabajo.'
+            : 'Create, edit, and delete categories to organize your expenses. Assign a name and color to each one. Categories are specific to each workspace.'}
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Idioma de la app' : 'App language'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Cambia el idioma de la interfaz entre English y Español en Ajustes → Preferencias.'
+            : 'Switch the interface language between English and Español in Settings → Preferences.'}
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Idioma de voz' : 'Voice language'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Elige el idioma que usa el micrófono para reconocer tu voz: English (US) o Español (ES). Encuéntralo en Ajustes → Preferencias.'
+            : 'Choose the language the microphone uses to recognize your voice: English (US) or Español (ES). Find it in Settings → Preferences.'}
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Modo oscuro' : 'Dark mode'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Activa o desactiva el tema oscuro desde Ajustes → Preferencias. La preferencia se guarda automáticamente.'
+            : 'Toggle dark mode on or off from Settings → Preferences. Your preference is saved automatically.'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 const TOPIC_CONTENT: Record<HelpTopic, React.ComponentType<{ lang: string }>> = {
   voice: VoiceHelp,
   expenses: ExpensesHelp,
   dashboard: DashboardHelp,
   categories: CategoriesHelp,
   recurring: RecurringHelp,
+  settings: SettingsHelp,
 }
 
 export function HelpSidebar() {
