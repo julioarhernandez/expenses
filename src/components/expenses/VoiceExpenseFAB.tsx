@@ -217,24 +217,24 @@ export function VoiceExpenseFAB() {
           </div>
         )}
 
-        <div className="relative w-[64px] h-[64px] flex items-center justify-center">
+        <div className="relative w-20 h-20 flex items-center justify-center">
           {isRecording && (
             <svg
-              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
-              viewBox="0 0 64 64"
+              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10"
+              viewBox="0 0 80 80"
             >
               <circle
-                cx="32" cy="32" r={RADIUS}
+                cx="40" cy="40" r={RADIUS}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
+                strokeWidth="3"
                 className="text-white/25"
               />
               <circle
-                cx="32" cy="32" r={RADIUS}
+                cx="40" cy="40" r={RADIUS}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
+                strokeWidth="3"
                 className="text-white transition-all duration-100"
                 strokeDasharray={CIRCUMFERENCE}
                 strokeDashoffset={CIRCUMFERENCE * recordingProgress}
@@ -247,8 +247,8 @@ export function VoiceExpenseFAB() {
             onClick={toggleRecording}
             disabled={isProcessing}
             className={`flex items-center justify-center transition-all duration-300 transform active:scale-95
-              w-14 h-14 rounded-2xl text-white ring-4 ring-background shadow-lg
-              ${isRecording ? 'bg-red-500 shadow-red-200 animate-pulse scale-110' : 'bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
+              w-14 h-14 text-white ring-4 ring-background shadow-lg
+              ${isRecording ? 'rounded-full bg-red-500 shadow-red-200 animate-pulse scale-110' : 'rounded-2xl bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
               ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
             `}
             title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
