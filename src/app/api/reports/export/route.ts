@@ -111,6 +111,27 @@ export async function GET(request: NextRequest) {
     const doc = new jsPDF()
     const workspacesInReport = workspaceList.filter((w: any) => selectedIds.includes(w.id))
     
+    // Pre-calculate totals for summary
+    const wsTotals: Record<string, number> = {}
+    const categoryWsMap: Record<string, Record<string, number>> = {}
+    const categorySet = new Set<string>()
+    let grandTotal = 0
+
+    workspacesInReport.forEach(ws => {
+      const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
+      const total = wsExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
+      wsTotals[ws.id] = total
+      grandTotal += total
+
+      wsExpenses.forEach(e => {
+        const catName = e.category?.name || '—'
+        categorySet.add(catName)
+        if (!categoryWsMap[catName]) categoryWsMap[catName] = {}
+        categoryWsMap[catName][ws.id] = (categoryWsMap[catName][ws.id] || 0) + Number(e.amount)
+      })
+    })
+    const sortedCategories = Array.from(categorySet).sort()
+
     // Header
     doc.setFontSize(22)
     doc.setTextColor(33, 33, 33)
@@ -123,12 +144,10 @@ export async function GET(request: NextRequest) {
     doc.text(`${t('reports').generated_at}: ${formatDate(today)}`, 14, 38)
     
     let currentY = 45
-    let grandTotal = 0
 
     workspacesInReport.forEach((ws: any) => {
       const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
-      const wsTotal = wsExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
-      grandTotal += wsTotal
+      const wsTotal = wsTotals[ws.id]
 
       if (currentY > 240) {
         doc.addPage()
@@ -148,7 +167,7 @@ export async function GET(request: NextRequest) {
           t('expenses').merchant,
           t('expenses').category,
           t('expenses').notes,
-          t('expenses').amount
+          { content: t('expenses').amount, styles: { halign: 'right' } }
         ]],
         body: wsExpenses.map(e => [
           formatDate(e.date),
@@ -161,6 +180,7 @@ export async function GET(request: NextRequest) {
           { content: t('reports').workspace_total, colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
           { content: wsTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
+        theme: 'striped',
         styles: { fontSize: 9, cellPadding: 3 },
         headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255], fontStyle: 'bold' },
         footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
@@ -181,8 +201,8 @@ export async function GET(request: NextRequest) {
         startY: currentY,
         head: [[
           t('expenses').category,
-          t('expenses').amount,
-          t('reports').percentage
+          { content: t('expenses').amount, styles: { halign: 'right' } },
+          { content: t('reports').percentage, styles: { halign: 'right' } }
         ]],
         body: Object.entries(catTotals)
           .sort(([, a], [, b]) => b - a)
@@ -191,9 +211,10 @@ export async function GET(request: NextRequest) {
             { content: total.toFixed(2), styles: { halign: 'right' } },
             { content: wsTotal > 0 ? ((total / wsTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
           ]),
-        theme: 'grid',
+        theme: 'striped',
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [150, 150, 150], textColor: [255, 255, 255] },
+        headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255] },
+        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
         margin: { left: 14, right: 14 },
       })
 
@@ -202,7 +223,7 @@ export async function GET(request: NextRequest) {
 
     // Summary section
     if (selectedIds.length > 1) {
-      if (currentY > 250) {
+      if (currentY > 180) {
         doc.addPage()
         currentY = 20
       }
@@ -214,14 +235,69 @@ export async function GET(request: NextRequest) {
       doc.setFontSize(16)
       doc.setTextColor(99, 102, 241)
       doc.text(t('reports').summary, 14, currentY)
-      currentY += 10
+      currentY += 5
       
-      doc.setFontSize(12)
-      doc.setTextColor(0, 0, 0)
-      doc.text(t('reports').combined_desc.replace('{n}', String(selectedIds.length)), 14, currentY)
-      
-      doc.setFontSize(18)
-      doc.text(`${grandTotal.toFixed(2)}`, 196, currentY, { align: 'right' })
+      // 1. Category totals per workspace (Pivot table)
+      const catPivotHead = [
+        t('expenses').category,
+        ...workspacesInReport.map(ws => ({ content: ws.name, styles: { halign: 'right' } })),
+        { content: t('common').total, styles: { halign: 'right' } }
+      ]
+
+      const catPivotBody = sortedCategories.map(cat => {
+        const row: any[] = [cat]
+        workspacesInReport.forEach(ws => {
+          row.push((categoryWsMap[cat][ws.id] || 0).toFixed(2))
+        })
+        const catTotal = Object.values(categoryWsMap[cat]).reduce((s, v) => s + v, 0)
+        row.push(catTotal.toFixed(2))
+        return row
+      })
+
+      const catPivotFooter = [
+        t('common').total,
+        ...workspacesInReport.map(ws => wsTotals[ws.id].toFixed(2)),
+        grandTotal.toFixed(2)
+      ]
+
+      autoTable(doc, {
+        startY: currentY,
+        head: [catPivotHead],
+        body: catPivotBody.map(row => row.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right' } })),
+        foot: [catPivotFooter.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right', fontStyle: 'bold' } })],
+        theme: 'striped',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [79, 70, 229] },
+        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
+        margin: { left: 14, right: 14 },
+      })
+
+      currentY = (doc as any).lastAutoTable.finalY + 15
+
+      // 2. Workspace Totals Summary (with Percentage)
+      autoTable(doc, {
+        startY: currentY + 2,
+        head: [[
+          t('common').workspace,
+          { content: t('expenses').amount, styles: { halign: 'right' } },
+          { content: t('reports').percentage, styles: { halign: 'right' } }
+        ]],
+        body: workspacesInReport.map(ws => [
+          ws.name,
+          { content: wsTotals[ws.id].toFixed(2), styles: { halign: 'right' } },
+          { content: grandTotal > 0 ? ((wsTotals[ws.id] / grandTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
+        ]),
+        foot: [[
+          t('common').total,
+          { content: grandTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: '100%', styles: { halign: 'right', fontStyle: 'bold' } }
+        ]],
+        theme: 'striped',
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [99, 102, 241] },
+        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
+        margin: { left: 14, right: 14 },
+      })
     }
 
     const pdfBuffer = doc.output('arraybuffer')

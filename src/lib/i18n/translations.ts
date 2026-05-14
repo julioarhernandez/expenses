@@ -12,6 +12,8 @@ export const translations = {
       search: 'Search',
       actions: 'Actions',
       back: 'Back',
+      workspace: 'Workspace',
+      total: 'Total',
     },
     nav: {
       dashboard: 'Home',
@@ -195,6 +197,8 @@ export const translations = {
       search: 'Buscar',
       actions: 'Acciones',
       back: 'Volver',
+      workspace: 'Espacio de trabajo',
+      total: 'Total',
     },
     nav: {
       dashboard: 'Inicio',
