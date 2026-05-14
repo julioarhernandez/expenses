@@ -4,6 +4,8 @@ import { createServerClient } from '@supabase/ssr'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getServerTranslation } from '@/lib/i18n/server-translation'
+import fs from 'fs'
+import path from 'path'
 
 function toDate(y: number, m0: number, d: number) {
   return new Date(y, m0, d).toISOString().split('T')[0]
@@ -132,49 +134,107 @@ export async function GET(request: NextRequest) {
     })
     const sortedCategories = Array.from(categorySet).sort()
 
-    // Header
-    doc.setFontSize(22)
-    doc.setTextColor(33, 33, 33)
-    doc.text(t('reports').title, 14, 20)
-
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    doc.text(`${t('reports').period}: ${label.toUpperCase()}`, 14, 28)
-    doc.text(`${t('reports').range}: ${formatDate(start)} to ${formatDate(end)}`, 14, 33)
-    doc.text(`${t('reports').generated_at}: ${formatDate(today)}`, 14, 38)
-
-    let currentY = 45
+    const colors = {
+      primary: [99, 102, 241] as [number, number, number],
+      primaryDark: [79, 70, 229] as [number, number, number],
+      textDark: [31, 41, 55] as [number, number, number],
+      textLight: [107, 114, 128] as [number, number, number],
+      bgLight: [249, 250, 251] as [number, number, number],
+      white: [255, 255, 255] as [number, number, number],
+      border: [229, 231, 235] as [number, number, number],
+    }
 
     const commonTableProps = {
       theme: 'striped' as const,
       headStyles: {
-        fillColor: [99, 102, 241] as [number, number, number],
-        textColor: [255, 255, 255] as [number, number, number],
-        fontStyle: 'bold' as const
+        fillColor: colors.primary,
+        textColor: colors.white,
+        fontStyle: 'bold' as const,
+        fontSize: 10,
+        cellPadding: 4,
       },
       footStyles: {
-        fillColor: [249, 250, 251] as [number, number, number],
-        textColor: [0, 0, 0] as [number, number, number],
-        fontStyle: 'bold' as const
+        fillColor: colors.bgLight,
+        textColor: colors.textDark,
+        fontStyle: 'bold' as const,
+        fontSize: 10,
+        cellPadding: 4,
       },
-      alternateRowStyles: { fillColor: [230, 230, 230] as [number, number, number] },
+      alternateRowStyles: { fillColor: [252, 253, 255] as [number, number, number] },
       margin: { left: 14, right: 14 },
-      styles: { fontSize: 9, cellPadding: 3 },
+      styles: { fontSize: 9, cellPadding: 3, textColor: colors.textDark },
     }
+
+    // --- Modern Header Image ---
+    try {
+      const headerImgPath = path.join(process.cwd(), 'public', 'report-header.jpg')
+      const headerImgData = fs.readFileSync(headerImgPath).toString('base64')
+      doc.addImage(headerImgData, 'JPG', 14, 14, 182, 30) // Adjusted height for 1260x205 aspect ratio
+    } catch (e) {
+      // Fallback to solid color if image fails
+      doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2])
+      doc.roundedRect(14, 14, 182, 30, 4, 4, 'F')
+    }
+
+    // Dynamic Header Text (Right Side)
+    doc.setTextColor(255, 255, 255)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(14)
+    doc.text('Expense Report', 145, 28) // Moved up to match shorter header
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    doc.text(`${label.toUpperCase()}`, 145, 36)
+
+    // --- Metadata Section (Prepared By, Department, Period) ---
+    let metaY = 60 // Moved up due to shorter header
+    // Column 1: Prepared By
+    doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
+    doc.setFontSize(9)
+    doc.text('Prepared By', 14, metaY)
+    doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.text(user.email?.split('@')[0].replace('.', ' ').toUpperCase() || 'USER', 14, metaY + 6)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
+    doc.text(user.email || '', 14, metaY + 12)
+
+    // Column 2: Department/Workspace
+    doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
+    doc.text('Workspace', 80, metaY)
+    doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.text(workspacesInReport.length > 1 ? 'MULTI-WORKSPACE' : workspacesInReport[0]?.name || '—', 80, metaY + 6)
+
+    // Column 3: Report Period
+    doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
+    doc.text('Report Period', 140, metaY)
+    doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.text(`${formatDate(start)} – ${formatDate(end)}`, 140, metaY + 6)
+
+    let currentY = 85 // Moved up to close gap
 
     workspacesInReport.forEach((ws: any) => {
       const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
       const wsTotal = wsTotals[ws.id]
 
-      if (currentY > 240) {
+      if (currentY > 230) {
         doc.addPage()
         currentY = 20
       }
 
-      doc.setFontSize(14)
-      doc.setTextColor(0, 0, 0)
-      doc.text(ws.name.toUpperCase(), 14, currentY)
-      currentY += 2
+      // Workspace Header Card
+      doc.setFillColor(colors.bgLight[0], colors.bgLight[1], colors.bgLight[2])
+      doc.roundedRect(14, currentY, 182, 10, 2, 2, 'F')
+      doc.setTextColor(colors.primaryDark[0], colors.primaryDark[1], colors.primaryDark[2])
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.text(ws.name.toUpperCase(), 18, currentY + 6.5)
+      currentY += 12
 
       // Main Expenses Table
       autoTable(doc, {
@@ -201,104 +261,67 @@ export async function GET(request: NextRequest) {
       })
 
       currentY = (doc as any).lastAutoTable.finalY + 10
-
-      // Category Summary Table
-      const catTotals: Record<string, number> = {}
-      wsExpenses.forEach(e => {
-        const catName = e.category?.name || '—'
-        catTotals[catName] = (catTotals[catName] || 0) + Number(e.amount)
-      })
-
-      autoTable(doc, {
-        ...commonTableProps,
-        startY: currentY,
-        styles: { fontSize: 8, cellPadding: 3 },
-        head: [[
-          t('expenses').category,
-          { content: t('expenses').amount, styles: { halign: 'right' } },
-          { content: t('reports').percentage, styles: { halign: 'right' } }
-        ]],
-        body: Object.entries(catTotals)
-          .sort(([, a], [, b]) => b - a)
-          .map(([name, total]) => [
-            name,
-            { content: total.toFixed(2), styles: { halign: 'right' } },
-            { content: wsTotal > 0 ? ((total / wsTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
-          ]),
-      })
-
-      currentY = (doc as any).lastAutoTable.finalY + 15
     })
 
-    // Summary section
-    if (selectedIds.length > 1) {
+    // --- Global Summary Section (Similar to Card layout) ---
+    if (selectedIds.length > 0) {
       if (currentY > 180) {
         doc.addPage()
         currentY = 20
       }
 
-      doc.setDrawColor(200, 200, 200)
+      doc.setDrawColor(colors.border[0], colors.border[1], colors.border[2])
       doc.line(14, currentY, 196, currentY)
-      currentY += 10
+      currentY += 15
 
-      doc.setFontSize(16)
-      doc.setTextColor(99, 102, 241)
-      doc.text(t('reports').summary, 14, currentY)
-      currentY += 5
+      // Summary Card (Left)
+      doc.setFillColor(243, 244, 246)
+      doc.roundedRect(14, currentY, 80, 70, 4, 4, 'F')
 
-      // 1. Category totals per workspace (Pivot table)
-      const catPivotHead = [
-        t('expenses').category,
-        ...workspacesInReport.map(ws => ({ content: ws.name, styles: { halign: 'right' } })),
-        { content: t('common').total, styles: { halign: 'right' } }
-      ]
+      doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.text('Summary', 35, currentY + 12)
 
-      const catPivotBody = sortedCategories.map(cat => {
-        const row: any[] = [cat]
-        workspacesInReport.forEach(ws => {
-          row.push((categoryWsMap[cat][ws.id] || 0).toFixed(2))
+      doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text('Total Expenses', 20, currentY + 25)
+
+      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(22)
+      doc.text(`$${grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, currentY + 38)
+
+      doc.setDrawColor(209, 213, 219)
+      doc.line(20, currentY + 45, 74, currentY + 45)
+
+      // Category Chart/List (Right)
+      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
+      doc.setFontSize(14)
+      doc.text('Expenses by Category', 105, currentY + 8)
+
+      const summaryRows = Object.entries(categoryWsMap)
+        .map(([name, wsMap]) => {
+          const total = Object.values(wsMap).reduce((s, v) => s + v, 0)
+          return [name, total]
         })
-        const catTotal = Object.values(categoryWsMap[cat]).reduce((s, v) => s + v, 0)
-        row.push(catTotal.toFixed(2))
-        return row
-      })
-
-      const catPivotFooter = [
-        t('common').total,
-        ...workspacesInReport.map(ws => wsTotals[ws.id].toFixed(2)),
-        grandTotal.toFixed(2)
-      ]
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .slice(0, 5) // Top 5
 
       autoTable(doc, {
-        ...commonTableProps,
-        startY: currentY,
-        styles: { fontSize: 8, cellPadding: 2 },
-        head: [catPivotHead],
-        body: catPivotBody.map(row => row.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right' } })),
-        foot: [catPivotFooter.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right', fontStyle: 'bold' } })],
-      })
-
-      currentY = (doc as any).lastAutoTable.finalY + 15
-
-      // 2. Workspace Totals Summary (with Percentage)
-      autoTable(doc, {
-        ...commonTableProps,
-        startY: currentY + 2,
-        head: [[
-          t('common').workspace,
-          { content: t('expenses').amount, styles: { halign: 'right' } },
-          { content: t('reports').percentage, styles: { halign: 'right' } }
-        ]],
-        body: workspacesInReport.map(ws => [
-          ws.name,
-          { content: wsTotals[ws.id].toFixed(2), styles: { halign: 'right' } },
-          { content: grandTotal > 0 ? ((wsTotals[ws.id] / grandTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
+        startY: currentY + 15,
+        margin: { left: 105 },
+        tableWidth: 90,
+        head: [[t('expenses').category, { content: t('expenses').amount, styles: { halign: 'right' } }, { content: '%', styles: { halign: 'right' } }]],
+        body: summaryRows.map(([name, total]) => [
+          name as string,
+          { content: (total as number).toFixed(2), styles: { halign: 'right' } },
+          { content: grandTotal > 0 ? (((total as number) / grandTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
         ]),
-        foot: [[
-          t('common').total,
-          { content: grandTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
-          { content: '100%', styles: { halign: 'right', fontStyle: 'bold' } }
-        ]],
+        theme: 'plain',
+        styles: { fontSize: 9, cellPadding: 2, textColor: colors.textDark },
+        headStyles: { fontStyle: 'bold', textColor: colors.primary, fillColor: [255, 255, 255] },
       })
     }
 
