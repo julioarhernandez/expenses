@@ -3,16 +3,20 @@ import type { Expense } from '@/types'
 export function exportToCSV(expenses: Expense[]) {
   const headers = ['Date', 'Merchant', 'Amount', 'Currency', 'Tax', 'Category', 'Payment Method', 'Notes']
 
-  const rows = expenses.map((e) => [
-    e.date,
-    e.merchant,
-    e.amount,
-    e.currency,
-    e.tax_amount ?? '',
-    e.category?.name ?? '',
-    e.payment_method ?? '',
-    (e.notes ?? '').replace(/"/g, '""'),
-  ])
+  const rows = expenses.map((e) => {
+    const [y, m, d] = e.date.split('-')
+    const dateStr = `${m}/${d}/${y}`
+    return [
+      dateStr,
+      e.merchant,
+      e.amount,
+      e.currency,
+      e.tax_amount ?? '',
+      e.category?.name ?? '',
+      e.payment_method ?? '',
+      (e.notes ?? '').replace(/"/g, '""'),
+    ]
+  })
 
   const csv = [headers, ...rows]
     .map((row) => row.map((cell) => `"${cell}"`).join(','))

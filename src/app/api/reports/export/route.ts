@@ -9,6 +9,12 @@ function toDate(y: number, m0: number, d: number) {
   return new Date(y, m0, d).toISOString().split('T')[0]
 }
 
+function formatDate(iso: string) {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-')
+  return `${m}/${d}/${y}`
+}
+
 function computeRange(period: string, year: number, month: number, quarter: number, half: number) {
   const today = new Date().toISOString().split('T')[0]
   let start: string, end: string, label: string
@@ -113,8 +119,8 @@ export async function GET(request: NextRequest) {
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
     doc.text(`${t('reports').period}: ${label.toUpperCase()}`, 14, 28)
-    doc.text(`${t('reports').range}: ${start} to ${end}`, 14, 33)
-    doc.text(`${t('reports').generated_at}: ${today}`, 14, 38)
+    doc.text(`${t('reports').range}: ${formatDate(start)} to ${formatDate(end)}`, 14, 33)
+    doc.text(`${t('reports').generated_at}: ${formatDate(today)}`, 14, 38)
     
     let currentY = 45
     let grandTotal = 0
@@ -134,6 +140,7 @@ export async function GET(request: NextRequest) {
       doc.text(ws.name.toUpperCase(), 14, currentY)
       currentY += 2
 
+      // Main Expenses Table
       autoTable(doc, {
         startY: currentY + 2,
         head: [[
@@ -144,7 +151,7 @@ export async function GET(request: NextRequest) {
           t('expenses').amount
         ]],
         body: wsExpenses.map(e => [
-          e.date,
+          formatDate(e.date),
           e.merchant,
           e.category?.name || '—',
           e.notes || '—',
@@ -161,6 +168,35 @@ export async function GET(request: NextRequest) {
         margin: { left: 14, right: 14 },
       })
       
+      currentY = (doc as any).lastAutoTable.finalY + 10
+
+      // Category Summary Table
+      const catTotals: Record<string, number> = {}
+      wsExpenses.forEach(e => {
+        const catName = e.category?.name || '—'
+        catTotals[catName] = (catTotals[catName] || 0) + Number(e.amount)
+      })
+
+      autoTable(doc, {
+        startY: currentY,
+        head: [[
+          t('expenses').category,
+          t('expenses').amount,
+          t('reports').percentage
+        ]],
+        body: Object.entries(catTotals)
+          .sort(([, a], [, b]) => b - a)
+          .map(([name, total]) => [
+            name,
+            { content: total.toFixed(2), styles: { halign: 'right' } },
+            { content: wsTotal > 0 ? ((total / wsTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
+          ]),
+        theme: 'grid',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [150, 150, 150], textColor: [255, 255, 255] },
+        margin: { left: 14, right: 14 },
+      })
+
       currentY = (doc as any).lastAutoTable.finalY + 15
     })
 
@@ -203,7 +239,7 @@ export async function GET(request: NextRequest) {
   const header = `${t('expenses').date},${t('expenses').merchant},${t('expenses').amount},Tax,${t('expenses').category},${t('expenses').payment_method},Workspace,${t('expenses').notes}`
   const lines = rows.map((e) =>
     [
-      csvEscape(e.date),
+      csvEscape(formatDate(e.date)),
       csvEscape(e.merchant),
       csvEscape(Number(e.amount).toFixed(2)),
       csvEscape(e.tax_amount != null ? Number(e.tax_amount).toFixed(2) : ''),

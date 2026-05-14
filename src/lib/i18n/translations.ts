@@ -179,6 +179,7 @@ export const translations = {
       workspace_total: 'Workspace Total',
       summary: 'Grand Total Summary',
       combined_desc: 'Total combined spending across {n} workspaces',
+      percentage: 'Percentage',
     },
   },
   es: {
@@ -361,6 +362,7 @@ export const translations = {
       workspace_total: 'Total del Espacio',
       summary: 'Resumen Total General',
       combined_desc: 'Gasto total combinado de {n} espacios',
+      percentage: 'Porcentaje',
     },
   },
 } as const

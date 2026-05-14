@@ -133,7 +133,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-muted-foreground font-medium w-[140px] whitespace-nowrap">
-                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy', { locale })}
+                {format(new Date(expense.date + 'T12:00:00'), 'MM/dd/yyyy')}
               </td>
               <td className="px-6 py-4 text-right">
                 <span className="font-bold text-foreground text-sm tabular-nums">
