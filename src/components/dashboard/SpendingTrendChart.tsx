@@ -28,21 +28,21 @@ export function SpendingTrendChart({ data }: { data: DataPoint[] }) {
           <AreaChart data={formatted} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#171717" stopOpacity={0.08} />
-                <stop offset="95%" stopColor="#171717" stopOpacity={0} />
+                <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.08} />
+                <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted/30" />
-            <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#737373' }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontSize: 10, fill: '#737373' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
             <Tooltip
               formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Spending']}
-              contentStyle={{ fontSize: 12, borderRadius: '8px', border: '1px solid #E5E5E5', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+              contentStyle={{ fontSize: 12, borderRadius: '8px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'var(--popover)', color: 'var(--popover-foreground)' }}
             />
             <Area
               type="monotone"
               dataKey="total"
-              stroke="#171717"
+              stroke="var(--foreground)"
               strokeWidth={2}
               fill="url(#spendGradient)"
             />

@@ -58,13 +58,13 @@ export function TopNav({ user }: { user: User }) {
   }
 
   return (
-    <header className="hidden md:flex items-center gap-4 px-6 h-16 border-b border-slate-100 bg-white sticky top-0 z-50 shrink-0">
+    <header className="hidden md:flex items-center gap-4 px-6 h-16 border-b border-border bg-background sticky top-0 z-50 shrink-0">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-3 shrink-0 group">
         <div className="w-10 h-10 bg-[#6366F1] rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100 transition-transform group-hover:scale-105">
           <span className="text-white font-bold text-xl">N</span>
         </div>
-        <span className="font-bold text-lg tracking-tight text-slate-900">Nova</span>
+        <span className="font-bold text-lg tracking-tight text-foreground">Nova</span>
       </Link>
 
       {/* Nav links */}
@@ -78,8 +78,8 @@ export function TopNav({ user }: { user: User }) {
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all',
                 isActive
-                  ? 'bg-slate-100 text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-accent text-accent-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               )}
             >
               <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-[#6366F1]")} />
@@ -94,13 +94,13 @@ export function TopNav({ user }: { user: User }) {
 
       {/* Workspace switcher */}
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-full border border-slate-100 transition-all hover:bg-slate-100 active:scale-95 outline-none min-w-0">
+        <DropdownMenuTrigger className="flex items-center gap-2 bg-muted px-3 py-2 rounded-full border border-border transition-all hover:bg-accent active:scale-95 outline-none min-w-0">
           <span className="text-lg">{wsIcon}</span>
-          <span className="text-sm font-semibold text-slate-700 truncate max-w-[120px]">{wsName}</span>
-          <ChevronDown className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
+          <span className="text-sm font-semibold text-foreground truncate max-w-[120px]">{wsName}</span>
+          <ChevronDown className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-slate-100 mt-2">
-          <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">
+        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-border mt-2">
+          <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1">
             {t('nav').switch_workspace}
           </div>
           {workspaces.map((ws) => (
@@ -109,15 +109,15 @@ export function TopNav({ user }: { user: User }) {
               onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
               className={cn(
                 "rounded-xl px-3 py-2 cursor-pointer transition-colors",
-                ws.id === activeWorkspaceId ? 'bg-indigo-50 text-indigo-600' : 'focus:bg-slate-50'
+                ws.id === activeWorkspaceId ? 'bg-accent text-accent-foreground' : 'focus:bg-accent'
               )}
             >
               <span className="mr-3 text-lg">{WORKSPACE_TYPE_ICONS[ws.type]}</span>
               <span className="font-semibold">{ws.name}</span>
             </DropdownMenuItem>
           ))}
-          <DropdownMenuSeparator className="bg-slate-50" />
-          <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')} className="rounded-xl px-3 py-2 focus:bg-slate-900 focus:text-white cursor-pointer">
+          <DropdownMenuSeparator className="bg-border/50" />
+          <DropdownMenuItem onClick={() => router.push('/settings?tab=workspaces')} className="rounded-xl px-3 py-2 focus:bg-foreground focus:text-background cursor-pointer">
             <Plus className="mr-3 h-4 w-4" />
             <span className="font-semibold">
               {t('nav').new_workspace}
