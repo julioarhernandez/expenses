@@ -20,15 +20,15 @@ export function VoiceExpenseFAB() {
   const [showHint, setShowHint] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [mounted, setMounted] = useState(false)
-  
+
   useEffect(() => {
     setMounted(true)
     const timer = setTimeout(() => setShowHint(false), 12000)
     return () => clearTimeout(timer)
   }, [])
-  
+
   const supabase = createClient()
-  
+
   const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null
   const recognitionRef = useRef<any>(null)
 
@@ -51,7 +51,7 @@ export function VoiceExpenseFAB() {
     recognition.lang = voiceLanguage
 
     recognition.onstart = () => setIsRecording(true)
-    
+
     recognition.onresult = async (event: any) => {
       setIsRecording(false)
       const transcript = event.results[0][0].transcript
@@ -79,9 +79,9 @@ export function VoiceExpenseFAB() {
   async function processSpeech(transcript: string) {
     if (!activeWorkspaceId) return
     setIsProcessing(true)
-    
+
     const toastId = toast.loading(lang === 'es' ? `Procesando: "${transcript}"...` : `Processing: "${transcript}"...`)
-    
+
     try {
       const res = await fetch('/api/ai-extract', {
         method: 'POST',
@@ -91,23 +91,23 @@ export function VoiceExpenseFAB() {
           categories: categories.map(c => c.name)
         })
       })
-      
+
       if (!res.ok) throw new Error('AI extraction failed')
-      
+
       const extracted = await res.json()
-      
+
       // Map category
       let categoryId = null
       if (extracted.suggested_category) {
         const cat = categories.find(c => c.name.toLowerCase() === extracted.suggested_category?.toLowerCase())
         if (cat) categoryId = cat.id
       }
-      
+
       // Set defaults for required fields if AI misses them
       const expenseDate = extracted.date || format(new Date(), 'yyyy-MM-dd')
       const expenseAmount = extracted.amount || 0
       const expenseMerchant = extracted.merchant || 'Unknown'
-      
+
       openDialog({
         draft: {
           workspace_id: activeWorkspaceId,
@@ -123,7 +123,7 @@ export function VoiceExpenseFAB() {
           receipt_path: null
         } as any
       })
-      
+
       toast.success(lang === 'es' ? `¡Listo! Revisa los detalles para ${expenseMerchant}` : `Ready! Check the details for ${expenseMerchant}`, { id: toastId })
     } catch (err: any) {
       console.error(err)
@@ -138,7 +138,7 @@ export function VoiceExpenseFAB() {
       toast.error(lang === 'es' ? 'El reconocimiento de voz no es soportado en este navegador.' : 'Speech recognition is not supported in this browser.')
       return
     }
-    
+
     if (isRecording) {
       recognitionRef.current?.stop()
     } else {
@@ -156,16 +156,16 @@ export function VoiceExpenseFAB() {
   return (
     <div className="fixed z-50 bottom-28 right-6 md:bottom-8 md:right-8 flex items-center gap-3">
       {mounted && showHint && !isRecording && !isProcessing && (
-        <div className="bg-white/60 backdrop-blur-md border border-neutral-200/50 px-3 py-2 rounded-xl shadow-lg text-[11px] font-medium text-neutral-600 animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[180px] text-right leading-tight">
+        <div className="bg-background/80 backdrop-blur-md border border-border px-3 py-2 rounded-xl shadow-lg text-[11px] font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[180px] text-right leading-tight">
           {examples[lang] || examples['en']}
         </div>
       )}
       <button
         onClick={toggleRecording}
         disabled={isProcessing}
-        className={`flex items-center justify-center transition-all duration-300 shadow-xl
-          w-14 h-14 rounded-full
-          ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-neutral-900 hover:bg-neutral-800 hover:scale-105 active:scale-95'}
+        className={`flex items-center justify-center transition-all duration-300 transform active:scale-95
+          w-14 h-14 rounded-2xl text-white ring-4 ring-background shadow-lg
+          ${isRecording ? 'bg-red-500 shadow-red-200 animate-pulse scale-110' : 'bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
           ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
