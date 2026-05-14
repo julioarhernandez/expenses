@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  AreaChart, Area, BarChart, Bar,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,13 +68,7 @@ export function SpendingTrendChart({ data, workspaces, isMulti }: SpendingTrendC
               ))}
             </BarChart>
           ) : (
-            <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={workspaces[0]?.color ?? '#6366f1'} stopOpacity={0.18} />
-                  <stop offset="95%" stopColor={workspaces[0]?.color ?? '#6366f1'} stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} tickFormatter={fmtTick} width={40} />
@@ -82,14 +76,13 @@ export function SpendingTrendChart({ data, workspaces, isMulti }: SpendingTrendC
                 formatter={(v) => [`$${Number(v).toLocaleString()}`, t('dashboard').total_spending]}
                 contentStyle={tooltipStyle}
               />
-              <Area
-                type="monotone"
+              <Bar
                 dataKey={workspaces[0]?.id ?? 'total'}
-                stroke={workspaces[0]?.color ?? '#6366f1'}
-                strokeWidth={2}
-                fill="url(#spendGradient)"
+                fill={workspaces[0]?.color ?? '#6366f1'}
+                radius={[3, 3, 0, 0]}
+                maxBarSize={40}
               />
-            </AreaChart>
+            </BarChart>
           )}
         </ResponsiveContainer>
       </CardContent>

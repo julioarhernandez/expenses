@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useTransition, useState } from 'react'
+import { useTransition, useState, useEffect } from 'react'
 import { Download, Loader2 } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
@@ -66,6 +66,10 @@ export function DashboardFilters({
   const [half, setHalf] = useState(initialHalf)
   const [year, setYear] = useState(initialYear)
   const [selectedIds, setSelectedIds] = useState<string[]>(initialIds)
+
+  useEffect(() => {
+    setSelectedIds(initialIds)
+  }, [initialIds.join(',')])
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: currentYear - 2021 }, (_, i) => currentYear - i)

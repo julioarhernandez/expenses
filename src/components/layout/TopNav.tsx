@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User as UserIcon, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -35,6 +35,7 @@ const WORKSPACE_TYPE_ICONS: Record<string, string> = {
 export function TopNav({ user }: { user: User }) {
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
   const { t, lang } = useTranslation()
@@ -117,7 +118,16 @@ export function TopNav({ user }: { user: User }) {
           {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
-              onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
+              onClick={() => {
+                setActiveWorkspaceId(ws.id)
+                if (pathname === '/dashboard') {
+                  const params = new URLSearchParams(searchParams.toString())
+                  params.set('workspaces', ws.id)
+                  router.replace('/dashboard?' + params.toString())
+                } else {
+                  router.refresh()
+                }
+              }}
               className={cn(
                 "rounded-xl px-3 py-2 cursor-pointer transition-colors",
                 ws.id === activeWorkspaceId ? 'bg-accent text-accent-foreground' : 'focus:bg-accent'

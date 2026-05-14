@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { ChevronDown, Plus, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -26,6 +26,8 @@ export function MobileHeader() {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useWorkspaceStore()
   const { t, lang } = useTranslation()
   const active = activeWorkspace()
@@ -67,7 +69,16 @@ export function MobileHeader() {
           {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
-              onClick={() => { setActiveWorkspaceId(ws.id); router.refresh() }}
+              onClick={() => {
+                setActiveWorkspaceId(ws.id)
+                if (pathname === '/dashboard') {
+                  const params = new URLSearchParams(searchParams.toString())
+                  params.set('workspaces', ws.id)
+                  router.replace('/dashboard?' + params.toString())
+                } else {
+                  router.refresh()
+                }
+              }}
               className={cn(
                 "rounded-xl px-3 py-2 cursor-pointer",
                 ws.id === activeWorkspaceId ? 'bg-accent text-accent-foreground' : 'focus:bg-accent'
