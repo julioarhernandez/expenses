@@ -171,6 +171,15 @@ export const translations = {
       min_one_workspace: 'You must have at least one workspace',
       delete_confirm: 'Delete workspace "{name}"? All expenses in it will be deleted.',
     },
+    reports: {
+      title: 'Expense Report',
+      period: 'Period',
+      range: 'Range',
+      generated_at: 'Generated on',
+      workspace_total: 'Workspace Total',
+      summary: 'Grand Total Summary',
+      combined_desc: 'Total combined spending across {n} workspaces',
+    },
   },
   es: {
     common: {
@@ -343,6 +352,15 @@ export const translations = {
       workspace_default_success: 'es ahora el espacio predeterminado',
       min_one_workspace: 'Debes tener al menos un espacio de trabajo',
       delete_confirm: '¿Eliminar el espacio "{name}"? Todos los gastos en él serán eliminados.',
+    },
+    reports: {
+      title: 'Reporte de Gastos',
+      period: 'Periodo',
+      range: 'Rango',
+      generated_at: 'Generado el',
+      workspace_total: 'Total del Espacio',
+      summary: 'Resumen Total General',
+      combined_desc: 'Gasto total combinado de {n} espacios',
     },
   },
 } as const
