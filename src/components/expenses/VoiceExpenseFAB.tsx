@@ -11,6 +11,11 @@ import type { Category } from '@/types'
 import { useTranslation } from '@/hooks/useTranslation'
 import { useHelpStore } from '@/store/help'
 
+const MAX_DURATION = 20
+const COUNTDOWN_AT = 3
+const RADIUS = 30
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+
 export function VoiceExpenseFAB() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const voiceLanguage = useWorkspaceStore((s) => s.voiceLanguage)
@@ -22,6 +27,12 @@ export function VoiceExpenseFAB() {
   const [showHint, setShowHint] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
   const [mounted, setMounted] = useState(false)
+  const [recordingProgress, setRecordingProgress] = useState(0)
+  const [countdown, setCountdown] = useState<number | null>(null)
+
+  const recognitionRef = useRef<any>(null)
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const autoStopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -32,7 +43,6 @@ export function VoiceExpenseFAB() {
   const supabase = createClient()
 
   const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null
-  const recognitionRef = useRef<any>(null)
 
   useEffect(() => {
     if (!activeWorkspaceId) return
@@ -45,6 +55,15 @@ export function VoiceExpenseFAB() {
       })
   }, [activeWorkspaceId])
 
+  function clearRecordingTimers() {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
+    if (autoStopTimeoutRef.current) clearTimeout(autoStopTimeoutRef.current)
+    progressIntervalRef.current = null
+    autoStopTimeoutRef.current = null
+    setRecordingProgress(0)
+    setCountdown(null)
+  }
+
   useEffect(() => {
     if (!mounted || !SpeechRecognition) return
     const recognition = new SpeechRecognition()
@@ -52,10 +71,28 @@ export function VoiceExpenseFAB() {
     recognition.interimResults = false
     recognition.lang = voiceLanguage
 
-    recognition.onstart = () => setIsRecording(true)
+    recognition.onstart = () => {
+      setIsRecording(true)
+      setRecordingProgress(0)
+      setCountdown(null)
+
+      const startTime = Date.now()
+      progressIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000
+        const progress = Math.min(elapsed / MAX_DURATION, 1)
+        setRecordingProgress(progress)
+        const remaining = MAX_DURATION - elapsed
+        setCountdown(remaining <= COUNTDOWN_AT ? Math.ceil(remaining) : null)
+      }, 100)
+
+      autoStopTimeoutRef.current = setTimeout(() => {
+        recognitionRef.current?.stop()
+      }, MAX_DURATION * 1000)
+    }
 
     recognition.onresult = async (event: any) => {
       setIsRecording(false)
+      clearRecordingTimers()
       const transcript = event.results[0][0].transcript
       if (transcript) {
         toast.info(lang === 'es' ? `Escuchado: "${transcript}"` : `Heard: "${transcript}"`)
@@ -64,15 +101,17 @@ export function VoiceExpenseFAB() {
     }
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error', event.error)
       setIsRecording(false)
+      clearRecordingTimers()
       if (event.error !== 'no-speech') {
+        console.error('Speech recognition error', event.error)
         toast.error(lang === 'es' ? 'Error al reconocer voz. Intenta de nuevo.' : 'Failed to recognize speech. Please try again.')
       }
     }
 
     recognition.onend = () => {
       setIsRecording(false)
+      clearRecordingTimers()
     }
 
     recognitionRef.current = recognition
@@ -98,14 +137,12 @@ export function VoiceExpenseFAB() {
 
       const extracted = await res.json()
 
-      // Map category
       let categoryId = null
       if (extracted.suggested_category) {
         const cat = categories.find(c => c.name.toLowerCase() === extracted.suggested_category?.toLowerCase())
         if (cat) categoryId = cat.id
       }
 
-      // Set defaults for required fields if AI misses them
       const expenseDate = extracted.date || format(new Date(), 'yyyy-MM-dd')
       const expenseAmount = extracted.amount || 0
       const expenseMerchant = extracted.merchant || 'Unknown'
@@ -169,25 +206,61 @@ export function VoiceExpenseFAB() {
     <div className="fixed z-50 bottom-28 right-6 md:bottom-8 md:right-8 flex items-center gap-3">
       {mounted && showHint && !isRecording && !isProcessing && (
         <div className="bg-background/80 backdrop-blur-md border border-border px-3 py-2 rounded-xl shadow-lg text-[11px] font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[180px] text-right leading-tight">
-          {examples[lang] || examples['en']}
+          {examples[lang as keyof typeof examples] || examples['en']}
         </div>
       )}
-      <button
-        onClick={toggleRecording}
-        disabled={isProcessing}
-        className={`flex items-center justify-center transition-all duration-300 transform active:scale-95
-          w-14 h-14 rounded-2xl text-white ring-4 ring-background shadow-lg
-          ${isRecording ? 'bg-red-500 shadow-red-200 animate-pulse scale-110' : 'bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
-          ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-        `}
-        title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
-      >
-        {isProcessing ? (
-          <Loader2 className="w-6 h-6 text-white animate-spin" />
-        ) : (
-          <Mic className="w-6 h-6 text-white" />
+
+      <div className="relative">
+        {countdown !== null && (
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse z-10">
+            {countdown}
+          </div>
         )}
-      </button>
+
+        <div className="relative w-[64px] h-[64px] flex items-center justify-center">
+          {isRecording && (
+            <svg
+              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
+              viewBox="0 0 64 64"
+            >
+              <circle
+                cx="32" cy="32" r={RADIUS}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="text-white/25"
+              />
+              <circle
+                cx="32" cy="32" r={RADIUS}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="text-white transition-all duration-100"
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={CIRCUMFERENCE * recordingProgress}
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+
+          <button
+            onClick={toggleRecording}
+            disabled={isProcessing}
+            className={`flex items-center justify-center transition-all duration-300 transform active:scale-95
+              w-14 h-14 rounded-2xl text-white ring-4 ring-background shadow-lg
+              ${isRecording ? 'bg-red-500 shadow-red-200 animate-pulse scale-110' : 'bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
+              ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+            title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
+          >
+            {isProcessing ? (
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            ) : (
+              <Mic className="w-6 h-6 text-white" />
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
