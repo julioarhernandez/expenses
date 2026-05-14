@@ -187,34 +187,48 @@ export async function GET(request: NextRequest) {
 
     // --- Metadata Section (Prepared By, Department, Period) ---
     let metaY = 60 // Moved up due to shorter header
+    // Icons helper
+    const addMetaIcon = (imgPath: string, x: number, y: number) => {
+      try {
+        const fullPath = path.join(process.cwd(), 'public', imgPath)
+        const data = fs.readFileSync(fullPath).toString('base64')
+        doc.addImage(data, 'PNG', x, y, 10.5, 10) // Scale 64x60px to ~10mm
+      } catch (e) {
+        console.error(`Missing icon: ${imgPath}`)
+      }
+    }
+
     // Column 1: Prepared By
+    addMetaIcon('report-user.png', 14, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
     doc.setFontSize(9)
-    doc.text('Prepared By', 14, metaY)
+    doc.text('Prepared By', 28, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
-    doc.text(user.email?.split('@')[0].replace('.', ' ').toUpperCase() || 'USER', 14, metaY + 6)
+    doc.text(user.email?.split('@')[0].replace('.', ' ').toUpperCase() || 'USER', 28, metaY + 6)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
-    doc.text(user.email || '', 14, metaY + 12)
+    doc.text(user.email || '', 28, metaY + 12)
 
     // Column 2: Department/Workspace
+    addMetaIcon('report-workspace.png', 80, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
-    doc.text('Workspace', 80, metaY)
+    doc.text('Workspace', 94, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
-    doc.text(workspacesInReport.length > 1 ? 'MULTI-WORKSPACE' : workspacesInReport[0]?.name || '—', 80, metaY + 6)
+    doc.text(workspacesInReport.length > 1 ? 'MULTI-WORKSPACE' : workspacesInReport[0]?.name || '—', 94, metaY + 6)
 
     // Column 3: Report Period
+    addMetaIcon('report-date.png', 140, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
-    doc.text('Report Period', 140, metaY)
+    doc.text('Report Period', 154, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
-    doc.text(`${formatDate(start)} – ${formatDate(end)}`, 140, metaY + 6)
+    doc.text(`${formatDate(start)} – ${formatDate(end)}`, 154, metaY + 6)
 
     let currentY = 85 // Moved up to close gap
 
