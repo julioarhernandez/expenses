@@ -7,6 +7,7 @@ import { WorkspaceProvider } from '@/components/layout/WorkspaceProvider'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { VoiceExpenseFAB } from '@/components/expenses/VoiceExpenseFAB'
 import { GlobalExpenseDialog } from '@/components/expenses/GlobalExpenseDialog'
+import { HelpSidebar } from '@/components/help/HelpSidebar'
 import type { Workspace } from '@/types'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <MobileBottomNav user={user} />
       <VoiceExpenseFAB />
       <GlobalExpenseDialog />
+      <HelpSidebar />
       </ThemeProvider>
     </WorkspaceProvider>
   )

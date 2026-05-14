@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User as UserIcon } from 'lucide-react'
+import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User as UserIcon, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useHelpStore } from '@/store/help'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -40,6 +41,7 @@ export function TopNav({ user }: { user: User }) {
   const active = activeWorkspace()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  const { openHelp } = useHelpStore()
 
   const navItems = [
     { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
@@ -91,6 +93,15 @@ export function TopNav({ user }: { user: User }) {
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Help */}
+      <button
+        onClick={() => openHelp()}
+        className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+        title="Help"
+      >
+        <HelpCircle className="h-4 w-4" />
+      </button>
 
       {/* Workspace switcher */}
       <DropdownMenu>

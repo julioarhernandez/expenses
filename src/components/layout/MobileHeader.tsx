@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, Plus, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useHelpStore } from '@/store/help'
 
 const WORKSPACE_TYPE_ICONS: Record<string, string> = {
   personal: '👤',
@@ -31,6 +32,7 @@ export function MobileHeader() {
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
   const wsName = mounted && active ? active.name : (lang === 'es' ? 'Espacio' : 'Workspace')
+  const { openHelp } = useHelpStore()
 
   return (
     <header className="flex md:hidden items-center justify-between gap-3 px-4 h-16 border-b border-border bg-background sticky top-0 z-50 shrink-0">
@@ -41,6 +43,15 @@ export function MobileHeader() {
         </div>
         <span className="font-bold text-base tracking-tight text-foreground">Nova</span>
       </div>
+
+      {/* Help button */}
+      <div className="flex-1" />
+      <button
+        onClick={() => openHelp()}
+        className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all mr-1"
+      >
+        <HelpCircle className="h-4 w-4" />
+      </button>
 
       {/* Workspace dropdown */}
       <DropdownMenu>

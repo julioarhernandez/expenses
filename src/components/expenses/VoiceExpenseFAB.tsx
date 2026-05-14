@@ -9,12 +9,14 @@ import { useExpenseStore } from '@/store/expenses'
 import { format } from 'date-fns'
 import type { Category } from '@/types'
 import { useTranslation } from '@/hooks/useTranslation'
+import { useHelpStore } from '@/store/help'
 
 export function VoiceExpenseFAB() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const voiceLanguage = useWorkspaceStore((s) => s.voiceLanguage)
   const { openDialog } = useExpenseStore()
   const { t, lang } = useTranslation()
+  const { openHelp } = useHelpStore()
   const [isRecording, setIsRecording] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showHint, setShowHint] = useState(true)
@@ -133,6 +135,8 @@ export function VoiceExpenseFAB() {
     }
   }
 
+  const MIC_HELP_KEY = 'nova-mic-help-seen'
+
   const toggleRecording = () => {
     if (!SpeechRecognition) {
       toast.error(lang === 'es' ? 'El reconocimiento de voz no es soportado en este navegador.' : 'Speech recognition is not supported in this browser.')
@@ -141,9 +145,17 @@ export function VoiceExpenseFAB() {
 
     if (isRecording) {
       recognitionRef.current?.stop()
-    } else {
-      recognitionRef.current?.start()
+      return
     }
+
+    const alreadySeen = typeof window !== 'undefined' && localStorage.getItem(MIC_HELP_KEY) === '1'
+    if (!alreadySeen) {
+      localStorage.setItem(MIC_HELP_KEY, '1')
+      openHelp('voice')
+      return
+    }
+
+    recognitionRef.current?.start()
   }
 
   if (!mounted || !SpeechRecognition) return null
