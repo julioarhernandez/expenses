@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Plus, Download, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -32,6 +33,37 @@ export default function ExpensesPage() {
   const [amountOp, setAmountOp] = useState<'' | 'lt' | 'gt' | 'eq' | 'between'>('')
   const [amountVal, setAmountVal] = useState('')
   const [amountVal2, setAmountVal2] = useState('')
+  const searchParams = useSearchParams()
+
+  // Handle URL search params — applied when navigating from dashboard cards
+  useEffect(() => {
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
+    const q = searchParams.get('q')
+    const category_id = searchParams.get('category_id')
+    const reset = searchParams.get('reset')
+
+    if (reset === 'true') {
+      resetFilters()
+      setDatePeriod('all')
+      setAmountOp('')
+      setAmountVal('')
+      setAmountVal2('')
+    } else if (from || to || q || category_id) {
+      setFilters({
+        from: from || null,
+        to: to || null,
+        q: q || '',
+        category_id: category_id || null,
+      })
+      // Always open filter panel when navigating from dashboard
+      setFiltersOpen(true)
+      if (from || to) {
+        setDatePeriod('custom')
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   useEffect(() => {
     const supabase = createClient()

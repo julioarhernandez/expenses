@@ -254,11 +254,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   expenses.forEach((e) => { vendorTotals[e.merchant] = (vendorTotals[e.merchant] ?? 0) + Number(e.amount) })
   const topMerchant = Object.entries(vendorTotals).sort(([, a], [, b]) => b - a)[0]
 
-  const catTotalsForStat: Record<string, { name: string; color: string; total: number }> = {}
+  const catTotalsForStat: Record<string, { id: string; name: string; color: string; total: number }> = {}
   expenses.forEach((e) => {
     if (e.category) {
       const n = e.category.name
-      if (!catTotalsForStat[n]) catTotalsForStat[n] = { name: n, color: e.category.color, total: 0 }
+      if (!catTotalsForStat[n]) catTotalsForStat[n] = { id: e.category.id, name: n, color: e.category.color, total: 0 }
       catTotalsForStat[n].total += Number(e.amount)
     }
   })
@@ -313,65 +313,87 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
-          <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').period_total}</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <p className="text-3xl font-bold text-foreground tabular-nums">{fmt(periodTotal)}</p>
-            <div className={`flex items-center gap-1 text-xs mt-2 font-semibold ${changeDir === 'up' ? 'text-[#B58371]' : changeDir === 'down' ? 'text-[#8DA399]' : 'text-muted-foreground'}`}>
-              <ChangeIcon className="h-3.5 w-3.5" />
-              <span>
-                {isNewSpending
-                  ? t('dashboard').new_spending
-                  : changePct === 0
-                    ? (lang === 'es' ? 'Sin cambios' : 'No change')
-                    : `${Math.abs(changePct).toFixed(1)}% ${t('dashboard').vs_prev_period}`}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href={`/expenses?from=${start}&to=${end}`} className="block group">
+          <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all group-hover:border-foreground/20 cursor-pointer">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').period_total}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <p className="text-3xl font-bold text-foreground tabular-nums">{fmt(periodTotal)}</p>
+              <div className={`flex items-center gap-1 text-xs mt-2 font-semibold ${changeDir === 'up' ? 'text-[#B58371]' : changeDir === 'down' ? 'text-[#8DA399]' : 'text-muted-foreground'}`}>
+                <ChangeIcon className="h-3.5 w-3.5" />
+                <span>
+                  {isNewSpending
+                    ? t('dashboard').new_spending
+                    : changePct === 0
+                      ? (lang === 'es' ? 'Sin cambios' : 'No change')
+                      : `${Math.abs(changePct).toFixed(1)}% ${t('dashboard').vs_prev_period}`}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
-          <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{lang === 'es' ? 'Período anterior' : 'Prev Period'}</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <p className="text-3xl font-bold text-foreground tabular-nums">{fmt(previousTotal)}</p>
-            <p className="text-xs text-muted-foreground mt-2 font-medium">{prevStart} — {prevEnd}</p>
-          </CardContent>
-        </Card>
+        <Link href={`/expenses?from=${prevStart}&to=${prevEnd}`} className="block group">
+          <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all group-hover:border-foreground/20 cursor-pointer">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{lang === 'es' ? 'Período anterior' : 'Prev Period'}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <p className="text-3xl font-bold text-foreground tabular-nums">{fmt(previousTotal)}</p>
+              <p className="text-xs text-muted-foreground mt-2 font-medium">{prevStart} — {prevEnd}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
-          <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_category}</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            {topCategory ? (
-              <>
+        {topCategory ? (
+          <Link href={`/expenses?category_id=${topCategory.id}&from=${start}&to=${end}`} className="block group">
+            <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all group-hover:border-foreground/20 cursor-pointer">
+              <CardHeader className="pb-1 pt-6 px-6">
+                <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_category}</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
                 <div className="flex items-center gap-2">
                   <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: topCategory.color }} />
                   <p className="text-xl font-bold text-foreground truncate">{topCategory.name}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 font-medium tabular-nums">{fmt(topCategory.total)}</p>
-              </>
-            ) : <p className="text-muted-foreground text-sm">—</p>}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_category}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <p className="text-muted-foreground text-sm">—</p>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
-          <CardHeader className="pb-1 pt-6 px-6">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_vendor}</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            {topMerchant ? (
-              <>
+        {topMerchant ? (
+          <Link href={`/expenses?q=${encodeURIComponent(topMerchant[0])}&from=${start}&to=${end}`} className="block group">
+            <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all group-hover:border-foreground/20 cursor-pointer">
+              <CardHeader className="pb-1 pt-6 px-6">
+                <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_vendor}</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
                 <p className="text-xl font-bold text-foreground truncate">{topMerchant[0]}</p>
                 <p className="text-xs text-muted-foreground mt-2 font-medium tabular-nums">{fmt(topMerchant[1])} total</p>
-              </>
-            ) : <p className="text-muted-foreground text-sm">—</p>}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard').top_vendor}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <p className="text-muted-foreground text-sm">—</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Charts row 1 */}
@@ -429,7 +451,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="bg-card border border-border rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">{t('dashboard').recent_expenses}</h2>
-          <Link href="/expenses" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/expenses?reset=true" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
             {t('dashboard').view_all}
           </Link>
         </div>
