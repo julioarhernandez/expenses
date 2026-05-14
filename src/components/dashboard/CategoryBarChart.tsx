@@ -3,51 +3,96 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from '@/hooks/useTranslation'
 
-interface DataPoint {
+interface CategoryDataPoint {
   name: string
   color: string
-  total: number
+  totals: Record<string, number>
+  grandTotal: number
+}
+
+interface WorkspaceInfo {
+  id: string
+  name: string
+  color: string
+}
+
+interface CategoryBarChartProps {
+  data: CategoryDataPoint[]
+  workspaces: WorkspaceInfo[]
+  isMulti: boolean
 }
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
-export function CategoryBarChart({ data }: { data: DataPoint[] }) {
+export function CategoryBarChart({ data, workspaces, isMulti }: CategoryBarChartProps) {
   const { t } = useTranslation()
-  if (data.length === 0) {
+  const rows = data.slice(0, 8)
+  const max = Math.max(...rows.map((d) => d.grandTotal), 1)
+  const singleWsId = workspaces[0]?.id
+
+  if (rows.length === 0) {
     return (
-      <Card className="border-border/50">
-        <CardHeader className="pb-2 pt-4 px-4">
-          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard').by_category}</CardTitle>
+      <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl">
+        <CardHeader className="pb-2 pt-6 px-6">
+          <CardTitle className="text-sm font-bold text-foreground">{t('dashboard').by_category}</CardTitle>
         </CardHeader>
-        <CardContent className="px-4 pb-4 flex items-center justify-center h-32 text-muted-foreground text-sm">
+        <CardContent className="px-6 pb-6 flex items-center justify-center h-32 text-muted-foreground text-sm">
           {t('dashboard').no_data}
         </CardContent>
       </Card>
     )
   }
 
-  const max = Math.max(...data.map((d) => Number(d.total)), 1)
-  const rows = data.slice(0, 7).map((d) => ({ ...d, total: Number(d.total) }))
-
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard').by_category}</CardTitle>
+    <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl">
+      <CardHeader className="pb-2 pt-6 px-6">
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="text-sm font-bold text-foreground">{t('dashboard').by_category}</CardTitle>
+          {isMulti && (
+            <div className="flex flex-wrap gap-x-3 gap-y-1 justify-end">
+              {workspaces.map((ws) => (
+                <span key={ws.id} className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+                  <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ws.color }} />
+                  {ws.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="px-4 pb-4 space-y-2.5">
+      <CardContent className="px-6 pb-6 space-y-3">
         {rows.map((d) => (
           <div key={d.name} className="space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium truncate">{d.name}</span>
-              <span className="text-xs text-muted-foreground shrink-0 ml-2 tabular-nums">{fmt(d.total)}</span>
+              <span className="text-xs font-semibold text-foreground truncate max-w-[130px]">{d.name}</span>
+              <span className="text-xs text-muted-foreground font-medium tabular-nums shrink-0 ml-2">{fmt(d.grandTotal)}</span>
             </div>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${(d.total / max) * 100}%`, backgroundColor: 'var(--foreground)' }}
-              />
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden flex">
+              {isMulti ? (
+                workspaces.map((ws) => {
+                  const amt = d.totals[ws.id] ?? 0
+                  const pct = (amt / max) * 100
+                  if (pct <= 0) return null
+                  return (
+                    <div
+                      key={ws.id}
+                      className="h-full transition-all duration-500"
+                      style={{ width: `${pct}%`, backgroundColor: ws.color }}
+                      title={`${ws.name}: ${fmt(amt)}`}
+                    />
+                  )
+                })
+              ) : (
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${((d.totals[singleWsId] ?? 0) / max) * 100}%`,
+                    backgroundColor: d.color,
+                  }}
+                />
+              )}
             </div>
           </div>
         ))}
