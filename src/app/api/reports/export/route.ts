@@ -326,6 +326,46 @@ export async function GET(request: NextRequest) {
           { content: '100%', styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
       })
+
+      // Category Totals Summary (Global)
+      currentY = (doc as any).lastAutoTable.finalY + 15
+      if (currentY > 180) {
+        doc.addPage()
+        currentY = 20
+      }
+
+      doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2])
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.text(t('dashboard').by_category.toUpperCase(), 14, currentY + 5)
+      currentY += 10
+
+      const globalCatTotals = Object.entries(categoryWsMap)
+        .map(([name, wsMap]) => {
+          const total = Object.values(wsMap).reduce((s, v) => s + v, 0)
+          return [name, total]
+        })
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+
+      autoTable(doc, {
+        ...commonTableProps,
+        startY: currentY,
+        head: [[
+          t('expenses').category,
+          { content: t('expenses').amount, styles: { halign: 'right' } },
+          { content: t('reports').percentage, styles: { halign: 'right' } }
+        ]],
+        body: globalCatTotals.map(([name, total]) => [
+          name as string,
+          { content: (total as number).toFixed(2), styles: { halign: 'right' } },
+          { content: grandTotal > 0 ? (((total as number) / grandTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
+        ]),
+        foot: [[
+          t('common').total,
+          { content: grandTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: '100%', styles: { halign: 'right', fontStyle: 'bold' } }
+        ]],
+      })
     }
 
     const pdfBuffer = doc.output('arraybuffer')
