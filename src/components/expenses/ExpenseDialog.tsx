@@ -230,19 +230,19 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
   return (
     <>
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-0 border-l border-neutral-100">
+      <SheetContent className="w-full sm:max-w-lg min-w-[350px] overflow-y-auto p-0 border-l border-border bg-background">
         <div className="p-8 space-y-8">
           <SheetHeader className="space-y-1">
-            <SheetTitle className="text-2xl font-bold text-[#171717]">
+            <SheetTitle className="text-2xl font-bold text-foreground">
               {expense ? t('expense_dialog').edit_title : t('expense_dialog').add_title}
             </SheetTitle>
-            <p className="text-sm text-neutral-500 font-medium">
+            <p className="text-sm text-muted-foreground font-medium">
               {expense ? t('expense_dialog').edit_desc : t('expense_dialog').add_desc}
             </p>
           </SheetHeader>
 
           <div className="space-y-8">
-            <div className="bg-neutral-50/50 p-4 rounded-2xl border border-neutral-100">
+            <div className="bg-muted/30 p-4 rounded-2xl border border-border">
               <ReceiptUploader
                 onFileSelected={(file, localUrl) => {
                   setPendingFile(file)
@@ -264,7 +264,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                     variant="ghost"
                     size="sm"
                     onClick={() => setReceiptOpen(true)}
-                    className="h-8 px-3 text-xs font-bold text-neutral-500 hover:text-[#171717] hover:bg-white rounded-lg transition-all gap-2"
+                    className="h-8 px-3 text-xs font-bold rounded-lg transition-all gap-2"
                   >
                     <ScanSearch className="h-3.5 w-3.5" />
                     Preview Receipt
@@ -276,21 +276,21 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                 <div className="col-span-2 space-y-2">
-                  <Label htmlFor="merchant" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').merchant_label} *</Label>
+                  <Label htmlFor="merchant" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').merchant_label} *</Label>
                   <Input
                     id="merchant"
                     value={form.merchant}
                     onChange={(e) => set('merchant', e.target.value)}
                     placeholder={t('expense_dialog').merchant_placeholder}
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                    className="rounded-xl h-11"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').amount_label} *</Label>
+                  <Label htmlFor="amount" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').amount_label} *</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium text-sm">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">$</span>
                     <Input
                       id="amount"
                       type="number"
@@ -299,25 +299,25 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                       value={form.amount}
                       onChange={(e) => set('amount', e.target.value)}
                       placeholder="0.00"
-                      className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11 pl-7 font-semibold"
+                      className="rounded-xl h-11 pl-7 font-semibold"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').date_label} *</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').date_label} *</Label>
                   <Popover open={dateOpen} onOpenChange={setDateOpen}>
                     <PopoverTrigger
                       className={cn(
-                        'w-full flex items-center justify-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-3 h-11 text-sm font-medium transition-all hover:bg-neutral-100',
-                        !form.date && 'text-neutral-400'
+                        'w-full flex items-center justify-start gap-3 rounded-xl border border-input bg-background px-3 h-11 text-sm font-medium transition-all hover:bg-accent',
+                        !form.date && 'text-muted-foreground'
                       )}
                     >
-                      <CalendarIcon className="h-4 w-4 text-neutral-400" />
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground shrink-0" />
                       {form.date ? format(new Date(form.date + 'T12:00:00'), 'MMM d, yyyy', { locale }) : (lang === 'es' ? 'Seleccionar fecha' : 'Pick a date')}
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-neutral-100">
+                    <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border">
                       <Calendar
                         mode="single"
                         locale={locale}
@@ -332,17 +332,17 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').category_label}</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').category_label}</Label>
                   <Select
                     value={form.category_id}
                     onValueChange={(v) => set('category_id', v ?? '')}
                   >
-                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                    <SelectTrigger className="rounded-xl h-11">
                       <SelectValue placeholder={lang === 'es' ? 'Seleccionar categoría' : 'Select category'}>
                         {form.category_id ? categories.find(c => c.id === form.category_id)?.name : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                    <SelectContent className="rounded-xl shadow-xl">
                       {categories.map((c) => (
                         <SelectItem key={c.id} value={c.id} label={c.name}>
                           <span className="flex items-center gap-2">
@@ -356,17 +356,17 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').payment_method_label}</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').payment_method_label}</Label>
                   <Select
                     value={form.payment_method}
                     onValueChange={(v) => set('payment_method', v ?? '')}
                   >
-                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                    <SelectTrigger className="rounded-xl h-11">
                       <SelectValue placeholder={lang === 'es' ? 'Seleccionar método' : 'Select method'}>
                         {form.payment_method ? PAYMENT_METHODS.find(m => m.value === form.payment_method)?.label : undefined}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                    <SelectContent className="rounded-xl shadow-xl">
                       {PAYMENT_METHODS.map((m) => (
                         <SelectItem key={m.value} value={m.value} label={m.label}>{m.label}</SelectItem>
                       ))}
@@ -375,7 +375,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').tax_label}</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').tax_label}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -383,12 +383,12 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                     value={form.tax_amount}
                     onChange={(e) => set('tax_amount', e.target.value)}
                     placeholder="0.00"
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                    className="rounded-xl h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').card_last_four_label}</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').card_last_four_label}</Label>
                   <Input
                     value={form.card_last_four}
                     onChange={(e) => {
@@ -398,18 +398,18 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                     placeholder={t('expense_dialog').card_last_four_placeholder}
                     maxLength={4}
                     inputMode="numeric"
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11 font-mono"
+                    className="rounded-xl h-11 font-mono"
                   />
                 </div>
 
                 <div className="col-span-2 space-y-2">
-                  <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('expense_dialog').notes_label}</Label>
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('expense_dialog').notes_label}</Label>
                   <Textarea
                     value={form.notes}
                     onChange={(e) => set('notes', e.target.value)}
                     placeholder={t('expense_dialog').notes_placeholder}
                     rows={3}
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white resize-none"
+                    className="rounded-xl resize-none"
                   />
                 </div>
 
@@ -426,31 +426,31 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                         <div className={cn(
                           'h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center',
                           isRecurring
-                            ? 'bg-[#171717] border-[#171717]'
-                            : 'bg-white border-neutral-300 group-hover:border-neutral-400'
+                            ? 'bg-foreground border-foreground'
+                            : 'bg-background border-border group-hover:border-foreground/50'
                         )}>
                           {isRecurring && (
-                            <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12">
+                            <svg className="h-3 w-3 text-background" fill="none" viewBox="0 0 12 12">
                               <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </div>
                       </div>
-                      <span className="text-sm font-semibold text-neutral-700">{t('recurring').make_recurring}</span>
+                      <span className="text-sm font-semibold text-foreground">{t('recurring').make_recurring}</span>
                     </label>
 
                     {isRecurring && (
                       <div className="mt-4 grid grid-cols-2 gap-4 pl-8 animate-in fade-in slide-in-from-top-2 duration-150">
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').frequency} *</Label>
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('recurring').frequency} *</Label>
                           <Select
                             value={recurringFrequency}
                             onValueChange={(v) => setRecurringFrequency(v as RecurringFrequency)}
                           >
-                            <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                            <SelectTrigger className="rounded-xl h-11">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
+                            <SelectContent className="rounded-xl shadow-xl">
                               {RECURRING_FREQUENCY_VALUES.map((v) => (
                                 <SelectItem key={v} value={v} label={t('recurring')[v]}>{t('recurring')[v]}</SelectItem>
                               ))}
@@ -458,13 +458,13 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-1">{t('recurring').end_date}</Label>
+                          <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">{t('recurring').end_date}</Label>
                           <Input
                             type="date"
                             value={recurringEndDate}
                             onChange={(e) => setRecurringEndDate(e.target.value)}
                             min={form.date}
-                            className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                            className="rounded-xl h-11"
                           />
                         </div>
                       </div>
@@ -473,18 +473,19 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
                 )}
               </div>
 
-              <div className="flex items-center gap-3 pt-6 border-t border-neutral-100">
-                <Button 
-                  type="button" 
-                  onClick={onClose} 
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm"
+              <div className="flex items-center gap-3 pt-6 border-t border-border">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1 rounded-lg h-9 text-sm font-semibold"
                 >
                   {t('expense_dialog').cancel}
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={saving} 
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm flex items-center justify-center gap-2"
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 rounded-lg h-9 text-sm font-semibold flex items-center justify-center gap-2"
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -504,29 +505,30 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>
-            {duplicateWarning?.exact 
-              ? (lang === 'es' ? 'Posible duplicado' : 'Possible duplicate') 
+            {duplicateWarning?.exact
+              ? (lang === 'es' ? 'Posible duplicado' : 'Possible duplicate')
               : (lang === 'es' ? 'Gasto similar encontrado' : 'Similar expense found')}
           </DialogTitle>
           <DialogDescription>
             {duplicateWarning?.exact
-              ? (lang === 'es' 
-                  ? 'Ya existe un gasto con el mismo comercio, monto, fecha y categoría. ¿Estás seguro de que quieres añadirlo?' 
+              ? (lang === 'es'
+                  ? 'Ya existe un gasto con el mismo comercio, monto, fecha y categoría. ¿Estás seguro de que quieres añadirlo?'
                   : 'An expense with the same merchant, amount, date, and category already exists. Are you sure you want to add it?')
-              : (lang === 'es' 
-                  ? 'Ya existe un gasto con el mismo monto, fecha y categoría pero con un comercio diferente. Esto podría ser un duplicado. ¿Quieres proceder?' 
+              : (lang === 'es'
+                  ? 'Ya existe un gasto con el mismo monto, fecha y categoría pero con un comercio diferente. Esto podría ser un duplicado. ¿Quieres proceder?'
                   : 'An expense with the same amount, date, and category already exists but with a different merchant. This could be a duplicate. Do you want to proceed?')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-3">
-          <Button 
-            className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm" 
+          <Button
+            variant="outline"
+            className="flex-1 rounded-lg h-9 text-sm font-semibold"
             onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}
           >
             {t('expense_dialog').cancel}
           </Button>
-          <Button 
-            className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm"
+          <Button
+            className="flex-1 rounded-lg h-9 text-sm font-semibold"
             onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}
           >
             {t('expense_dialog').save_anyway}
