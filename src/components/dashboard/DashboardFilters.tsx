@@ -2,9 +2,15 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition, useState, useEffect } from 'react'
-import { Download, Loader2, FileText } from 'lucide-react'
+import { Download, Loader2, FileText, ChevronDown } from 'lucide-react'
 import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 type PeriodType = 'monthly' | 'quarterly' | 'semi' | 'yearly'
 
@@ -232,16 +238,45 @@ export function DashboardFilters({
         </div>
       )}
 
-      {/* Export Actions */}
       <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-        <a
-          href={exportUrl}
-          download
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-all"
-        >
-          <Download className="h-3.5 w-3.5" />
-          {t('expenses').export_csv}
-        </a>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border bg-background text-foreground hover:bg-accent transition-all outline-none">
+            <Download className="h-3.5 w-3.5" />
+            {t('expenses').export_csv}
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-52 rounded-xl p-1 shadow-lg border-border bg-card">
+            <DropdownMenuItem 
+              className="rounded-lg px-2.5 py-2 cursor-pointer focus:bg-accent transition-colors"
+              onClick={() => {
+                const link = document.createElement('a')
+                link.href = exportUrl + '&mode=reading'
+                link.setAttribute('download', '')
+                link.click()
+              }}
+            >
+              <div className="flex flex-col gap-0.5 text-left w-full">
+                <span className="text-[13px] font-bold">{t('reports').csv_reading}</span>
+                <span className="text-[10px] text-muted-foreground">{t('reports').csv_reading_desc}</span>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="rounded-lg px-2.5 py-2 cursor-pointer focus:bg-accent transition-colors mt-1"
+              onClick={() => {
+                const link = document.createElement('a')
+                link.href = exportUrl + '&mode=processing'
+                link.setAttribute('download', '')
+                link.click()
+              }}
+            >
+              <div className="flex flex-col gap-0.5 text-left w-full">
+                <span className="text-[13px] font-bold">{t('reports').csv_processing}</span>
+                <span className="text-[10px] text-muted-foreground">{t('reports').csv_processing_desc}</span>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <a
           href={exportUrl + '&format=pdf'}
           download

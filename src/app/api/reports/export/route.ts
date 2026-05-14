@@ -108,31 +108,31 @@ export async function GET(request: NextRequest) {
 
   const rows = (expenses ?? []) as any[]
   const today = new Date().toISOString().split('T')[0]
+  const workspacesInReport = workspaceList.filter((w: any) => selectedIds.includes(w.id))
+
+  // Pre-calculate totals for summary
+  const wsTotals: Record<string, number> = {}
+  const categoryWsMap: Record<string, Record<string, number>> = {}
+  const categorySet = new Set<string>()
+  let grandTotal = 0
+
+  workspacesInReport.forEach(ws => {
+    const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
+    const total = wsExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
+    wsTotals[ws.id] = total
+    grandTotal += total
+
+    wsExpenses.forEach(e => {
+      const catName = e.category?.name || '—'
+      categorySet.add(catName)
+      if (!categoryWsMap[catName]) categoryWsMap[catName] = {}
+      categoryWsMap[catName][ws.id] = (categoryWsMap[catName][ws.id] || 0) + Number(e.amount)
+    })
+  })
+  const sortedCategories = Array.from(categorySet).sort()
 
   if (format === 'pdf') {
     const doc = new jsPDF()
-    const workspacesInReport = workspaceList.filter((w: any) => selectedIds.includes(w.id))
-
-    // Pre-calculate totals for summary
-    const wsTotals: Record<string, number> = {}
-    const categoryWsMap: Record<string, Record<string, number>> = {}
-    const categorySet = new Set<string>()
-    let grandTotal = 0
-
-    workspacesInReport.forEach(ws => {
-      const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
-      const total = wsExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
-      wsTotals[ws.id] = total
-      grandTotal += total
-
-      wsExpenses.forEach(e => {
-        const catName = e.category?.name || '—'
-        categorySet.add(catName)
-        if (!categoryWsMap[catName]) categoryWsMap[catName] = {}
-        categoryWsMap[catName][ws.id] = (categoryWsMap[catName][ws.id] || 0) + Number(e.amount)
-      })
-    })
-    const sortedCategories = Array.from(categorySet).sort()
 
     const colors = {
       primary: [99, 102, 241] as [number, number, number],
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
     addMetaIcon('report-user.png', 14, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
     doc.setFontSize(9)
-    doc.text('Prepared By', 28, metaY)
+    doc.text(t('reports').prepared_by, 28, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
@@ -215,7 +215,7 @@ export async function GET(request: NextRequest) {
     // Column 2: Department/Workspace
     addMetaIcon('report-workspace.png', 80, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
-    doc.text('Workspace', 94, metaY)
+    doc.text(t('common').workspace, 94, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
     // Column 3: Report Period
     addMetaIcon('report-date.png', 140, metaY - 3)
     doc.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2])
-    doc.text('Report Period', 154, metaY)
+    doc.text(t('reports').report_period, 154, metaY)
     doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2])
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
@@ -391,7 +391,7 @@ export async function GET(request: NextRequest) {
     }
 
     const pdfBuffer = doc.output('arraybuffer')
-    const filename = `report-${label}-${today}.pdf`
+    const filename = `Expense_Report_${label}_${today}.pdf`
 
     return new NextResponse(pdfBuffer, {
       status: 200,
@@ -402,24 +402,94 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  const header = `${t('expenses').date},${t('expenses').merchant},${t('expenses').amount},Tax,${t('expenses').category},${t('expenses').payment_method},Workspace,${t('expenses').notes}`
-  const lines = rows.map((e) =>
-    [
-      csvEscape(formatDate(e.date)),
-      csvEscape(e.merchant),
-      csvEscape(Number(e.amount).toFixed(2)),
-      csvEscape(e.tax_amount != null ? Number(e.tax_amount).toFixed(2) : ''),
-      csvEscape(e.category?.name ?? ''),
-      csvEscape(e.payment_method ?? ''),
-      csvEscape(wsNameMap[e.workspace_id] ?? ''),
-      csvEscape(e.notes ?? ''),
-    ].join(',')
-  )
+  const mode = sp.get('mode') || 'reading'
+  let csvContent = ''
+  let filename = ''
 
-  const csv = '﻿' + [header, ...lines].join('\r\n')
-  const filename = `expenses-${label}-${today}.csv`
+  if (mode === 'reading') {
+    // Structured "Readable" CSV
+    const csvLines: string[] = []
+    csvLines.push(`${t('reports').title.toUpperCase()} - ${label.toUpperCase()} - ${today}`)
+    csvLines.push(`${t('reports').generated_at}: ${new Date().toLocaleString()}`)
+    csvLines.push('')
 
-  return new NextResponse(csv, {
+    workspacesInReport.forEach(ws => {
+      const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
+      const wsTotal = wsTotals[ws.id]
+      
+      csvLines.push(`${t('common').workspace.toUpperCase()}: ${ws.name.toUpperCase()}`)
+      csvLines.push(`${t('expenses').date},${t('expenses').merchant},${t('expenses').category},${t('expenses').notes},${t('expenses').amount}`)
+      
+      wsExpenses.forEach(e => {
+        csvLines.push([
+          formatDate(e.date),
+          csvEscape(e.merchant),
+          csvEscape(e.category?.name || '—'),
+          csvEscape(e.notes || '—'),
+          Number(e.amount).toFixed(2)
+        ].join(','))
+      })
+      
+      csvLines.push(`,,,${t('common').total.toUpperCase()},${wsTotal.toFixed(2)}`)
+      csvLines.push('')
+      
+      // Category Summary for Workspace
+      const catTotals: Record<string, number> = {}
+      wsExpenses.forEach(e => {
+        const catName = e.category?.name || '—'
+        catTotals[catName] = (catTotals[catName] || 0) + Number(e.amount)
+      })
+      
+      csvLines.push(`${t('reports').category_summary.toUpperCase()} (${ws.name.toUpperCase()})`)
+      csvLines.push(`${t('expenses').category},${t('expenses').amount},${t('reports').percentage}`)
+      Object.entries(catTotals)
+        .sort(([, a], [, b]) => b - a)
+        .forEach(([name, total]) => {
+          csvLines.push([
+            csvEscape(name),
+            total.toFixed(2),
+            wsTotal > 0 ? ((total / wsTotal) * 100).toFixed(1) + '%' : '0%'
+          ].join(','))
+        })
+      csvLines.push('')
+      csvLines.push('')
+    })
+
+    if (selectedIds.length > 1) {
+      csvLines.push(t('reports').summary.toUpperCase())
+      csvLines.push(`${t('common').workspace},${t('expenses').amount},${t('reports').percentage}`)
+      workspacesInReport.forEach(ws => {
+        csvLines.push([
+          csvEscape(ws.name),
+          wsTotals[ws.id].toFixed(2),
+          grandTotal > 0 ? ((wsTotals[ws.id] / grandTotal) * 100).toFixed(1) + '%' : '0%'
+        ].join(','))
+      })
+      csvLines.push(`${t('common').total.toUpperCase()},${grandTotal.toFixed(2)},100%`)
+    }
+
+    csvContent = '\uFEFF' + csvLines.join('\r\n')
+    filename = `Expense_Report_${label}_${today}.csv`
+  } else {
+    // Flat "Processing" CSV (Taxes)
+    const header = `${t('expenses').date},${t('expenses').merchant},${t('expenses').amount},Tax,${t('expenses').category},${t('expenses').payment_method},Workspace,${t('expenses').notes}`
+    const lines = rows.map((e) =>
+      [
+        csvEscape(formatDate(e.date)),
+        csvEscape(e.merchant),
+        csvEscape(Number(e.amount).toFixed(2)),
+        csvEscape(e.tax_amount != null ? Number(e.tax_amount).toFixed(2) : ''),
+        csvEscape(e.category?.name ?? ''),
+        csvEscape(e.payment_method ?? ''),
+        csvEscape(wsNameMap[e.workspace_id] ?? ''),
+        csvEscape(e.notes ?? ''),
+      ].join(',')
+    )
+    csvContent = '\uFEFF' + [header, ...lines].join('\r\n')
+    filename = `Expense_Data_${label}_${today}.csv`
+  }
+
+  return new NextResponse(csvContent, {
     status: 200,
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
