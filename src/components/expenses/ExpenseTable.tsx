@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, Pencil, Receipt, RefreshCw, Trash2 } from 'lucide-react'
+import { MoreVertical, Pencil, Receipt, RefreshCw, Trash2 } from 'lucide-react'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -61,67 +61,23 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
       <table className="w-full text-left">
         <thead>
           <tr className="bg-muted/30 border-b border-border/50">
-            <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').merchant}</th>
+            <th className="px-3 py-3 w-10" />
+            <th className="pr-4 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').merchant}</th>
             <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest w-[140px]">{t('expenses').date}</th>
             <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').amount}</th>
             <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').category}</th>
             <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').payment_method}</th>
-            <th className="px-6 py-3 w-10" />
           </tr>
         </thead>
         <tbody className="divide-y divide-border/50">
           {expenses.map((expense) => (
             <tr key={expense.id} className="hover:bg-muted/20 transition-colors group">
-              <td className="px-6 py-4 max-w-[200px]">
-                <div className="flex items-center gap-2">
-                  {expense.is_recurring && (
-                    <span className="inline-flex items-center justify-center p-1 rounded-full bg-violet-500/10 text-violet-500 border border-violet-500/20 shrink-0">
-                      <RefreshCw className="h-2.5 w-2.5" />
-                    </span>
-                  )}
-                  <span className="font-semibold text-foreground text-sm truncate">{expense.merchant}</span>
-                </div>
-              </td>
-              <td className="px-6 py-4 text-sm text-muted-foreground font-medium w-[140px] whitespace-nowrap">
-                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy', { locale })}
-              </td>
-              <td className="px-6 py-4 text-right">
-                <span className="font-bold text-foreground text-sm tabular-nums">
-                  {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                </span>
-              </td>
-              <td className="px-6 py-4 text-right">
-                {expense.category ? (
-                  <span
-                    style={{
-                      backgroundColor: expense.category.color + '15',
-                      color: expense.category.color,
-                      borderColor: expense.category.color + '30'
-                    }}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
-                  >
-                    {expense.category.name}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </td>
-              <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
-                {expense.payment_method ? (
-                  <span className="whitespace-nowrap">
-                    {PAYMENT_LABELS[expense.payment_method]}
-                    {expense.card_last_four && (
-                      <span className="ml-1 text-[10px] text-muted-foreground/70">••••{expense.card_last_four}</span>
-                    )}
-                  </span>
-                ) : <span className="text-muted-foreground/50">—</span>}
-              </td>
-              <td className="px-6 py-4 text-right">
+              <td className="px-3 py-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all outline-none">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-xl border-border">
+                  <DropdownMenuContent align="start" className="w-52 rounded-2xl p-2 shadow-xl border-border">
                     {expense.is_recurring ? (
                       <>
                         <DropdownMenuItem
@@ -166,11 +122,56 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                   </DropdownMenuContent>
                 </DropdownMenu>
               </td>
+              <td className="pr-4 py-4 max-w-[200px]">
+                <div className="flex items-center gap-2">
+                  {expense.is_recurring && (
+                    <span className="inline-flex items-center justify-center p-1 rounded-full bg-violet-500/10 text-violet-500 border border-violet-500/20 shrink-0">
+                      <RefreshCw className="h-2.5 w-2.5" />
+                    </span>
+                  )}
+                  <span className="font-semibold text-foreground text-sm truncate">{expense.merchant}</span>
+                </div>
+              </td>
+              <td className="px-6 py-4 text-sm text-muted-foreground font-medium w-[140px] whitespace-nowrap">
+                {format(new Date(expense.date + 'T12:00:00'), 'MMM d, yyyy', { locale })}
+              </td>
+              <td className="px-6 py-4 text-right">
+                <span className="font-bold text-foreground text-sm tabular-nums">
+                  {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-right">
+                {expense.category ? (
+                  <span
+                    style={{
+                      backgroundColor: expense.category.color + '15',
+                      color: expense.category.color,
+                      borderColor: expense.category.color + '30'
+                    }}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
+                  >
+                    {expense.category.name}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </td>
+              <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
+                {expense.payment_method ? (
+                  <span className="whitespace-nowrap">
+                    {PAYMENT_LABELS[expense.payment_method]}
+                    {expense.card_last_four && (
+                      <span className="ml-1 text-[10px] text-muted-foreground/70">••••{expense.card_last_four}</span>
+                    )}
+                  </span>
+                ) : <span className="text-muted-foreground/50">—</span>}
+              </td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-border/50 bg-muted/30">
+            <td className="px-3 py-3" />
             <td className="px-6 py-3" colSpan={2}>
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 {expenses.length} {expenses.length === 1 ? t('expenses').transactions_one : t('expenses').transactions_other}
@@ -181,7 +182,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                 {expenses.reduce((s, e) => s + Number(e.amount), 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </span>
             </td>
-            <td colSpan={3} />
+            <td colSpan={2} />
           </tr>
         </tfoot>
       </table>
