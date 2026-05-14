@@ -132,13 +132,13 @@ export function DashboardFilters({
     <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         {/* Period type tabs */}
-        <div className="flex gap-1 p-1 bg-muted rounded-xl">
+        <div className="flex gap-1 p-1 bg-muted rounded-xl w-full sm:w-auto">
           {(['monthly', 'quarterly', 'semi', 'yearly'] as PeriodType[]).map((p) => (
             <button
               key={p}
               onClick={() => handlePeriod(p)}
               className={cn(
-                'px-3 py-1.5 text-xs font-semibold rounded-lg transition-all',
+                'flex-1 sm:flex-none px-3 py-1.5 text-xs font-semibold rounded-lg transition-all',
                 period === p
                   ? 'bg-[#6366F1] text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -167,10 +167,9 @@ export function DashboardFilters({
             onChange={(e) => handleQuarter(Number(e.target.value))}
             className={selectCls}
           >
-            <option value={1}>Q1</option>
-            <option value={2}>Q2</option>
-            <option value={3}>Q3</option>
-            <option value={4}>Q4</option>
+            {[1, 2, 3, 4].map((q) => (
+              <option key={q} value={q}>{lang === 'es' ? `T${q}` : `Q${q}`}</option>
+            ))}
           </select>
         )}
         {period === 'semi' && (
@@ -179,8 +178,9 @@ export function DashboardFilters({
             onChange={(e) => handleHalf(Number(e.target.value))}
             className={selectCls}
           >
-            <option value={1}>H1</option>
-            <option value={2}>H2</option>
+            {[1, 2].map((h) => (
+              <option key={h} value={h}>{lang === 'es' ? `S${h}` : `H${h}`}</option>
+            ))}
           </select>
         )}
 
