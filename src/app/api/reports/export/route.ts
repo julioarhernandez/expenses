@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
   if (format === 'pdf') {
     const doc = new jsPDF()
     const workspacesInReport = workspaceList.filter((w: any) => selectedIds.includes(w.id))
-    
+
     // Pre-calculate totals for summary
     const wsTotals: Record<string, number> = {}
     const categoryWsMap: Record<string, Record<string, number>> = {}
@@ -136,14 +136,31 @@ export async function GET(request: NextRequest) {
     doc.setFontSize(22)
     doc.setTextColor(33, 33, 33)
     doc.text(t('reports').title, 14, 20)
-    
+
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
     doc.text(`${t('reports').period}: ${label.toUpperCase()}`, 14, 28)
     doc.text(`${t('reports').range}: ${formatDate(start)} to ${formatDate(end)}`, 14, 33)
     doc.text(`${t('reports').generated_at}: ${formatDate(today)}`, 14, 38)
-    
+
     let currentY = 45
+
+    const commonTableProps = {
+      theme: 'striped' as const,
+      headStyles: {
+        fillColor: [99, 102, 241] as [number, number, number],
+        textColor: [255, 255, 255] as [number, number, number],
+        fontStyle: 'bold' as const
+      },
+      footStyles: {
+        fillColor: [249, 250, 251] as [number, number, number],
+        textColor: [0, 0, 0] as [number, number, number],
+        fontStyle: 'bold' as const
+      },
+      alternateRowStyles: { fillColor: [230, 230, 230] as [number, number, number] },
+      margin: { left: 14, right: 14 },
+      styles: { fontSize: 9, cellPadding: 3 },
+    }
 
     workspacesInReport.forEach((ws: any) => {
       const wsExpenses = rows.filter(e => e.workspace_id === ws.id)
@@ -161,6 +178,7 @@ export async function GET(request: NextRequest) {
 
       // Main Expenses Table
       autoTable(doc, {
+        ...commonTableProps,
         startY: currentY + 2,
         head: [[
           t('expenses').date,
@@ -180,14 +198,8 @@ export async function GET(request: NextRequest) {
           { content: t('reports').workspace_total, colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
           { content: wsTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
-        theme: 'striped',
-        styles: { fontSize: 9, cellPadding: 3 },
-        headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255], fontStyle: 'bold' },
-        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
-        alternateRowStyles: { fillColor: [252, 253, 255] },
-        margin: { left: 14, right: 14 },
       })
-      
+
       currentY = (doc as any).lastAutoTable.finalY + 10
 
       // Category Summary Table
@@ -198,7 +210,9 @@ export async function GET(request: NextRequest) {
       })
 
       autoTable(doc, {
+        ...commonTableProps,
         startY: currentY,
+        styles: { fontSize: 8, cellPadding: 3 },
         head: [[
           t('expenses').category,
           { content: t('expenses').amount, styles: { halign: 'right' } },
@@ -211,11 +225,6 @@ export async function GET(request: NextRequest) {
             { content: total.toFixed(2), styles: { halign: 'right' } },
             { content: wsTotal > 0 ? ((total / wsTotal) * 100).toFixed(1) + '%' : '0%', styles: { halign: 'right' } }
           ]),
-        theme: 'striped',
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255] },
-        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
-        margin: { left: 14, right: 14 },
       })
 
       currentY = (doc as any).lastAutoTable.finalY + 15
@@ -227,16 +236,16 @@ export async function GET(request: NextRequest) {
         doc.addPage()
         currentY = 20
       }
-      
+
       doc.setDrawColor(200, 200, 200)
       doc.line(14, currentY, 196, currentY)
       currentY += 10
-      
+
       doc.setFontSize(16)
       doc.setTextColor(99, 102, 241)
       doc.text(t('reports').summary, 14, currentY)
       currentY += 5
-      
+
       // 1. Category totals per workspace (Pivot table)
       const catPivotHead = [
         t('expenses').category,
@@ -261,21 +270,19 @@ export async function GET(request: NextRequest) {
       ]
 
       autoTable(doc, {
+        ...commonTableProps,
         startY: currentY,
+        styles: { fontSize: 8, cellPadding: 2 },
         head: [catPivotHead],
         body: catPivotBody.map(row => row.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right' } })),
         foot: [catPivotFooter.map((cell, i) => i === 0 ? cell : { content: cell, styles: { halign: 'right', fontStyle: 'bold' } })],
-        theme: 'striped',
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [79, 70, 229] },
-        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
-        margin: { left: 14, right: 14 },
       })
 
       currentY = (doc as any).lastAutoTable.finalY + 15
 
       // 2. Workspace Totals Summary (with Percentage)
       autoTable(doc, {
+        ...commonTableProps,
         startY: currentY + 2,
         head: [[
           t('common').workspace,
@@ -292,11 +299,6 @@ export async function GET(request: NextRequest) {
           { content: grandTotal.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
           { content: '100%', styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
-        theme: 'striped',
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [99, 102, 241] },
-        footStyles: { fillColor: [249, 250, 251], textColor: [0, 0, 0] },
-        margin: { left: 14, right: 14 },
       })
     }
 
