@@ -82,7 +82,7 @@ export function MobileBottomNav({ user }: { user: User }) {
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" className="w-48 mb-4 rounded-2xl p-2 shadow-xl border-border">
-              <div className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1">{user.email}</div>
+              <div className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1 truncate">{user.email}</div>
               <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl focus:bg-accent">
                 <Settings className="mr-2 h-4 w-4" />{t('nav').settings}
               </DropdownMenuItem>
