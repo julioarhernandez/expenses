@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SpendingTrendChart } from '@/components/dashboard/SpendingTrendChart'
 import { CategoryBarChart } from '@/components/dashboard/CategoryBarChart'
 import { PaymentMethodChart } from '@/components/dashboard/PaymentMethodChart'
-import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
+import { DashboardHeaderActions } from '@/components/dashboard/DashboardHeaderActions'
 import { HeaderUpdater } from '@/components/layout/HeaderUpdater'
 import { HelpSupportCard } from '@/components/help/HelpSupportCard'
 import { getServerTranslation } from '@/lib/i18n/server-translation'
@@ -236,22 +236,24 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
   const exportUrl = `/api/reports?workspaces=${selectedWorkspaceIds.join(',')}&from=${start}&to=${end}`
 
   return (
-    <div className="max-w-[1280px] mx-auto p-6 md:p-8 pt-2 space-y-6 bg-background min-h-screen">
+    <div className="max-w-[1280px] mx-auto p-6 md:p-8 pt-4 space-y-8">
       <HeaderUpdater title={t('dashboard').title} subtitle={label} />
+      
+      <div className="flex items-center justify-end">
+        <DashboardHeaderActions
+            workspaces={allWorkspaces}
+            selectedIds={selectedWorkspaceIds}
+            period={period}
+            month={month}
+            quarter={quarter}
+            half={half}
+            year={year}
+            exportUrl={exportUrl}
+          />
+        </div>
 
-      <DashboardFilters
-        workspaces={allWorkspaces}
-        selectedIds={selectedWorkspaceIds}
-        period={period}
-        month={month}
-        quarter={quarter}
-        half={half}
-        year={year}
-        exportUrl={exportUrl}
-      />
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-2">
         <Link href={`/expenses?from=${start}&to=${end}`} className="block group">
           <Card className="bg-indigo-50/30 dark:bg-indigo-950/10 border-indigo-100/50 dark:border-indigo-900/20 shadow-[0_4px_20px_rgba(99,102,241,0.04)] rounded-xl hover:shadow-[0_10px_30px_rgba(99,102,241,0.08)] transition-all group-hover:border-indigo-300/50 cursor-pointer h-full">
             <CardHeader className="pb-1 pt-4 sm:pt-6 px-4 sm:px-6">

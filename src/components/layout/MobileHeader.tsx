@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { ChevronDown, Plus, HelpCircle, Check } from 'lucide-react'
+import { ChevronDown, Plus, HelpCircle, Check, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -40,12 +40,22 @@ export function MobileHeader() {
   const wsInitial = mounted && active?.name ? active.name.charAt(0).toUpperCase() : 'W'
   const { openHelp } = useHelpStore()
 
+  const isDashboard = pathname === '/dashboard'
+
   return (
-    <header className="flex items-center justify-between gap-3 px-6 h-24 bg-background sticky top-0 z-50 shrink-0">
+    <header className={cn(
+      "flex items-center justify-between gap-3 px-6 h-24 sticky top-0 z-50 shrink-0 transition-all duration-500",
+      isDashboard ? "bg-transparent" : "bg-background shadow-sm border-b border-border/50"
+    )}>
       {/* Title & Subtitle on the Left */}
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-foreground truncate">{headerTitle}</h1>
+          <h1 className={cn(
+            "text-2xl font-bold truncate transition-colors duration-500",
+            isDashboard ? "text-white drop-shadow-sm" : "text-foreground"
+          )}>
+            {headerTitle}
+          </h1>
           {pathname === '/settings' && (
              <button
                 onClick={() => openHelp()}
@@ -61,9 +71,17 @@ export function MobileHeader() {
       <div className="shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <div className="relative w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center text-base font-bold text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-all active:scale-95 shadow-sm">
-              {wsInitial}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-background rounded-full border border-border flex items-center justify-center text-xs shadow-sm">
+            <div className={cn(
+              "relative w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-sm border",
+              isDashboard 
+                ? "bg-white/20 border-white/20 text-white backdrop-blur-md hover:bg-white/30" 
+                : "bg-muted border-border text-muted-foreground hover:border-indigo-500 hover:text-indigo-600"
+            )}>
+              <User className="h-5 w-5" />
+              <div className={cn(
+                "absolute -bottom-1 -right-1 w-6 h-6 rounded-full border flex items-center justify-center text-xs shadow-sm",
+                isDashboard ? "bg-white border-white/20 text-black" : "bg-background border-border"
+              )}>
                 {wsIcon}
               </div>
             </div>
