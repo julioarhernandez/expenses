@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
+import { HelpSupportCard } from '@/components/help/HelpSupportCard'
 import type { Workspace, WorkspaceType } from '@/types'
 
 const getWorkspaceTypes = (t: any) => [
@@ -188,6 +189,10 @@ export function WorkspaceManager() {
             </svg>
           </button>
         </div>
+      </div>
+
+      <div className="mt-8 pt-4">
+        <HelpSupportCard topic="workspaces" />
       </div>
     </section>
   )

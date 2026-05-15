@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type HelpTopic = 'voice' | 'expenses' | 'dashboard' | 'reports' | 'categories' | 'recurring' | 'settings'
+export type HelpTopic = 'voice' | 'expenses' | 'dashboard' | 'reports' | 'categories' | 'recurring' | 'settings' | 'workspaces'
 
 interface HelpStore {
   isOpen: boolean

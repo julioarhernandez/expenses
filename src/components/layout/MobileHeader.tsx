@@ -41,7 +41,7 @@ export function MobileHeader() {
   const { openHelp } = useHelpStore()
 
   return (
-    <header className="flex items-center justify-between gap-3 px-4 h-24 bg-background sticky top-0 z-50 shrink-0">
+    <header className="flex items-center justify-between gap-3 px-6 h-24 bg-background sticky top-0 z-50 shrink-0">
       {/* Title & Subtitle on the Left */}
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-2">
@@ -55,11 +55,6 @@ export function MobileHeader() {
              </button>
           )}
         </div>
-        {headerSubtitle && (
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest truncate mt-0.5">
-            {headerSubtitle}
-          </p>
-        )}
       </div>
 
       {/* Workspace switcher on the Right */}

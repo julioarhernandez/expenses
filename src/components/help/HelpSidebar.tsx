@@ -2,6 +2,8 @@
 
 import { useHelpStore, type HelpTopic } from '@/store/help'
 import { useTranslation } from '@/hooks/useTranslation'
+import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { Mic, LayoutDashboard, Receipt, Tag, RefreshCw, Settings, FileDown, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +15,7 @@ const TOPICS: { id: HelpTopic; icon: React.ElementType; label: { en: string; es:
   { id: 'categories', icon: Tag,            label: { en: 'Categories',    es: 'Categorías' } },
   { id: 'recurring',  icon: RefreshCw,      label: { en: 'Recurring',     es: 'Recurrentes' } },
   { id: 'settings',   icon: Settings,       label: { en: 'Settings',      es: 'Ajustes' } },
+  { id: 'workspaces', icon: LayoutDashboard,label: { en: 'Workspaces',    es: 'Espacios' } },
 ]
 
 function VoiceHelp({ lang }: { lang: string }) {
@@ -299,10 +302,6 @@ function SettingsHelp({ lang }: { lang: string }) {
       <div className="grid gap-4">
         {[
           { 
-            t: isEs ? 'Espacios de Trabajo' : 'Workspaces', 
-            d: isEs ? 'Separa tus finanzas: Personal, Negocio, Freelance. Cada espacio es independiente.' : 'Separate your finances: Personal, Business, Freelance. Each space is independent.' 
-          },
-          { 
             t: isEs ? 'Idioma y Voz' : 'Language & Voice', 
             d: isEs ? 'Cambia el idioma de la app y del reconocimiento de voz en Preferencias.' : 'Change the app language and voice recognition language in Preferences.' 
           },
@@ -321,6 +320,32 @@ function SettingsHelp({ lang }: { lang: string }) {
   )
 }
 
+function WorkspacesHelp({ lang }: { lang: string }) {
+  const isEs = lang === 'es'
+  return (
+    <div className="space-y-6">
+      <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
+        <h3 className="text-sm font-bold text-foreground mb-2">
+          {isEs ? 'Separar Finanzas' : 'Separate Finances'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Crea múltiples espacios para separar tus gastos personales de los de tu negocio o proyectos secundarios. Cada espacio tiene sus propias categorías y reportes.'
+            : 'Create multiple workspaces to keep your personal expenses separate from your business or side projects. Each workspace has its own categories and reports.'}
+        </p>
+      </div>
+      <div className="bg-card p-5 rounded-2xl border border-border shadow-sm">
+        <h4 className="text-sm font-bold text-foreground mb-2">{isEs ? 'Cambiar de espacio' : 'Switching workspaces'}</h4>
+        <p className="text-sm text-muted-foreground">
+          {isEs 
+            ? 'Usa el selector en la esquina superior derecha de cualquier pantalla para cambiar rápidamente entre tus espacios de trabajo.'
+            : 'Use the selector in the top-right corner of any screen to quickly switch between your active workspaces.'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 const TOPIC_CONTENT: Record<HelpTopic, React.ComponentType<{ lang: string }>> = {
   voice: VoiceHelp,
   expenses: ExpensesHelp,
@@ -329,12 +354,21 @@ const TOPIC_CONTENT: Record<HelpTopic, React.ComponentType<{ lang: string }>> = 
   categories: CategoriesHelp,
   recurring: RecurringHelp,
   settings: SettingsHelp,
+  workspaces: WorkspacesHelp,
 }
 
 export function HelpSidebar() {
   const { isOpen, activeTopic, closeHelp, setTopic } = useHelpStore()
   const { lang } = useTranslation()
+  const pathname = usePathname()
   const isEs = lang === 'es'
+
+  // Auto-close help when navigating to a different page
+  useEffect(() => {
+    if (isOpen) {
+      closeHelp()
+    }
+  }, [pathname, closeHelp]) // Only trigger on path changes
 
   if (!isOpen) return null
 

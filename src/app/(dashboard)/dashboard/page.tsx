@@ -10,6 +10,7 @@ import { CategoryBarChart } from '@/components/dashboard/CategoryBarChart'
 import { PaymentMethodChart } from '@/components/dashboard/PaymentMethodChart'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
 import { HeaderUpdater } from '@/components/layout/HeaderUpdater'
+import { HelpSupportCard } from '@/components/help/HelpSupportCard'
 import { getServerTranslation } from '@/lib/i18n/server-translation'
 import { es, enUS } from 'date-fns/locale'
 
@@ -437,6 +438,8 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
           </table>
         </div>
       </div>
+
+      <HelpSupportCard topic="dashboard" />
     </div>
   )
 }
