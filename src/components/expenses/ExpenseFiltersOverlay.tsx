@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RotateCcw, X, Search, Tag, Calendar, DollarSign, RefreshCw, ChevronLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { Category } from '@/types'
 
 interface ExpenseFiltersOverlayProps {
@@ -259,7 +260,7 @@ export function ExpenseFiltersOverlay({
                     : 'bg-muted/30 text-muted-foreground border-border/50 hover:border-foreground/30'
                 )}
               >
-                {p.icon && <p.icon className="h-3.5 w-3.5" />}
+                {'icon' in p && p.icon && <p.icon className="h-3.5 w-3.5" />}
                 {p.label}
               </button>
             ))}
@@ -270,12 +271,13 @@ export function ExpenseFiltersOverlay({
 
       {/* Footer Actions */}
       <div className="p-6 border-t border-border/50 bg-background/80 backdrop-blur-md">
-        <button
+        <Button
+          size="lg"
           onClick={onClose}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98]"
+          className="w-full font-bold"
         >
           {t('common').apply ?? 'Apply Filters'}
-        </button>
+        </Button>
       </div>
     </div>
   )
