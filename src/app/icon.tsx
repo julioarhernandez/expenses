@@ -41,8 +41,9 @@ function IconContent({ size }: { size: Size }) {
   )
 }
 
-export default function Icon({ id }: { id: string }) {
-  const size = sizes[Number(id)] ?? sizes[0]
+export default async function Icon({ id }: { id: Promise<string> }) {
+  const resolvedId = await id
+  const size = sizes[Number(resolvedId)] ?? sizes[0]
 
   return new ImageResponse(<IconContent size={size} />, { ...size })
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreVertical, Pencil, Receipt, RefreshCw, Trash2 } from 'lucide-react'
+import { MoreVertical, Pencil, Receipt, RefreshCw, Trash2, WifiOff } from 'lucide-react'
+import { isPending } from '@/hooks/useOfflineSync'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -12,6 +13,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslation } from '@/hooks/useTranslation'
 import { es, enUS } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
 import type { Expense } from '@/types'
 
 interface ExpenseTableProps {
@@ -70,9 +72,16 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
           </tr>
         </thead>
         <tbody className="divide-y divide-border/50">
-          {expenses.map((expense) => (
-            <tr key={expense.id} className="hover:bg-muted/20 transition-colors group">
+          {expenses.map((expense) => {
+            const pending = isPending(expense)
+            return (
+            <tr key={expense.id} className={cn("hover:bg-muted/20 transition-colors group", pending && "opacity-60")}>
               <td className="px-3 py-4">
+                {pending ? (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-amber-500">
+                    <WifiOff className="h-4 w-4" />
+                  </div>
+                ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all outline-none">
                     <MoreVertical className="h-4 w-4" />
@@ -121,6 +130,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+                )}
               </td>
               <td className="pr-4 py-4 max-w-[200px]">
                 <div className="flex items-center gap-2">
@@ -130,6 +140,9 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                     </span>
                   )}
                   <span className="font-semibold text-foreground text-sm truncate">{expense.merchant}</span>
+                  {pending && (
+                    <span className="ml-1 text-[10px] font-semibold text-amber-500 whitespace-nowrap">pending sync</span>
+                  )}
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-muted-foreground font-medium w-[140px] whitespace-nowrap">
@@ -167,7 +180,8 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                 ) : <span className="text-muted-foreground/50">—</span>}
               </td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-border/50 bg-muted/30">

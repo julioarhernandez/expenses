@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useWorkspaceStore } from '@/store/workspace'
+import { useOfflineSync } from '@/hooks/useOfflineSync'
 import type { Workspace } from '@/types'
 
 export function WorkspaceProvider({
@@ -12,6 +13,7 @@ export function WorkspaceProvider({
   children: React.ReactNode
 }) {
   const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces)
+  useOfflineSync()
 
   useEffect(() => {
     setWorkspaces(workspaces)

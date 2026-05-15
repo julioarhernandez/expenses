@@ -17,6 +17,8 @@ import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { createExpense, updateExpense } from '@/lib/expenses'
 import { createRecurringExpense } from '@/lib/recurring'
+import { enqueueExpense } from '@/lib/offline-queue'
+import { pendingId, isPending } from '@/hooks/useOfflineSync'
 import { useRouter } from 'next/navigation'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
@@ -141,6 +143,47 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
   async function saveExpense() {
     setSaving(true)
     try {
+      const basePayload = {
+        merchant: form.merchant,
+        amount: parseFloat(form.amount),
+        currency: 'USD',
+        tax_amount: form.tax_amount ? parseFloat(form.tax_amount) : null,
+        date: form.date,
+        category_id: form.category_id || null,
+        payment_method: (form.payment_method as PaymentMethod) || null,
+        card_last_four: form.card_last_four || null,
+        notes: form.notes || null,
+        receipt_url: form.receipt_url || null,
+        receipt_path: form.receipt_path || null,
+        workspace_id: form.workspace_id,
+      }
+
+      // Offline path: queue expense locally, skip receipt upload
+      if (!expense && !navigator.onLine) {
+        const queued = await enqueueExpense(basePayload)
+        const fakeExpense = {
+          id: pendingId(queued.queueId),
+          user_id: '',
+          is_deleted: false as const,
+          created_at: queued.queuedAt,
+          updated_at: queued.queuedAt,
+          category: categories.find((c) => c.id === basePayload.category_id),
+          is_recurring: false,
+          recurring_expense_id: null,
+          ...basePayload,
+        }
+        addExpense(fakeExpense)
+        // Register background sync so the SW wakes us up when connection returns
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready
+          const syncReg = reg as ServiceWorkerRegistration & { sync?: { register: (tag: string) => Promise<void> } }
+          await syncReg.sync?.register('sync-expenses')
+        }
+        toast.success('Saved offline — will sync when back online')
+        onClose()
+        return
+      }
+
       let receiptsUrl = form.receipt_url || null
       let receiptsPath = form.receipt_path || null
 
@@ -157,22 +200,11 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
         receiptsPath = path
       }
 
-      const payload = {
-        merchant: form.merchant,
-        amount: parseFloat(form.amount),
-        currency: 'USD',
-        tax_amount: form.tax_amount ? parseFloat(form.tax_amount) : null,
-        date: form.date,
-        category_id: form.category_id || null,
-        payment_method: (form.payment_method as PaymentMethod) || null,
-        card_last_four: form.card_last_four || null,
-        notes: form.notes || null,
-        receipt_url: receiptsUrl,
-        receipt_path: receiptsPath,
-        workspace_id: form.workspace_id,
-      }
+      const payload = { ...basePayload, receipt_url: receiptsUrl, receipt_path: receiptsPath }
 
       if (expense) {
+        // Don't allow editing a pending expense — it hasn't been created yet
+        if (isPending(expense)) return
         const updated = await updateExpense(expense.id, payload)
         updateStore(expense.id, updated)
         toast.success('Expense updated')

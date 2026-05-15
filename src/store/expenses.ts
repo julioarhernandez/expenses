@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { Expense, ExpenseFilters } from '@/types'
 
+export const PENDING_ID_PREFIX = 'pending-'
+
 interface ExpenseStore {
   expenses: Expense[]
   filters: ExpenseFilters
@@ -37,7 +39,14 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
   isDialogOpen: false,
   draftExpense: null,
   editingExpense: null,
-  setExpenses: (expenses) => set({ expenses }),
+  setExpenses: (expenses) =>
+    set((state) => ({
+      // Keep any pending (offline-queued) expenses that aren't in the fresh list
+      expenses: [
+        ...state.expenses.filter((e) => e.id.startsWith(PENDING_ID_PREFIX)),
+        ...expenses,
+      ],
+    })),
   addExpense: (expense) =>
     set((state) => ({ expenses: [expense, ...state.expenses] })),
   updateExpense: (id, updates) =>

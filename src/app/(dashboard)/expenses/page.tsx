@@ -80,7 +80,7 @@ export default function ExpensesPage() {
     setLoading(true)
     fetchExpenses(activeWorkspaceId, filters)
       .then(setExpenses)
-      .catch((err) => toast.error(err.message))
+      .catch((err) => { if (navigator.onLine) toast.error(err.message) })
       .finally(() => setLoading(false))
   }, [activeWorkspaceId, filters, setExpenses, setLoading, refreshKey])
 
