@@ -48,6 +48,7 @@ export function DashboardFiltersOverlay({
   const [localHalf, setLocalHalf] = useState(initialHalf)
   const [localYear, setLocalYear] = useState(initialYear)
   const [localSelectedIds, setLocalSelectedIds] = useState<string[]>(selectedIds)
+  const [saveAsDefault, setSaveAsDefault] = useState(false)
 
   if (!isOpen) return null
 
@@ -59,6 +60,15 @@ export function DashboardFiltersOverlay({
     params.set('half', localHalf.toString())
     params.set('year', localYear.toString())
     params.set('workspaces', localSelectedIds.join(','))
+    
+    if (saveAsDefault) {
+      document.cookie = `dash_period=${localPeriod}; path=/; max-age=31536000`
+      document.cookie = `dash_month=${localMonth}; path=/; max-age=31536000`
+      document.cookie = `dash_quarter=${localQuarter}; path=/; max-age=31536000`
+      document.cookie = `dash_half=${localHalf}; path=/; max-age=31536000`
+      document.cookie = `dash_year=${localYear}; path=/; max-age=31536000`
+      document.cookie = `dash_workspaces=${localSelectedIds.join(',')}; path=/; max-age=31536000`
+    }
     
     startTransition(() => {
       router.push(`?${params.toString()}`)
@@ -236,8 +246,22 @@ export function DashboardFiltersOverlay({
           </section>
         )}
 
+        {/* Save as default */}
+        <div className="flex items-center gap-3 pt-2 pb-2">
+          <input
+            type="checkbox"
+            id="saveDefault"
+            checked={saveAsDefault}
+            onChange={(e) => setSaveAsDefault(e.target.checked)}
+            className="w-5 h-5 rounded border-border text-indigo-600 focus:ring-indigo-500"
+          />
+          <label htmlFor="saveDefault" className="text-sm font-semibold text-foreground cursor-pointer">
+            {lang === 'es' ? 'Guardar como predeterminado' : 'Save as default filters'}
+          </label>
+        </div>
+
         {/* Apply Button in flow */}
-        <div className="pt-4 pb-2">
+        <div className="pt-2 pb-2">
           <button 
             onClick={handleApply}
             disabled={isPending}

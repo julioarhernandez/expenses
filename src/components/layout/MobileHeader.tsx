@@ -77,7 +77,7 @@ export function MobileHeader() {
                 ? "bg-white/20 border-white/20 text-white backdrop-blur-md hover:bg-white/30" 
                 : "bg-muted border-border text-muted-foreground hover:border-indigo-500 hover:text-indigo-600"
             )}>
-              <User className="h-5 w-5" />
+              <span className="font-bold text-lg">{wsInitial}</span>
               <div className={cn(
                 "absolute -bottom-1 -right-1 w-6 h-6 rounded-full border flex items-center justify-center text-xs shadow-sm",
                 isDashboard ? "bg-white border-white/20 text-black" : "bg-background border-border"

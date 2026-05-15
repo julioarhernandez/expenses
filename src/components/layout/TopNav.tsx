@@ -150,7 +150,9 @@ export function TopNav({ user }: { user: User }) {
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
           <Avatar className="h-7 w-7">
-            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+              <UserIcon className="h-4 w-4" />
+            </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52">

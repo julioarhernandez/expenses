@@ -156,15 +156,17 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
   const { data: allWorkspaces } = await supabase.from('workspaces').select('*')
   if (!allWorkspaces || allWorkspaces.length === 0) redirect('/workspaces')
 
-  const wsQuery = searchParams.workspaces
+  const cookieStore = await cookies()
+  
+  const wsQuery = searchParams.workspaces || cookieStore.get('dash_workspaces')?.value
   const selectedWorkspaceIds = wsQuery ? (typeof wsQuery === 'string' ? wsQuery.split(',') : wsQuery) : [allWorkspaces[0].id]
   const selectedWorkspaces = allWorkspaces.filter(ws => selectedWorkspaceIds.includes(ws.id))
   
-  const period = (searchParams.period as PeriodType) || 'monthly'
-  const year = Number(searchParams.year) || new Date().getFullYear()
-  const month = Number(searchParams.month) || new Date().getMonth() + 1
-  const quarter = Number(searchParams.quarter) || Math.ceil(month / 3)
-  const half = Number(searchParams.half) || (month <= 6 ? 1 : 2)
+  const period = (searchParams.period as PeriodType) || (cookieStore.get('dash_period')?.value as PeriodType) || 'monthly'
+  const year = Number(searchParams.year) || Number(cookieStore.get('dash_year')?.value) || new Date().getFullYear()
+  const month = Number(searchParams.month) || Number(cookieStore.get('dash_month')?.value) || new Date().getMonth() + 1
+  const quarter = Number(searchParams.quarter) || Number(cookieStore.get('dash_quarter')?.value) || Math.ceil(month / 3)
+  const half = Number(searchParams.half) || Number(cookieStore.get('dash_half')?.value) || (month <= 6 ? 1 : 2)
 
   const { start, end, prevStart, prevEnd, label } = computeDateRange(period, year, month, quarter, half)
 
