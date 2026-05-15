@@ -39,7 +39,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   ]
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-[100] h-[90px] flex items-end pointer-events-none">
+    <footer className="fixed bottom-0 left-0 right-0 z-40 h-[90px] flex items-end pointer-events-none">
       {/* Custom Background - Simple Div approach */}
       <div 
         className="absolute inset-x-0 bottom-0 h-[70px] bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-8px_30px_rgba(0,0,0,0.08)] pointer-events-auto"
