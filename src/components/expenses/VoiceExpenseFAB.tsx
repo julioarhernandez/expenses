@@ -204,55 +204,65 @@ export function VoiceExpenseFAB() {
 
   return (
     <div className="fixed z-[60] bottom-28 right-6 md:bottom-8 md:right-8 flex flex-col items-end gap-3 pointer-events-none">
-      {/* Action Menu */}
-      {isActionMenuOpen && !isRecording && (
+      {/* Action Menu & Recording State */}
+      {(isActionMenuOpen || isRecording) && (
         <div className="flex flex-col items-end gap-3 mb-2 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {/* Voice / Recording Action */}
           <div className="flex items-center gap-3">
-             <span className="bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm">
+             <span className={cn(
+                "bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm transition-opacity",
+                isRecording && "opacity-50"
+             )}>
                 {lang === 'es' ? 'Voz' : 'Voice'}
              </span>
-             <button
-                onClick={toggleRecording}
-                className="w-12 h-12 bg-[#6366F1] rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-200 transition-transform active:scale-90"
-             >
-                <Mic className="w-5 h-5" />
-             </button>
-          </div>
-          
-          <div className="flex items-center gap-3">
-             <span className="bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm">
-                {lang === 'es' ? 'Manual' : 'Manual'}
-             </span>
-             <button
-                onClick={() => openDialog()}
-                className="w-12 h-12 bg-[#6366F1] rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-200 transition-transform active:scale-90"
-             >
-                <Plus className="w-5 h-5" />
-             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Recording State (Floating overlay) */}
-      {isRecording && (
-        <div className="flex flex-col items-center mb-4 pointer-events-auto">
-            <div className="relative w-24 h-24 flex items-center justify-center">
-                <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="3" className="text-white/25" />
-                  <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="3" className="text-[#6366F1] transition-all duration-100" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE * recordingProgress} strokeLinecap="round" />
-                </svg>
+             
+             <div className="relative w-12 h-12 flex items-center justify-center">
+                {isRecording && (
+                    <>
+                        <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10 scale-[1.3]" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="4" className="text-white/20" />
+                            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="4" className="text-white transition-all duration-100" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE * recordingProgress} strokeLinecap="round" />
+                        </svg>
+                        {countdown !== null && (
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                                {countdown}
+                            </div>
+                        )}
+                    </>
+                )}
                 <button
                     onClick={toggleRecording}
-                    className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-red-100 animate-pulse"
+                    disabled={isProcessing}
+                    className={cn(
+                        "relative w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 transform active:scale-90",
+                        isRecording ? "bg-red-500 animate-pulse scale-110" : "bg-[#6366F1] shadow-indigo-200",
+                        isProcessing && "opacity-50 cursor-not-allowed"
+                    )}
                 >
-                    <Mic className="w-7 h-7" />
+                    <Mic className={cn("transition-all duration-300", isRecording ? "w-6 h-6" : "w-5 h-5")} />
                 </button>
-                {countdown !== null && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
-                        {countdown}
-                    </div>
-                )}
-            </div>
+             </div>
+          </div>
+          
+          {/* Manual Action */}
+          <div className="flex items-center gap-3">
+              <span className={cn(
+                "bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm transition-opacity",
+                isRecording && "opacity-50"
+              )}>
+                  {lang === 'es' ? 'Manual' : 'Manual'}
+              </span>
+              <button
+                  onClick={() => openDialog()}
+                  disabled={isRecording || isProcessing}
+                  className={cn(
+                    "w-12 h-12 bg-[#6366F1] rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-200 transition-all duration-300 transform active:scale-90",
+                    (isRecording || isProcessing) && "opacity-50 cursor-not-allowed grayscale-[0.5]"
+                  )}
+              >
+                  <Plus className="w-5 h-5" />
+              </button>
+          </div>
         </div>
       )}
 
