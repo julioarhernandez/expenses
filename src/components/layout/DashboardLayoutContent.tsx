@@ -16,7 +16,7 @@ export function DashboardLayoutContent({ header, children }: DashboardLayoutCont
     <div className="relative flex flex-col h-screen overflow-hidden">
       {/* Global Hero Background (only on Dashboard) */}
       {isDashboard && (
-        <div className="absolute top-0 left-0 right-0 h-[280px] bg-gradient-to-br from-indigo-600 via-indigo-500 to-indigo-400 dark:from-indigo-950 dark:via-indigo-900 dark:to-indigo-950 -z-0 transition-all duration-500" />
+        <div className="absolute top-0 left-0 right-0 h-[550px] bg-gradient-to-b from-[#020617] via-[#1e1b4b]/60 to-transparent -z-0 transition-all duration-500" />
       )}
 
       <div className={cn(
