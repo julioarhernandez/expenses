@@ -17,6 +17,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { createExpense, updateExpense } from '@/lib/expenses'
 import { createRecurringExpense } from '@/lib/recurring'
+import { useRouter } from 'next/navigation'
 import { useExpenseStore } from '@/store/expenses'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
@@ -55,6 +56,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
   const { addExpense, updateExpense: updateStore, expenses } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const { t, lang } = useTranslation()
+  const router = useRouter()
   const locale = lang === 'es' ? es : enUS
 
   const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -195,6 +197,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
           toast.success('Expense added')
         }
       }
+      router.refresh()
       onClose()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to save expense')

@@ -26,6 +26,7 @@ export function VoiceExpenseFAB() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [showHint, setShowHint] = useState(true)
   const [categories, setCategories] = useState<Category[]>([])
+  const categoriesRef = useRef<Category[]>([])
   const [mounted, setMounted] = useState(false)
   const [recordingProgress, setRecordingProgress] = useState(0)
   const [countdown, setCountdown] = useState<number | null>(null)
@@ -45,15 +46,15 @@ export function VoiceExpenseFAB() {
   const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null
 
   useEffect(() => {
-    if (!activeWorkspaceId) return
     supabase
       .from('categories')
       .select('*')
-      .eq('workspace_id', activeWorkspaceId)
+      .order('sort_order', { ascending: true, nullsFirst: false })
+      .order('name')
       .then(({ data }) => {
-        if (data) setCategories(data)
+        if (data) { setCategories(data); categoriesRef.current = data }
       })
-  }, [activeWorkspaceId])
+  }, [])
 
   function clearRecordingTimers() {
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
@@ -129,7 +130,7 @@ export function VoiceExpenseFAB() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: `Today is ${format(new Date(), 'yyyy-MM-dd')}. User speech: ${transcript}`,
-          categories: categories.map(c => c.name)
+          categories: categoriesRef.current.map(c => c.name)
         })
       })
 
@@ -139,7 +140,7 @@ export function VoiceExpenseFAB() {
 
       let categoryId = null
       if (extracted.suggested_category) {
-        const cat = categories.find(c => c.name.toLowerCase() === extracted.suggested_category?.toLowerCase())
+        const cat = categoriesRef.current.find(c => c.name.toLowerCase() === extracted.suggested_category?.toLowerCase())
         if (cat) categoryId = cat.id
       }
 
