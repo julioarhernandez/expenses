@@ -21,7 +21,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   const router = useRouter()
   const supabase = createClient()
   const { t } = useTranslation()
-  const openDialog = useExpenseStore((s) => s.openDialog)
+  const { openDialog, isActionMenuOpen, setActionMenuOpen } = useExpenseStore()
   const initials = (user.email ?? '?').slice(0, 2).toUpperCase()
 
   async function signOut() {
@@ -58,10 +58,13 @@ export function MobileBottomNav({ user }: { user: User }) {
         <div className="relative w-20 h-20 -top-6 flex items-center justify-center">
           <div className="absolute inset-0 bg-[#6366F1] rounded-full blur-2xl opacity-20 animate-pulse" />
           <button 
-            onClick={() => openDialog()}
-            className="group relative w-14 h-14 bg-[#6366F1] rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(99,102,241,0.4)] text-white transition-all duration-300 hover:scale-110 active:scale-95"
+            onClick={() => setActionMenuOpen(!isActionMenuOpen)}
+            className={cn(
+                "group relative w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(99,102,241,0.4)] text-white transition-all duration-300 hover:scale-110 active:scale-95",
+                isActionMenuOpen ? "bg-muted text-muted-foreground" : "bg-[#6366F1]"
+            )}
           >
-            <Plus className="w-7 h-7 transition-transform group-hover:rotate-90" strokeWidth={3} />
+            <Plus className={cn("w-7 h-7 transition-transform", isActionMenuOpen ? "rotate-45" : "group-hover:rotate-90")} strokeWidth={3} />
           </button>
         </div>
 
