@@ -10,6 +10,8 @@ interface ExpenseStore {
   isDialogOpen: boolean
   draftExpense: Partial<Expense> | null
   editingExpense: Expense | null
+  sharedReceiptUrl: string | null
+  sharedReceiptPath: string | null
   setExpenses: (expenses: Expense[]) => void
   addExpense: (expense: Expense) => void
   updateExpense: (id: string, updates: Partial<Expense>) => void
@@ -17,7 +19,12 @@ interface ExpenseStore {
   setFilters: (filters: Partial<ExpenseFilters>) => void
   resetFilters: () => void
   setLoading: (loading: boolean) => void
-  openDialog: (data?: { draft?: Partial<Expense> | null; expense?: Expense | null }) => void
+  openDialog: (data?: {
+    draft?: Partial<Expense> | null
+    expense?: Expense | null
+    sharedReceiptUrl?: string | null
+    sharedReceiptPath?: string | null
+  }) => void
   closeDialog: () => void
 }
 
@@ -39,9 +46,10 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
   isDialogOpen: false,
   draftExpense: null,
   editingExpense: null,
+  sharedReceiptUrl: null,
+  sharedReceiptPath: null,
   setExpenses: (expenses) =>
     set((state) => ({
-      // Keep any pending (offline-queued) expenses that aren't in the fresh list
       expenses: [
         ...state.expenses.filter((e) => e.id.startsWith(PENDING_ID_PREFIX)),
         ...expenses,
@@ -61,10 +69,18 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
     set((state) => ({ filters: { ...state.filters, ...filters } })),
   resetFilters: () => set({ filters: defaultFilters }),
   setLoading: (isLoading) => set({ isLoading }),
-  openDialog: (data = {}) => set({ 
-    isDialogOpen: true, 
-    draftExpense: data.draft || null, 
-    editingExpense: data.expense || null 
+  openDialog: (data = {}) => set({
+    isDialogOpen: true,
+    draftExpense: data.draft || null,
+    editingExpense: data.expense || null,
+    sharedReceiptUrl: data.sharedReceiptUrl ?? null,
+    sharedReceiptPath: data.sharedReceiptPath ?? null,
   }),
-  closeDialog: () => set({ isDialogOpen: false, draftExpense: null, editingExpense: null }),
+  closeDialog: () => set({
+    isDialogOpen: false,
+    draftExpense: null,
+    editingExpense: null,
+    sharedReceiptUrl: null,
+    sharedReceiptPath: null,
+  }),
 }))

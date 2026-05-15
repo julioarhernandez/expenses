@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default function manifest(): MetadataRoute.Manifest & { share_target?: unknown } {
   return {
     name: 'Nova Expenses',
     short_name: 'Nova',
@@ -34,6 +34,19 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    share_target: {
+      action: '/share-target',
+      method: 'POST',
+      enctype: 'multipart/form-data',
+      params: {
+        files: [
+          {
+            name: 'receipt',
+            accept: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+          },
+        ],
+      },
+    },
     shortcuts: [
       {
         name: 'Add Expense',

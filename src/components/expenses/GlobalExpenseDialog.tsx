@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Category } from '@/types'
 
 export function GlobalExpenseDialog() {
-  const { isDialogOpen, draftExpense, editingExpense, closeDialog } = useExpenseStore()
+  const { isDialogOpen, draftExpense, editingExpense, sharedReceiptUrl, sharedReceiptPath, closeDialog } = useExpenseStore()
   const [categories, setCategories] = useState<Category[]>([])
   const supabase = createClient()
 
@@ -29,6 +29,8 @@ export function GlobalExpenseDialog() {
       expense={editingExpense}
       draft={draftExpense}
       categories={categories}
+      sharedReceiptUrl={sharedReceiptUrl}
+      sharedReceiptPath={sharedReceiptPath}
     />
   )
 }

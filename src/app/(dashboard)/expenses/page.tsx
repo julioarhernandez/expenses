@@ -35,15 +35,22 @@ export default function ExpensesPage() {
   const [amountVal2, setAmountVal2] = useState('')
   const searchParams = useSearchParams()
 
-  // Handle URL search params — applied when navigating from dashboard cards
+  // Handle URL search params — applied when navigating from dashboard cards or share target
   useEffect(() => {
     const from = searchParams.get('from')
     const to = searchParams.get('to')
     const q = searchParams.get('q')
     const category_id = searchParams.get('category_id')
     const reset = searchParams.get('reset')
+    const shareUrl = searchParams.get('share_url')
+    const sharePath = searchParams.get('share_path')
+    const isNew = searchParams.get('new')
 
-    if (reset === 'true') {
+    if (shareUrl) {
+      openDialog({ sharedReceiptUrl: shareUrl, sharedReceiptPath: sharePath })
+    } else if (isNew === 'true') {
+      openDialog()
+    } else if (reset === 'true') {
       resetFilters()
       setDatePeriod('all')
       setAmountOp('')
@@ -56,7 +63,6 @@ export default function ExpensesPage() {
         q: q || '',
         category_id: category_id || null,
       })
-      // Always open filter panel when navigating from dashboard
       setFiltersOpen(true)
       if (from || to) {
         setDatePeriod('custom')
