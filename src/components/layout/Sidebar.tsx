@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase } from 'lucide-react'
+import { LayoutDashboard, Receipt, Settings, LogOut, ChevronDown, Plus, Briefcase, User as UserIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -128,7 +128,7 @@ export function Sidebar({ user }: SidebarProps) {
             )}
           >
             <Avatar className="h-6 w-6">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="text-xs bg-muted text-muted-foreground"><UserIcon className="h-3.5 w-3.5" /></AvatarFallback>
             </Avatar>
             <span className="text-sm truncate">{user.email}</span>
           </DropdownMenuTrigger>

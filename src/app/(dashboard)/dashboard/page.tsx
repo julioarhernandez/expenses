@@ -278,7 +278,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
         </Link>
 
         <Link href={`/expenses?from=${prevStart}&to=${prevEnd}`} className="block group">
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
+          <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">{lang === 'es' ? 'Período anterior' : 'Prev Period'}</CardTitle>
             </CardHeader>
@@ -291,7 +291,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
 
         {topCategory ? (
           <Link href={`/expenses?category_id=${topCategory.id}&from=${start}&to=${end}`} className="block group">
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
+            <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
               <CardHeader className="pb-1 pt-6 px-6">
                 <CardTitle className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-tight">{t('dashboard').top_category}</CardTitle>
               </CardHeader>
@@ -305,7 +305,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
             </Card>
           </Link>
         ) : (
-          <Card className="bg-white/80 backdrop-blur-md border-white/20 shadow-lg rounded-2xl h-full">
+          <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl h-full">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">{t('dashboard').top_category}</CardTitle>
             </CardHeader>
@@ -317,7 +317,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
 
         {topMerchant ? (
           <Link href={`/expenses?q=${encodeURIComponent(topMerchant[0])}&from=${start}&to=${end}`} className="block group">
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
+            <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer h-full">
               <CardHeader className="pb-1 pt-6 px-6">
                 <CardTitle className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest leading-tight">{t('dashboard').top_vendor}</CardTitle>
               </CardHeader>
@@ -328,7 +328,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
             </Card>
           </Link>
         ) : (
-          <Card className="bg-white/80 backdrop-blur-md border-white/20 shadow-lg rounded-2xl h-full">
+          <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-white/20 dark:border-white/10 shadow-lg rounded-2xl h-full">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">{t('dashboard').top_vendor}</CardTitle>
             </CardHeader>

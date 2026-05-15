@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Receipt, Settings, LogOut, Plus } from 'lucide-react'
+import { LayoutDashboard, Receipt, Settings, LogOut, Plus, User as UserIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -77,18 +77,12 @@ export function MobileBottomNav({ user }: { user: User }) {
           {/* Account Dropdown */}
           <div className="flex flex-col items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex flex-col items-center gap-1.5 outline-none group">
-                <div className={cn(
-                  "w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold overflow-hidden transition-all duration-300",
-                  "bg-muted border-border text-muted-foreground group-hover:border-indigo-400 group-hover:text-indigo-600"
-                )}>
-                  {initials}
+              <DropdownMenuTrigger className="flex flex-col items-center outline-none group transition-all duration-300 text-muted-foreground hover:text-indigo-400">
+                <div className="relative">
+                  <UserIcon className="w-6 h-6 transition-all duration-300 transform group-active:scale-90 stroke-[2px]" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-[0.05em] text-muted-foreground group-hover:text-indigo-600 transition-colors">
-                  {t('nav').account}
-                </span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" side="top" className="w-52 mb-4 rounded-2xl p-2 shadow-2xl border-border bg-background/95 backdrop-blur-xl">
+              <DropdownMenuContent align="end" side="top" className="z-[200] w-52 mb-4 rounded-2xl p-2 shadow-2xl border-border bg-background/95 backdrop-blur-xl">
                 <div className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1 truncate">{user.email}</div>
                 <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl focus:bg-accent cursor-pointer py-2.5">
                   <Settings className="mr-2.5 h-4 w-4" />{t('nav').settings}
@@ -111,7 +105,7 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center gap-1.5 transition-all duration-300 group",
+        "flex flex-col items-center transition-all duration-300 group",
         isActive ? "text-[#6366F1]" : "text-muted-foreground hover:text-indigo-400"
       )}
     >
@@ -126,12 +120,6 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
           )} 
         />
       </div>
-      <span className={cn(
-        "text-xs font-bold uppercase tracking-[0.05em] transition-colors",
-        isActive ? "text-[#6366F1]" : "text-muted-foreground"
-      )}>
-        {label}
-      </span>
     </Link>
   )
 }
