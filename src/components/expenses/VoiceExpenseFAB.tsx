@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Mic, Loader2 } from 'lucide-react'
+import { Mic, Loader2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useExpenseStore } from '@/store/expenses'
@@ -19,7 +20,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 export function VoiceExpenseFAB() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const voiceLanguage = useWorkspaceStore((s) => s.voiceLanguage)
-  const { openDialog } = useExpenseStore()
+  const { openDialog, isActionMenuOpen, setActionMenuOpen } = useExpenseStore()
   const { t, lang } = useTranslation()
   const { openHelp } = useHelpStore()
   const [isRecording, setIsRecording] = useState(false)
@@ -42,7 +43,6 @@ export function VoiceExpenseFAB() {
   }, [])
 
   const supabase = createClient()
-
   const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null
 
   useEffect(() => {
@@ -135,7 +135,6 @@ export function VoiceExpenseFAB() {
       })
 
       if (!res.ok) throw new Error('AI extraction failed')
-
       const extracted = await res.json()
 
       let categoryId = null
@@ -204,64 +203,96 @@ export function VoiceExpenseFAB() {
   }
 
   return (
-    <div className="fixed z-50 bottom-28 right-6 md:bottom-8 md:right-8 flex items-center gap-3">
-      {mounted && showHint && !isRecording && !isProcessing && (
-        <div className="bg-background/80 backdrop-blur-md border border-border px-3 py-2 rounded-xl shadow-lg text-[11px] font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-700 max-w-[180px] text-right leading-tight">
-          {examples[lang as keyof typeof examples] || examples['en']}
+    <div className="fixed z-[110] bottom-28 right-6 md:bottom-8 md:right-8 flex flex-col items-end gap-3 pointer-events-none">
+      {/* Action Menu & Recording State */}
+      {(isActionMenuOpen || isRecording) && (
+        <div className="flex flex-col items-end gap-3 mb-2 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {/* Voice / Recording Action */}
+          <div className="flex items-center gap-3">
+             <span className={cn(
+                "bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm transition-opacity",
+                isRecording && "opacity-50"
+             )}>
+                {lang === 'es' ? 'Voz' : 'Voice'}
+             </span>
+             
+             <div className="relative w-12 h-12 flex items-center justify-center">
+                {isRecording && (
+                    <>
+                        <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10 scale-[1.3]" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="4" className="text-white/20" />
+                            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="currentColor" strokeWidth="4" className="text-white transition-all duration-100" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE * recordingProgress} strokeLinecap="round" />
+                        </svg>
+                        {countdown !== null && (
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                                {countdown}
+                            </div>
+                        )}
+                    </>
+                )}
+                <button
+                    onClick={toggleRecording}
+                    disabled={isProcessing}
+                    className={cn(
+                        "relative w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 transform active:scale-90",
+                        isRecording ? "bg-red-500 animate-pulse scale-110" : "bg-[#6366F1] shadow-indigo-200",
+                        isProcessing && "opacity-50 cursor-not-allowed"
+                    )}
+                >
+                    <Mic className={cn("transition-all duration-300", isRecording ? "w-6 h-6" : "w-5 h-5")} />
+                </button>
+             </div>
+          </div>
+          
+          {/* Manual Action */}
+          <div className="flex items-center gap-3">
+              <span className={cn(
+                "bg-background/90 backdrop-blur-md border border-border px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm transition-opacity",
+                isRecording && "opacity-50"
+              )}>
+                  {lang === 'es' ? 'Manual' : 'Manual'}
+              </span>
+              <button
+                  onClick={() => openDialog()}
+                  disabled={isRecording || isProcessing}
+                  className={cn(
+                    "w-12 h-12 bg-[#6366F1] rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-200 transition-all duration-300 transform active:scale-90",
+                    (isRecording || isProcessing) && "opacity-50 cursor-not-allowed grayscale-[0.5]"
+                  )}
+              >
+                  <Plus className="w-5 h-5" />
+              </button>
+          </div>
         </div>
       )}
 
-      <div className="relative">
-        {countdown !== null && (
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse z-10">
-            {countdown}
-          </div>
-        )}
-
-        <div className="relative w-20 h-20 flex items-center justify-center">
-          {isRecording && (
-            <svg
-              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10"
-              viewBox="0 0 80 80"
-            >
-              <circle
-                cx="40" cy="40" r={RADIUS}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                className="text-white/25"
-              />
-              <circle
-                cx="40" cy="40" r={RADIUS}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                className="text-white transition-all duration-100"
-                strokeDasharray={CIRCUMFERENCE}
-                strokeDashoffset={CIRCUMFERENCE * recordingProgress}
-                strokeLinecap="round"
-              />
-            </svg>
+      {/* Main Desktop Toggle (Hidden on mobile because navbar handle it) */}
+      <div className="hidden md:flex relative pointer-events-auto">
+        <button
+          onClick={() => setActionMenuOpen(!isActionMenuOpen)}
+          disabled={isProcessing}
+          className={cn(
+            "w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-300 transform active:scale-90",
+            isActionMenuOpen ? "bg-muted text-muted-foreground rotate-45" : "bg-[#6366F1] shadow-indigo-200 hover:scale-105"
           )}
-
-          <button
-            onClick={toggleRecording}
-            disabled={isProcessing}
-            className={`flex items-center justify-center transition-all duration-300 transform active:scale-95
-              w-14 h-14 text-white ring-4 ring-background shadow-lg
-              ${isRecording ? 'rounded-full bg-red-500 shadow-red-200 animate-pulse scale-110' : 'rounded-2xl bg-[#6366F1] shadow-indigo-200 hover:scale-105'}
-              ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-            title={lang === 'es' ? 'Añadir gasto por voz' : 'Add expense by voice'}
-          >
-            {isProcessing ? (
-              <Loader2 className="w-6 h-6 text-white animate-spin" />
-            ) : (
-              <Mic className="w-6 h-6 text-white" />
-            )}
-          </button>
-        </div>
+        >
+          {isProcessing ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <Plus className="w-7 h-7" />
+          )}
+        </button>
       </div>
+
+      {/* Processing overlay for mobile/desktop */}
+      {isProcessing && (
+         <div className="fixed inset-0 bg-background/20 backdrop-blur-[2px] z-[120] flex items-center justify-center pointer-events-auto">
+             <div className="bg-background border border-border p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
+                 <Loader2 className="w-8 h-8 text-[#6366F1] animate-spin" />
+                 <p className="text-sm font-medium">{lang === 'es' ? 'Procesando gasto...' : 'Processing expense...'}</p>
+             </div>
+         </div>
+      )}
     </div>
   )
 }

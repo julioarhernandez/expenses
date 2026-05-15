@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 import { useWorkspaceStore } from '@/store/workspace'
+import { HelpSupportCard } from '@/components/help/HelpSupportCard'
 import type { Category } from '@/types'
 
 const PRESET_COLORS = [
@@ -150,6 +151,10 @@ export function CategoryManager() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mt-8 pt-4">
+        <HelpSupportCard topic="categories" />
       </div>
     </section>
   )

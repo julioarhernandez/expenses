@@ -64,11 +64,11 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
         <thead>
           <tr className="bg-muted/30 border-b border-border/50">
             <th className="px-3 py-3 w-10" />
-            <th className="pr-4 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').merchant}</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest w-[140px]">{t('expenses').date}</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').amount}</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').category}</th>
-            <th className="px-6 py-3 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').payment_method}</th>
+            <th className="pr-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').merchant}</th>
+            <th className="px-6 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest w-[140px]">{t('expenses').date}</th>
+            <th className="px-6 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').amount}</th>
+            <th className="px-6 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest text-right">{t('expenses').category}</th>
+            <th className="px-6 py-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('expenses').payment_method}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/50">
@@ -139,17 +139,17 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                       <RefreshCw className="h-2.5 w-2.5" />
                     </span>
                   )}
-                  <span className="font-semibold text-foreground text-sm truncate">{expense.merchant}</span>
+                  <span className="font-semibold text-foreground text-base truncate">{expense.merchant}</span>
                   {pending && (
                     <span className="ml-1 text-[10px] font-semibold text-amber-500 whitespace-nowrap">pending sync</span>
                   )}
                 </div>
               </td>
-              <td className="px-6 py-4 text-sm text-muted-foreground font-medium w-[140px] whitespace-nowrap">
+              <td className="px-6 py-4 text-base text-muted-foreground font-medium w-[140px] whitespace-nowrap">
                 {format(new Date(expense.date + 'T12:00:00'), 'MM/dd/yyyy')}
               </td>
               <td className="px-6 py-4 text-right">
-                <span className="font-bold text-foreground text-sm tabular-nums">
+                <span className="font-bold text-foreground text-base tabular-nums">
                   {Number(expense.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                 </span>
               </td>
@@ -161,7 +161,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                       color: expense.category.color,
                       borderColor: expense.category.color + '30'
                     }}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border whitespace-nowrap"
                   >
                     {expense.category.name}
                   </span>
@@ -169,7 +169,7 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
                   <span className="text-muted-foreground">—</span>
                 )}
               </td>
-              <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
+              <td className="px-6 py-4 text-base text-muted-foreground font-medium">
                 {expense.payment_method ? (
                   <span className="whitespace-nowrap">
                     {PAYMENT_LABELS[expense.payment_method]}
@@ -187,12 +187,12 @@ export function ExpenseTable({ expenses, isLoading, onEdit, onDelete, onEditRecu
           <tr className="border-t-2 border-border/50 bg-muted/30">
             <td className="px-3 py-3" />
             <td className="px-6 py-3" colSpan={2}>
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 {expenses.length} {expenses.length === 1 ? t('expenses').transactions_one : t('expenses').transactions_other}
               </span>
             </td>
             <td className="px-6 py-3 text-right">
-              <span className="font-bold text-foreground text-sm tabular-nums">
+              <span className="font-bold text-foreground text-base tabular-nums">
                 {expenses.reduce((s, e) => s + Number(e.amount), 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </span>
             </td>

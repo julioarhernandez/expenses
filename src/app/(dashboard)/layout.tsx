@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { VoiceExpenseFAB } from '@/components/expenses/VoiceExpenseFAB'
 import { GlobalExpenseDialog } from '@/components/expenses/GlobalExpenseDialog'
 import { HelpSidebar } from '@/components/help/HelpSidebar'
+import { DashboardLayoutContent } from '@/components/layout/DashboardLayoutContent'
 import type { Workspace } from '@/types'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -24,12 +25,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <WorkspaceProvider workspaces={(workspaces as Workspace[]) ?? []}>
       <ThemeProvider>
-      <div className="flex flex-col h-screen overflow-hidden">
-        <TopNav user={user} />
-        <MobileHeader />
-        <main className="flex-1 overflow-y-auto pb-40 md:pb-0 bg-gradient-to-b from-muted to-muted/40">{children}</main>
-      </div>
-      <MobileBottomNav user={user} />
+        <DashboardLayoutContent header={<MobileHeader />}>
+          {children}
+        </DashboardLayoutContent>
+        <MobileBottomNav user={user} />
       <VoiceExpenseFAB />
       <GlobalExpenseDialog />
       <HelpSidebar />

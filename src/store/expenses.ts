@@ -8,6 +8,9 @@ interface ExpenseStore {
   filters: ExpenseFilters
   isLoading: boolean
   isDialogOpen: boolean
+  isActionMenuOpen: boolean
+  headerTitle: string
+  headerSubtitle: string
   draftExpense: Partial<Expense> | null
   editingExpense: Expense | null
   sharedReceiptUrl: string | null
@@ -19,6 +22,7 @@ interface ExpenseStore {
   setFilters: (filters: Partial<ExpenseFilters>) => void
   resetFilters: () => void
   setLoading: (loading: boolean) => void
+  setHeader: (title: string, subtitle?: string) => void
   openDialog: (data?: {
     draft?: Partial<Expense> | null
     expense?: Expense | null
@@ -26,6 +30,7 @@ interface ExpenseStore {
     sharedReceiptPath?: string | null
   }) => void
   closeDialog: () => void
+  setActionMenuOpen: (open: boolean) => void
 }
 
 const defaultFilters: ExpenseFilters = {
@@ -44,6 +49,9 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
   filters: defaultFilters,
   isLoading: false,
   isDialogOpen: false,
+  isActionMenuOpen: false,
+  headerTitle: '',
+  headerSubtitle: '',
   draftExpense: null,
   editingExpense: null,
   sharedReceiptUrl: null,
@@ -69,8 +77,10 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
     set((state) => ({ filters: { ...state.filters, ...filters } })),
   resetFilters: () => set({ filters: defaultFilters }),
   setLoading: (isLoading) => set({ isLoading }),
+  setHeader: (headerTitle, headerSubtitle = '') => set({ headerTitle, headerSubtitle }),
   openDialog: (data = {}) => set({
     isDialogOpen: true,
+    isActionMenuOpen: false,
     draftExpense: data.draft || null,
     editingExpense: data.expense || null,
     sharedReceiptUrl: data.sharedReceiptUrl ?? null,
@@ -83,4 +93,5 @@ export const useExpenseStore = create<ExpenseStore>((set) => ({
     sharedReceiptUrl: null,
     sharedReceiptPath: null,
   }),
+  setActionMenuOpen: (isActionMenuOpen) => set({ isActionMenuOpen }),
 }))

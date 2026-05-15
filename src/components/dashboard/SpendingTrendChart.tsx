@@ -42,7 +42,7 @@ export function SpendingTrendChart({ data, workspaces, isMulti }: SpendingTrendC
   const { t } = useTranslation()
 
   return (
-    <Card className="bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl">
+    <Card className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-2xl shadow-xl">
       <CardHeader className="pb-2 pt-6 px-6">
         <CardTitle className="text-sm font-bold text-foreground">{t('dashboard').spending_trend}</CardTitle>
       </CardHeader>

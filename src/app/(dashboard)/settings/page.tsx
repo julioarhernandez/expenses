@@ -6,18 +6,18 @@ import { CategoryManager } from '@/components/settings/CategoryManager'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
+import { HeaderUpdater } from '@/components/layout/HeaderUpdater'
+import { useHelpStore } from '@/store/help'
+import { HelpSupportCard } from '@/components/help/HelpSupportCard'
 
 export default function SettingsPage() {
   const { voiceLanguage, setVoiceLanguage, uiLanguage, setUiLanguage, theme, setTheme } = useWorkspaceStore()
   const { t } = useTranslation()
+  const openHelp = useHelpStore((s) => s.openHelp)
 
   return (
-    <div className="min-h-full bg-background px-6 pt-8 pb-32">
-      {/* Header Section */}
-      <section className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">{t('settings').title}</h1>
-        <p className="text-muted-foreground font-medium">{t('settings').subtitle}</p>
-      </section>
+    <div className="min-h-full bg-background px-6 pt-2 pb-32">
+      <HeaderUpdater title={t('settings').title} subtitle={t('settings').subtitle} />
 
       <Tabs defaultValue="workspaces" className="w-full">
         {/* Tab Navigation */}
@@ -122,6 +122,8 @@ export default function SettingsPage() {
                 </button>
                 <p className="text-xs text-muted-foreground mt-1">{t('settings').dark_mode_desc}</p>
               </div>
+
+              <HelpSupportCard topic="settings" />
             </div>
           </div>
         </TabsContent>
