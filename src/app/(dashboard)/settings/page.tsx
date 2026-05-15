@@ -6,17 +6,29 @@ import { CategoryManager } from '@/components/settings/CategoryManager'
 import { useWorkspaceStore } from '@/store/workspace'
 import { useTranslation } from '@/hooks/useTranslation'
 import { cn } from '@/lib/utils'
+import { HelpCircle } from 'lucide-react'
+import { useHelpStore } from '@/store/help'
 
 export default function SettingsPage() {
   const { voiceLanguage, setVoiceLanguage, uiLanguage, setUiLanguage, theme, setTheme } = useWorkspaceStore()
   const { t } = useTranslation()
+  const { openHelp } = useHelpStore()
 
   return (
     <div className="min-h-full bg-background px-6 pt-8 pb-32">
       {/* Header Section */}
-      <section className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">{t('settings').title}</h1>
-        <p className="text-muted-foreground font-medium">{t('settings').subtitle}</p>
+      <section className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">{t('settings').title}</h1>
+          <p className="text-muted-foreground font-medium">{t('settings').subtitle}</p>
+        </div>
+        <button
+          onClick={() => openHelp()}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted border border-border text-sm font-semibold text-foreground hover:bg-accent transition-all active:scale-95"
+        >
+          <HelpCircle className="h-4 w-4 text-[#6366F1]" />
+          <span>{t('help')?.title || 'Help'}</span>
+        </button>
       </section>
 
       <Tabs defaultValue="workspaces" className="w-full">

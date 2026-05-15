@@ -451,7 +451,7 @@ export function HelpSidebar() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) closeHelp() }}>
-      <SheetContent side="right" className="w-full sm:max-w-[420px] flex flex-col p-0 gap-0">
+      <SheetContent side="right" className="w-full sm:max-w-none flex flex-col p-0 gap-0">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/50 shrink-0">
           <SheetTitle className="text-base font-semibold">
             {isEs ? 'Centro de ayuda' : 'Help Center'}

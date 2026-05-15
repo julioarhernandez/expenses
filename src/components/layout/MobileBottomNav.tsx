@@ -39,7 +39,7 @@ export function MobileBottomNav({ user }: { user: User }) {
   ]
 
   return (
-    <footer className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-[90px] flex items-end pointer-events-none">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 h-[90px] flex items-end pointer-events-none">
       {/* Custom Background - Simple Div approach */}
       <div 
         className="absolute inset-x-0 bottom-0 h-[70px] bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-8px_30px_rgba(0,0,0,0.08)] pointer-events-auto"
@@ -56,12 +56,12 @@ export function MobileBottomNav({ user }: { user: User }) {
 
         {/* Center Plus Button */}
         <div className="relative w-20 h-20 -top-6 flex items-center justify-center">
-          <div className="absolute inset-0 bg-[#6366F1] rounded-full blur-2xl opacity-20 animate-pulse" />
+          <div className="absolute inset-0 bg-primary rounded-full blur-2xl opacity-20 animate-pulse" />
           <button 
             onClick={() => setActionMenuOpen(!isActionMenuOpen)}
             className={cn(
-                "group relative w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(99,102,241,0.4)] text-white transition-all duration-300 hover:scale-110 active:scale-95",
-                isActionMenuOpen ? "bg-muted text-muted-foreground" : "bg-[#6366F1]"
+                "group relative w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(0,0,0,0.2)] text-primary-foreground transition-all duration-300 hover:scale-110 active:scale-95",
+                isActionMenuOpen ? "bg-muted text-muted-foreground shadow-none" : "bg-primary"
             )}
           >
             <Plus className={cn("w-7 h-7 transition-transform", isActionMenuOpen ? "rotate-45" : "group-hover:rotate-90")} strokeWidth={3} />
