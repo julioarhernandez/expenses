@@ -36,6 +36,8 @@ interface ExpenseDialogProps {
   expense?: Expense | null
   draft?: Partial<Expense> | null
   categories: Category[]
+  sharedReceiptUrl?: string | null
+  sharedReceiptPath?: string | null
 }
 
 function emptyForm(workspaceId: string) {
@@ -54,7 +56,7 @@ function emptyForm(workspaceId: string) {
   }
 }
 
-export function ExpenseDialog({ open, onClose, expense, draft, categories }: ExpenseDialogProps) {
+export function ExpenseDialog({ open, onClose, expense, draft, categories, sharedReceiptUrl, sharedReceiptPath }: ExpenseDialogProps) {
   const { addExpense, updateExpense: updateStore, expenses } = useExpenseStore()
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const { t, lang } = useTranslation()
@@ -69,6 +71,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
     { value: 'other', label: lang === 'es' ? 'Otro' : 'Other' },
   ]
   const [saving, setSaving] = useState(false)
+  const [sharedOcrStep, setSharedOcrStep] = useState<'idle' | 'ocr' | 'extracting'>('idle')
   const [duplicateWarning, setDuplicateWarning] = useState<{ exact: boolean } | null>(null)
   const [pendingSubmit, setPendingSubmit] = useState<(() => Promise<void>) | null>(null)
   const [receiptsOpen, setReceiptOpen] = useState(false)
@@ -119,6 +122,45 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
       setForm(emptyForm(activeWorkspaceId ?? ''))
     }
   }, [expense, draft, activeWorkspaceId, open])
+
+  // Auto-run OCR when the dialog is opened from the Share Target flow
+  useEffect(() => {
+    if (!open || !sharedReceiptUrl) return
+    setLocalReceiptUrl(sharedReceiptUrl)
+    setForm((f) => ({ ...f, receipt_url: sharedReceiptUrl, receipt_path: sharedReceiptPath ?? '' }))
+
+    async function runSharedOcr() {
+      try {
+        setSharedOcrStep('ocr')
+        const res = await fetch(sharedReceiptUrl!)
+        const blob = await res.blob()
+        const file = new File([blob], 'receipt.jpg', { type: blob.type || 'image/jpeg' })
+        const fd = new FormData()
+        fd.append('file', file)
+        const ocrRes = await fetch('/api/ocr', { method: 'POST', body: fd })
+        if (!ocrRes.ok) return
+        const { text } = await ocrRes.json() as { text: string }
+
+        setSharedOcrStep('extracting')
+        const aiRes = await fetch('/api/ai-extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, categories: categories.map((c) => c.name) }),
+        })
+        if (!aiRes.ok) return
+        const extracted = await aiRes.json() as OcrExtraction
+        applyOcrExtraction(extracted)
+        toast.success(t('receipt').success_extracted)
+      } catch {
+        // User can fill in manually
+      } finally {
+        setSharedOcrStep('idle')
+      }
+    }
+
+    runSharedOcr()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, sharedReceiptUrl])
 
   function applyOcrExtraction(data: OcrExtraction) {
     const matchedCategory = data.suggested_category
@@ -277,7 +319,15 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories }: Exp
           </SheetHeader>
 
           <div className="space-y-8">
-            <div className="bg-muted/30 p-4 rounded-2xl border border-border">
+            <div className="bg-muted/30 p-4 rounded-2xl border border-border relative">
+              {sharedOcrStep !== 'idle' && (
+                <div className="absolute inset-0 rounded-2xl bg-background/80 backdrop-blur-sm flex items-center justify-center gap-2 z-10">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    {sharedOcrStep === 'ocr' ? t('receipt').reading : t('receipt').extracting}
+                  </span>
+                </div>
+              )}
               <ReceiptUploader
                 onFileSelected={(file, localUrl) => {
                   setPendingFile(file)
