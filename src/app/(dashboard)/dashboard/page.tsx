@@ -9,7 +9,7 @@ import { SpendingTrendChart } from '@/components/dashboard/SpendingTrendChart'
 import { CategoryBarChart } from '@/components/dashboard/CategoryBarChart'
 import { PaymentMethodChart } from '@/components/dashboard/PaymentMethodChart'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
-import { AddExpenseButton } from '@/components/dashboard/AddExpenseButton'
+import { HeaderUpdater } from '@/components/layout/HeaderUpdater'
 import { getServerTranslation } from '@/lib/i18n/server-translation'
 import { es, enUS } from 'date-fns/locale'
 
@@ -289,15 +289,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     }))
 
   return (
-    <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-background min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('dashboard').title}</h1>
-          <p className="text-muted-foreground font-medium">{label}</p>
-        </div>
-        <AddExpenseButton />
-      </div>
+    <div className="max-w-[1280px] mx-auto p-6 md:p-8 pt-2 space-y-8 bg-background min-h-screen">
+      <HeaderUpdater title={t('dashboard').title} subtitle={label} />
 
       {/* Filters */}
       <DashboardFilters

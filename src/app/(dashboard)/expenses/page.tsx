@@ -20,6 +20,8 @@ import { exportToCSV } from '@/lib/export'
 import { createClient } from '@/lib/supabase/client'
 import type { Category, Expense } from '@/types'
 
+import { HeaderUpdater } from '@/components/layout/HeaderUpdater'
+
 export default function ExpensesPage() {
   const { expenses, filters, isLoading, setExpenses, setFilters, resetFilters, removeExpense, setLoading, openDialog } =
     useExpenseStore()
@@ -172,44 +174,33 @@ export default function ExpensesPage() {
   )
 
   return (
-    <div className="max-w-[1280px] mx-auto p-6 md:p-8 space-y-8 bg-background min-h-screen">
-      {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('nav').expenses}</h1>
-          <p className="text-muted-foreground font-medium">{t('expenses').subtitle}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <Button
-            variant="outline"
-            onClick={() => setFiltersOpen((o) => !o)}
-            className={cn(
-              "rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all",
-              filtersOpen && "bg-accent"
-            )}
-          >
-            <SlidersHorizontal className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">{t('expenses').filters}</span>
-            {hasFilters && (
-              <span className="ml-1.5 md:ml-2 h-2 w-2 rounded-full bg-[#6366F1]" />
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => exportToCSV(expenses)}
-            className="rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all"
-          >
-            <Download className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">{t('expenses').export_csv}</span>
-          </Button>
-          <Button
-            onClick={openCreate}
-            className="rounded-lg px-4 h-9 text-sm font-semibold shadow-sm transition-all ml-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('expenses').add_expense}
-          </Button>
-        </div>
+    <div className="max-w-[1280px] mx-auto p-6 md:p-8 pt-2 space-y-6 bg-background min-h-screen">
+      <HeaderUpdater title={t('nav').expenses} subtitle={t('expenses').subtitle} />
+
+      {/* Actions Row */}
+      <div className="flex flex-wrap items-center gap-3 w-full">
+        <Button
+          variant="outline"
+          onClick={() => setFiltersOpen((o) => !o)}
+          className={cn(
+            "rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all",
+            filtersOpen && "bg-accent"
+          )}
+        >
+          <SlidersHorizontal className="h-4 w-4 md:mr-2" />
+          <span className="hidden md:inline">{t('expenses').filters}</span>
+          {hasFilters && (
+            <span className="ml-1.5 md:ml-2 h-2 w-2 rounded-full bg-[#6366F1]" />
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => exportToCSV(expenses)}
+          className="rounded-lg px-3 md:px-4 h-9 text-sm font-semibold shadow-sm transition-all"
+        >
+          <Download className="h-4 w-4 md:mr-2" />
+          <span className="hidden md:inline">{t('expenses').export_csv}</span>
+        </Button>
       </div>
 
       {/* Filters Panel */}
