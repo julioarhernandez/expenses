@@ -43,26 +43,9 @@ export function WorkspaceManager() {
         .single()
       if (error) throw error
 
-      const defaultCategories = [
-        { name: 'Meals',                 color: '#f59e0b', sort_order: 1 },
-        { name: 'Vehicle',               color: '#3b82f6', sort_order: 2 },
-        { name: 'Travel',                color: '#0ea5e9', sort_order: 3 },
-        { name: 'Office',                color: '#8b5cf6', sort_order: 4 },
-        { name: 'Software',              color: '#6366f1', sort_order: 5 },
-        { name: 'Marketing',             color: '#f43f5e', sort_order: 6 },
-        { name: 'Contractors',           color: '#64748b', sort_order: 7 },
-        { name: 'Utilities',             color: '#10b981', sort_order: 8 },
-        { name: 'Rent',                  color: '#f97316', sort_order: 9 },
-        { name: 'Equipment',             color: '#84cc16', sort_order: 10 },
-        { name: 'Taxes & Fees',          color: '#ef4444', sort_order: 11 },
-        { name: 'Insurance',             color: '#06b6d4', sort_order: 12 },
-        { name: 'Professional Services', color: '#a855f7', sort_order: 13 },
-      ].map((c) => ({ ...c, user_id: user.id, workspace_id: ws.id, is_default: true }))
-
-      await supabase.from('categories').insert(defaultCategories)
-
       const updated = [...workspaces, ws as Workspace]
       setWorkspaces(updated)
+      setActiveWorkspaceId(ws.id)
       setNewName('')
       toast.success(t('settings').workspace_created)
     } catch (err: unknown) {
