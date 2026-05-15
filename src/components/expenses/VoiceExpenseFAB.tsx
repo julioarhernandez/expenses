@@ -203,7 +203,7 @@ export function VoiceExpenseFAB() {
   }
 
   return (
-    <div className="fixed z-[60] bottom-28 right-6 md:bottom-8 md:right-8 flex flex-col items-end gap-3 pointer-events-none">
+    <div className="fixed z-[110] bottom-28 right-6 md:bottom-8 md:right-8 flex flex-col items-end gap-3 pointer-events-none">
       {/* Action Menu & Recording State */}
       {(isActionMenuOpen || isRecording) && (
         <div className="flex flex-col items-end gap-3 mb-2 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -286,7 +286,7 @@ export function VoiceExpenseFAB() {
 
       {/* Processing overlay for mobile/desktop */}
       {isProcessing && (
-         <div className="fixed inset-0 bg-background/20 backdrop-blur-[2px] z-[100] flex items-center justify-center pointer-events-auto">
+         <div className="fixed inset-0 bg-background/20 backdrop-blur-[2px] z-[120] flex items-center justify-center pointer-events-auto">
              <div className="bg-background border border-border p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
                  <Loader2 className="w-8 h-8 text-[#6366F1] animate-spin" />
                  <p className="text-sm font-medium">{lang === 'es' ? 'Procesando gasto...' : 'Processing expense...'}</p>
