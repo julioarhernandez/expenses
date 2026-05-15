@@ -3,13 +3,14 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useHelpStore, type HelpTopic } from '@/store/help'
 import { useTranslation } from '@/hooks/useTranslation'
-import { Mic, LayoutDashboard, Receipt, Tag, RefreshCw, Settings } from 'lucide-react'
+import { Mic, LayoutDashboard, Receipt, Tag, RefreshCw, Settings, FileDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TOPICS: { id: HelpTopic; icon: React.ElementType; label: { en: string; es: string } }[] = [
   { id: 'voice',      icon: Mic,            label: { en: 'Voice Input',   es: 'Voz' } },
   { id: 'expenses',   icon: Receipt,        label: { en: 'Expenses',      es: 'Gastos' } },
   { id: 'dashboard',  icon: LayoutDashboard,label: { en: 'Dashboard',     es: 'Panel' } },
+  { id: 'reports',    icon: FileDown,       label: { en: 'Reports',       es: 'Reportes' } },
   { id: 'categories', icon: Tag,            label: { en: 'Categories',    es: 'Categorías' } },
   { id: 'recurring',  icon: RefreshCw,      label: { en: 'Recurring',     es: 'Recurrentes' } },
   { id: 'settings',   icon: Settings,       label: { en: 'Settings',      es: 'Ajustes' } },
@@ -110,19 +111,34 @@ function ExpensesHelp({ lang }: { lang: string }) {
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'Haz clic en el botón "+ Añadir gasto" en la parte superior de la página de gastos, o usa el micrófono para entrada por voz.'
-            : 'Click the "+ Add expense" button at the top of the expenses page, or use the microphone for voice input.'}
+            ? 'Haz clic en "+ Añadir gasto" en la parte superior, o usa el micrófono para entrada por voz. El formulario incluye comercio, monto, fecha, categoría, método de pago, impuesto y notas.'
+            : 'Click "+ Add expense" at the top, or use the microphone for voice input. The form covers merchant, amount, date, category, payment method, tax, and notes.'}
         </p>
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
-          {isEs ? 'Filtrar y buscar' : 'Filter & search'}
+          {isEs ? 'Panel de filtros' : 'Filter panel'}
         </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {isEs
-            ? 'Usa la barra de búsqueda y filtros para encontrar gastos por fecha, categoría, monto o método de pago.'
-            : 'Use the search bar and filters to find expenses by date, category, amount, or payment method.'}
-        </p>
+        <ul className="space-y-1.5 text-sm text-muted-foreground">
+          {(isEs ? [
+            'Búsqueda — escribe para filtrar por comercio o notas.',
+            'Categoría — muestra solo gastos de una categoría.',
+            'Fecha — chips rápidos: este mes, mes anterior, últimos 3 meses, este año, o rango personalizado.',
+            'Monto — filtra por menor que, mayor que, igual a, o entre dos valores.',
+            'Tipo — todos, solo recurrentes, o solo únicos.',
+          ] : [
+            'Search — type to filter by merchant or notes.',
+            'Category — show only expenses of one category.',
+            'Date — quick chips: this month, last month, last 3 months, this year, or custom range.',
+            'Amount — filter by less than, greater than, equal to, or between two values.',
+            'Type — all, recurring only, or one-time only.',
+          ]).map((tip) => (
+            <li key={tip} className="flex items-start gap-2">
+              <span className="text-indigo-500 font-bold mt-0.5 shrink-0">·</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
@@ -136,12 +152,22 @@ function ExpensesHelp({ lang }: { lang: string }) {
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
-          {isEs ? 'Recibos' : 'Receipts'}
+          {isEs ? 'Escáner de recibos' : 'Receipt scanner'}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'Al editar un gasto puedes adjuntar una foto del recibo. También puedes usar el escáner de recibos para extraer datos automáticamente.'
-            : 'When editing an expense you can attach a receipt photo. You can also use the receipt scanner to extract data automatically.'}
+            ? 'Al añadir o editar un gasto, sube una foto o PDF del recibo. La IA lee el texto y pre-rellena automáticamente comercio, monto, fecha y categoría.'
+            : 'When adding or editing an expense, upload a photo or PDF of the receipt. The AI reads the text and auto-fills merchant, amount, date, and category.'}
+        </p>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Exportar CSV' : 'Export CSV'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Usa el botón "Exportar CSV" en la parte superior para descargar todos los gastos visibles (con los filtros activos) como archivo CSV.'
+            : 'Use the "Export CSV" button at the top to download all visible expenses (with active filters applied) as a CSV file.'}
         </p>
       </div>
     </div>
@@ -154,32 +180,124 @@ function DashboardHelp({ lang }: { lang: string }) {
     <div className="space-y-5">
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
-          {isEs ? 'Resumen de gastos' : 'Spending overview'}
+          {isEs ? 'Tarjetas de resumen' : 'Summary cards'}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'El panel muestra el total gastado, comparativa con el mes anterior y las tendencias de gasto por período.'
-            : 'The dashboard shows total spending, comparison with the previous month, and spending trends over time.'}
+            ? 'Las tarjetas en la parte superior muestran el total gastado, número de transacciones, promedio por transacción y comparativa con el período anterior (↑ ↓). Haz clic en cualquier tarjeta para ir a los gastos filtrados por ese período.'
+            : 'The cards at the top show total spending, transaction count, average per transaction, and comparison with the prior period (↑ ↓). Click any card to jump to the expenses page filtered to that period.'}
         </p>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Selector de período' : 'Period selector'}
+        </h3>
+        <ul className="space-y-1.5 text-sm text-muted-foreground">
+          {(isEs ? [
+            'Mensual — elige el mes y año específico.',
+            'Trimestral — elige el trimestre (T1–T4) y año.',
+            'Semestral — elige el semestre (S1 ene–jun, S2 jul–dic) y año.',
+            'Anual — vista de todo el año.',
+          ] : [
+            'Monthly — pick a specific month and year.',
+            'Quarterly — pick the quarter (Q1–Q4) and year.',
+            'Semi-annual — pick the half (H1 Jan–Jun, H2 Jul–Dec) and year.',
+            'Yearly — full year view.',
+          ]).map((tip) => (
+            <li key={tip} className="flex items-start gap-2">
+              <span className="text-indigo-500 font-bold mt-0.5 shrink-0">·</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
           {isEs ? 'Gráficos' : 'Charts'}
         </h3>
+        <ul className="space-y-1.5 text-sm text-muted-foreground">
+          {(isEs ? [
+            'Tendencia de gasto — gráfico de barras con el gasto por subperíodo. Compara visualmente con el período anterior.',
+            'Por categoría — barras horizontales con el gasto acumulado por categoría. Haz clic en una categoría para ver esos gastos.',
+            'Método de pago — desglose de cómo pagaste (tarjeta, efectivo, etc.).',
+          ] : [
+            'Spending trend — bar chart of spending per sub-period. Visually compares with the prior period.',
+            'By category — horizontal bars with total spending per category. Click a category to see those expenses.',
+            'Payment method — breakdown of how you paid (card, cash, etc.).',
+          ]).map((tip) => (
+            <li key={tip} className="flex items-start gap-2">
+              <span className="text-indigo-500 font-bold mt-0.5 shrink-0">·</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Comparar espacios de trabajo' : 'Compare workspaces'}
+        </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'El gráfico de pastel muestra el desglose por categoría. El gráfico de barras muestra la tendencia mensual. Pasa el cursor sobre los elementos para ver detalles.'
-            : 'The pie chart shows breakdown by category. The bar chart shows monthly trend. Hover over items to see details.'}
+            ? 'Si tienes más de un espacio de trabajo, aparecen casillas en el panel de filtros. Marca varios para ver y comparar el gasto de cada uno lado a lado en los gráficos.'
+            : 'If you have more than one workspace, checkboxes appear in the filter panel. Check multiple to view and compare spending across them side by side in the charts.'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ReportsHelp({ lang }: { lang: string }) {
+  const isEs = lang === 'es'
+  return (
+    <div className="space-y-5">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? '¿Dónde están los reportes?' : 'Where are reports?'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Los controles de exportación están en el Panel principal, dentro del panel de filtros, en la fila inferior. Selecciona el período que quieras antes de exportar.'
+            : 'Export controls are on the Dashboard, inside the filter panel, in the bottom row. Select the period you want before exporting.'}
         </p>
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
-          {isEs ? 'Espacios de trabajo' : 'Workspaces'}
+          {isEs ? 'CSV — Legible' : 'CSV — Readable'}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'Usa el selector de espacio en la parte superior para cambiar entre diferentes espacios (personal, negocio, etc.). Los datos son independientes por espacio.'
-            : 'Use the workspace selector at the top to switch between different spaces (personal, business, etc.). Data is separate per workspace.'}
+            ? 'Exporta un CSV formateado para lectura fácil: encabezados en mayúsculas, montos con símbolo de moneda, fechas en formato largo. Ideal para revisar en Excel o Google Sheets.'
+            : 'Exports a CSV formatted for easy reading: capitalized headers, amounts with currency symbol, long-format dates. Ideal for reviewing in Excel or Google Sheets.'}
+        </p>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'CSV — Procesamiento' : 'CSV — Processing'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Exporta un CSV limpio para importar en otras herramientas o sistemas: valores numéricos sin formato, fechas en ISO 8601 (YYYY-MM-DD), sin símbolo de moneda.'
+            : 'Exports a clean CSV for importing into other tools or systems: unformatted numeric values, ISO 8601 dates (YYYY-MM-DD), no currency symbol.'}
+        </p>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'PDF' : 'PDF'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'Descarga un reporte PDF del período seleccionado, listo para imprimir o compartir con un contador o cliente.'
+            : 'Download a PDF report of the selected period, ready to print or share with an accountant or client.'}
+        </p>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1.5">
+          {isEs ? 'Exportar desde Gastos' : 'Export from Expenses'}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {isEs
+            ? 'La página de Gastos también tiene un botón "Exportar CSV" que descarga exactamente los gastos visibles con los filtros activos aplicados.'
+            : 'The Expenses page also has an "Export CSV" button that downloads exactly the visible expenses with any active filters applied.'}
         </p>
       </div>
     </div>
@@ -273,8 +391,8 @@ function SettingsHelp({ lang }: { lang: string }) {
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {isEs
-            ? 'Crea, edita y elimina categorías para organizar tus gastos. Asigna un nombre y color a cada una. Las categorías son específicas por espacio de trabajo.'
-            : 'Create, edit, and delete categories to organize your expenses. Assign a name and color to each one. Categories are specific to each workspace.'}
+            ? 'Crea, edita y elimina categorías para organizar tus gastos. Las categorías son compartidas en todos tus espacios de trabajo: un cambio aplica en todos.'
+            : 'Create, edit, and delete categories to organize your expenses. Categories are shared across all your workspaces — a change applies everywhere.'}
         </p>
       </div>
 
@@ -318,6 +436,7 @@ const TOPIC_CONTENT: Record<HelpTopic, React.ComponentType<{ lang: string }>> = 
   voice: VoiceHelp,
   expenses: ExpensesHelp,
   dashboard: DashboardHelp,
+  reports: ReportsHelp,
   categories: CategoriesHelp,
   recurring: RecurringHelp,
   settings: SettingsHelp,
