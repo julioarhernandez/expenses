@@ -48,7 +48,6 @@ export function TopNav({ user }: { user: User }) {
     { href: '/dashboard', label: t('nav').dashboard, icon: LayoutDashboard },
     { href: '/expenses', label: t('nav').expenses, icon: Receipt },
     { href: '/settings', label: t('nav').settings, icon: Settings },
-    { href: '/settings?tab=profile', label: t('nav').account, icon: UserIcon },
   ]
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
