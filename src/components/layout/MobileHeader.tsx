@@ -37,26 +37,26 @@ export function MobileHeader() {
 
   const wsIcon = mounted && active ? WORKSPACE_TYPE_ICONS[active.type] : '📁'
   const wsName = mounted && active ? active.name : (lang === 'es' ? 'Espacio' : 'Workspace')
-  const wsInitial = active?.name ? active.name.charAt(0).toUpperCase() : 'W'
+  const wsInitial = mounted && active?.name ? active.name.charAt(0).toUpperCase() : 'W'
   const { openHelp } = useHelpStore()
 
   return (
-    <header className="flex items-center justify-between gap-3 px-4 h-20 bg-background sticky top-0 z-50 shrink-0">
+    <header className="flex items-center justify-between gap-3 px-4 h-24 bg-background sticky top-0 z-50 shrink-0">
       {/* Title & Subtitle on the Left */}
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-foreground truncate">{headerTitle}</h1>
+          <h1 className="text-2xl font-bold text-foreground truncate">{headerTitle}</h1>
           {pathname === '/settings' && (
              <button
                 onClick={() => openHelp()}
-                className="flex items-center justify-center h-6 w-6 rounded-full text-muted-foreground hover:text-[#6366F1] hover:bg-accent transition-all active:scale-95"
+                className="flex items-center justify-center h-7 w-7 rounded-full text-muted-foreground hover:text-[#6366F1] hover:bg-accent transition-all active:scale-95"
              >
-                <HelpCircle className="h-4 w-4" />
+                <HelpCircle className="h-5 w-5" />
              </button>
           )}
         </div>
         {headerSubtitle && (
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest truncate mt-0.5">
             {headerSubtitle}
           </p>
         )}
@@ -66,9 +66,9 @@ export function MobileHeader() {
       <div className="shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <div className="relative w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-sm font-bold text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-all active:scale-95 shadow-sm">
+            <div className="relative w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center text-base font-bold text-muted-foreground hover:border-indigo-500 hover:text-indigo-600 transition-all active:scale-95 shadow-sm">
               {wsInitial}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-background rounded-full border border-border flex items-center justify-center text-[10px] shadow-sm">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-background rounded-full border border-border flex items-center justify-center text-xs shadow-sm">
                 {wsIcon}
               </div>
             </div>

@@ -79,17 +79,17 @@ export function MobileBottomNav({ user }: { user: User }) {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex flex-col items-center gap-1.5 outline-none group">
                 <div className={cn(
-                  "w-6 h-6 rounded-full border flex items-center justify-center text-[9px] font-bold overflow-hidden transition-all duration-300",
+                  "w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold overflow-hidden transition-all duration-300",
                   "bg-muted border-border text-muted-foreground group-hover:border-indigo-400 group-hover:text-indigo-600"
                 )}>
                   {initials}
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-muted-foreground group-hover:text-indigo-600 transition-colors">
+                <span className="text-xs font-bold uppercase tracking-[0.05em] text-muted-foreground group-hover:text-indigo-600 transition-colors">
                   {t('nav').account}
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" side="top" className="w-52 mb-4 rounded-2xl p-2 shadow-2xl border-border bg-background/95 backdrop-blur-xl">
-                <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1 truncate">{user.email}</div>
+                <div className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1 truncate">{user.email}</div>
                 <DropdownMenuItem onClick={() => router.push('/settings')} className="rounded-xl focus:bg-accent cursor-pointer py-2.5">
                   <Settings className="mr-2.5 h-4 w-4" />{t('nav').settings}
                 </DropdownMenuItem>
@@ -121,13 +121,13 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
         )}
         <Icon 
           className={cn(
-            "w-5.5 h-5.5 transition-all duration-300 transform group-active:scale-90", 
+            "w-6 h-6 transition-all duration-300 transform group-active:scale-90", 
             isActive ? "stroke-[2.5px] scale-110" : "stroke-[2px]"
           )} 
         />
       </div>
       <span className={cn(
-        "text-[10px] font-bold uppercase tracking-[0.05em] transition-colors",
+        "text-xs font-bold uppercase tracking-[0.05em] transition-colors",
         isActive ? "text-[#6366F1]" : "text-muted-foreground"
       )}>
         {label}
@@ -135,4 +135,3 @@ function NavItem({ href, label, icon: Icon, isActive }: { href: string, label: s
     </Link>
   )
 }
-
