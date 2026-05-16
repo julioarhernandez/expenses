@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { X, Download, FileText, ChevronRight, Loader2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/hooks/useTranslation'
+import { Button } from '@/components/ui/button'
 
 type PeriodType = 'monthly' | 'quarterly' | 'semi' | 'yearly'
 
@@ -262,14 +263,15 @@ export function DashboardFiltersOverlay({
 
         {/* Apply Button in flow */}
         <div className="pt-2 pb-2">
-          <button 
+          <Button
+            size="lg"
             onClick={handleApply}
             disabled={isPending}
-            className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black shadow-xl shadow-indigo-200 dark:shadow-none active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="w-full flex items-center justify-center gap-3"
           >
             {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
             <span className="uppercase tracking-tighter text-lg">{t('common').apply ?? 'Apply Filters'}</span>
-          </button>
+          </Button>
         </div>
 
         {/* Exports */}

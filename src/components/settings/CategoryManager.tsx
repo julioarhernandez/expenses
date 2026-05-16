@@ -121,22 +121,23 @@ export function CategoryManager() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <input
-              className="flex-1 px-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-background transition-all outline-none"
+              className="flex-1 px-4 h-12 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary focus:bg-background transition-all outline-none"
               placeholder="Category name..."
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCategory()}
             />
-            <button
+            <Button
+              size="lg"
               onClick={addCategory}
               disabled={adding || !newName.trim()}
-              className="w-full sm:w-12 h-12 bg-foreground text-background rounded-2xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              className="w-full sm:w-12 px-0"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
               </svg>
-            </button>
+            </Button>
           </div>
 
           <div className="flex flex-wrap gap-2 justify-center sm:justify-start">

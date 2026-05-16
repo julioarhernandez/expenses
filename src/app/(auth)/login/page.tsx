@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 type Mode = 'signin' | 'signup'
 
@@ -106,7 +107,7 @@ export default function LoginPage() {
                 onClick={() => switchMode(m)}
                 className={`flex-1 py-2 text-sm font-semibold rounded-xl transition-all ${
                   mode === m
-                    ? 'bg-[#6366F1] text-white shadow-sm'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -118,8 +119,8 @@ export default function LoginPage() {
           {/* Email sent confirmation */}
           {emailSent ? (
             <div className="text-center space-y-4 py-4">
-              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto">
-                <Mail className="h-6 w-6 text-[#6366F1]" />
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                <Mail className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <p className="font-semibold text-foreground">Check your inbox</p>
@@ -127,12 +128,13 @@ export default function LoginPage() {
                   We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>. Click it to activate your account.
                 </p>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                className="text-primary underline-offset-4 hover:underline font-semibold"
                 onClick={() => switchMode('signin')}
-                className="text-sm text-[#6366F1] font-semibold hover:underline"
               >
                 Back to sign in
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -147,7 +149,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (mode === 'signin' ? handleEmailSignIn() : handleEmailSignUp())}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6366F1]/40 focus:border-[#6366F1] transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   />
                 </div>
 
@@ -160,7 +162,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && mode === 'signin' && handleEmailSignIn()}
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6366F1]/40 focus:border-[#6366F1] transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                   />
                   <button
                     type="button"
@@ -181,20 +183,21 @@ export default function LoginPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleEmailSignUp()}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6366F1]/40 focus:border-[#6366F1] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     />
                   </div>
                 )}
 
                 {/* Submit */}
-                <button
+                <Button
+                  size="lg"
                   onClick={mode === 'signin' ? handleEmailSignIn : handleEmailSignUp}
                   disabled={emailLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#6366F1] hover:bg-[#5558e3] px-4 py-3 text-sm font-semibold text-white transition-all shadow-sm shadow-indigo-500/25 hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full"
                 >
                   {emailLoading && <Spinner />}
                   {mode === 'signin' ? 'Sign in' : 'Create account'}
-                </button>
+                </Button>
               </div>
 
               {/* Divider */}
@@ -205,10 +208,12 @@ export default function LoginPage() {
               </div>
 
               {/* Google button */}
-              <button
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={handleGoogleAuth}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 rounded-2xl border border-border bg-background hover:bg-accent px-4 py-3 text-sm font-semibold text-foreground transition-all shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full gap-3"
               >
                 {googleLoading ? (
                   <Spinner />
@@ -221,7 +226,7 @@ export default function LoginPage() {
                   </svg>
                 )}
                 Continue with Google
-              </button>
+              </Button>
             </>
           )}
 

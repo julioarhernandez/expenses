@@ -143,7 +143,7 @@ function computePaymentMethodData(expenses: any[]) {
     map.set(method, entry)
   }
   return Array.from(map.entries())
-    .map(([method, data]) => ({ method, ...data }))
+    .map(([method, data]) => ({ method, label: method, ...data }))
     .sort((a, b) => b.total - a.total)
 }
 
@@ -218,7 +218,7 @@ export default async function DashboardPage({ searchParams: rawSearchParams }: {
     .sort((a, b) => b.total - a.total)
     .slice(0, 5)
 
-  const topMerchant = topMerchants[0] ? [topMerchants[0].merchant, topMerchants[0].total] : null
+  const topMerchant: [string, number] | null = topMerchants[0] ? [topMerchants[0].merchant, topMerchants[0].total] : null
 
   const categoryTotals = new Map<string, { id: string; name: string; color: string; total: number }>()
   for (const exp of currentExpenses) {

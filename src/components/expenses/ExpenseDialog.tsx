@@ -347,7 +347,6 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
                     onClick={() => setReceiptOpen(true)}
                     className="h-8 px-3 text-xs font-bold rounded-lg transition-all gap-2"
                   >
@@ -367,7 +366,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                     value={form.merchant}
                     onChange={(e) => set('merchant', e.target.value)}
                     placeholder={t('expense_dialog').merchant_placeholder}
-                    className="rounded-xl h-11"
+                    className="rounded-xl h-10"
                     required
                   />
                 </div>
@@ -384,7 +383,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                       value={form.amount}
                       onChange={(e) => set('amount', e.target.value)}
                       placeholder="0.00"
-                      className="rounded-xl h-11 pl-7 font-semibold"
+                      className="rounded-xl h-10 pl-7 font-semibold"
                       required
                     />
                   </div>
@@ -395,7 +394,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                   <Popover open={dateOpen} onOpenChange={setDateOpen}>
                     <PopoverTrigger
                       className={cn(
-                        'w-full flex items-center justify-start gap-3 rounded-xl border border-input bg-background px-3 h-11 text-sm font-medium transition-all hover:bg-accent',
+                        'w-full flex items-center justify-start gap-3 rounded-xl border border-input bg-background px-3 h-10 text-sm font-medium transition-all hover:bg-accent',
                         !form.date && 'text-muted-foreground'
                       )}
                     >
@@ -422,7 +421,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                     value={form.category_id}
                     onValueChange={(v) => set('category_id', v ?? '')}
                   >
-                    <SelectTrigger className="rounded-xl h-11">
+                    <SelectTrigger>
                       <SelectValue placeholder={lang === 'es' ? 'Seleccionar categoría' : 'Select category'}>
                         {form.category_id ? categories.find(c => c.id === form.category_id)?.name : undefined}
                       </SelectValue>
@@ -446,7 +445,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                     value={form.payment_method}
                     onValueChange={(v) => set('payment_method', v ?? '')}
                   >
-                    <SelectTrigger className="rounded-xl h-11">
+                    <SelectTrigger>
                       <SelectValue placeholder={lang === 'es' ? 'Seleccionar método' : 'Select method'}>
                         {form.payment_method ? PAYMENT_METHODS.find(m => m.value === form.payment_method)?.label : undefined}
                       </SelectValue>
@@ -468,7 +467,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                     value={form.tax_amount}
                     onChange={(e) => set('tax_amount', e.target.value)}
                     placeholder="0.00"
-                    className="rounded-xl h-11"
+                    className="rounded-xl h-10"
                   />
                 </div>
 
@@ -483,7 +482,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                     placeholder={t('expense_dialog').card_last_four_placeholder}
                     maxLength={4}
                     inputMode="numeric"
-                    className="rounded-xl h-11 font-mono"
+                    className="rounded-xl h-10 font-mono"
                   />
                 </div>
 
@@ -532,7 +531,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                             value={recurringFrequency}
                             onValueChange={(v) => setRecurringFrequency(v as RecurringFrequency)}
                           >
-                            <SelectTrigger className="rounded-xl h-11">
+                            <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="rounded-xl shadow-xl">
@@ -549,7 +548,7 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                             value={recurringEndDate}
                             onChange={(e) => setRecurringEndDate(e.target.value)}
                             min={form.date}
-                            className="rounded-xl h-11"
+                            className="rounded-xl h-10"
                           />
                         </div>
                       </div>
@@ -562,15 +561,17 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
                 <Button
                   type="button"
                   variant="outline"
+                  size="lg"
                   onClick={onClose}
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold"
+                  className="flex-1"
                 >
                   {t('expense_dialog').cancel}
                 </Button>
                 <Button
                   type="submit"
+                  size="lg"
                   disabled={saving}
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 gap-2"
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -607,13 +608,15 @@ export function ExpenseDialog({ open, onClose, expense, draft, categories, share
         <DialogFooter className="gap-3">
           <Button
             variant="outline"
-            className="flex-1 rounded-lg h-9 text-sm font-semibold"
+            size="lg"
+            className="flex-1"
             onClick={() => { setDuplicateWarning(null); setPendingSubmit(null) }}
           >
             {t('expense_dialog').cancel}
           </Button>
           <Button
-            className="flex-1 rounded-lg h-9 text-sm font-semibold"
+            size="lg"
+            className="flex-1"
             onClick={async () => { setDuplicateWarning(null); await pendingSubmit?.() }}
           >
             {t('expense_dialog').save_anyway}
