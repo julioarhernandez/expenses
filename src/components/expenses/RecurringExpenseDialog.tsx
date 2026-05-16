@@ -123,7 +123,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                     value={form.merchant}
                     onChange={(e) => set('merchant', e.target.value)}
                     placeholder="Where did you spend?"
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-10"
                     required
                   />
                 </div>
@@ -139,7 +139,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                       value={form.amount}
                       onChange={(e) => set('amount', e.target.value)}
                       placeholder="0.00"
-                      className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11 pl-7 font-semibold"
+                      className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-10 pl-7 font-semibold"
                       required
                     />
                   </div>
@@ -151,7 +151,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                     value={form.frequency}
                     onValueChange={(v) => set('frequency', v ?? 'monthly')}
                   >
-                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                    <SelectTrigger className="bg-neutral-50 border-neutral-100 focus:bg-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-neutral-100 shadow-xl">
@@ -167,7 +167,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                     <PopoverTrigger
                       className={cn(
-                        'w-full flex items-center justify-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-3 h-11 text-sm font-medium transition-all hover:bg-neutral-100',
+                        'w-full flex items-center justify-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-3 h-10 text-sm font-medium transition-all hover:bg-neutral-100',
                         !form.start_date && 'text-neutral-400'
                       )}
                     >
@@ -194,7 +194,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                     value={form.end_date}
                     onChange={(e) => set('end_date', e.target.value)}
                     min={form.start_date}
-                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11"
+                    className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-10"
                   />
                 </div>
 
@@ -204,7 +204,7 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                     value={form.category_id}
                     onValueChange={(v) => set('category_id', v ?? '')}
                   >
-                    <SelectTrigger className="rounded-xl bg-neutral-50 border-neutral-100 focus:bg-white h-11">
+                    <SelectTrigger className="bg-neutral-50 border-neutral-100 focus:bg-white">
                       <SelectValue placeholder="Select category">
                         {form.category_id ? categories.find(c => c.id === form.category_id)?.name : undefined}
                       </SelectValue>
@@ -234,18 +234,21 @@ export function RecurringExpenseDialog({ recurringId, categories, onClose, onSav
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-6 border-t border-neutral-100">
+              <div className="flex items-center gap-3 pt-6 border-t border-border">
                 <Button
                   type="button"
+                  variant="outline"
+                  size="lg"
                   onClick={onClose}
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-all shadow-sm"
+                  className="flex-1"
                 >
                   {t('common').cancel}
                 </Button>
                 <Button
                   type="submit"
+                  size="lg"
                   disabled={saving}
-                  className="flex-1 rounded-lg h-9 text-sm font-semibold bg-[#171717] text-white hover:bg-neutral-800 transition-all shadow-sm flex items-center justify-center gap-2"
+                  className="flex-1 gap-2"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                   {t('recurring').save_changes}

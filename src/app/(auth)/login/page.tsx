@@ -129,7 +129,8 @@ export default function LoginPage() {
                 </p>
               </div>
               <Button
-                variant="link"
+                variant="ghost"
+                className="text-primary underline-offset-4 hover:underline font-semibold"
                 onClick={() => switchMode('signin')}
               >
                 Back to sign in

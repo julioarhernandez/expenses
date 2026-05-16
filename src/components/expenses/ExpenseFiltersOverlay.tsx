@@ -93,7 +93,7 @@ export function ExpenseFiltersOverlay({
               value={filters.category_id ?? ''}
               onValueChange={(v) => setFilters({ category_id: v || null })}
             >
-              <SelectTrigger className="rounded-2xl h-12 bg-muted/30 border-border/50 text-sm font-medium focus:bg-background transition-all">
+              <SelectTrigger className="h-12 rounded-2xl bg-muted/30 border-border/50 font-medium focus:bg-background transition-all">
                 <SelectValue placeholder={t('expenses').all_categories}>
                     <div className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-indigo-500" />
@@ -177,7 +177,7 @@ export function ExpenseFiltersOverlay({
                 applyAmountFilter(op, amountVal, amountVal2)
               }}
             >
-              <SelectTrigger className="rounded-2xl h-12 bg-muted/30 border-border/50 text-sm font-bold">
+              <SelectTrigger className="h-12 rounded-2xl bg-muted/30 border-border/50 font-bold">
                 <SelectValue placeholder={t('expenses').amount_any}>
                     <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-emerald-500" />
